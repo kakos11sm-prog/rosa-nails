@@ -153,9 +153,30 @@ function setupShowcase() {
   play();
 }
 
+function setupFooterReveal() {
+  const foot = document.getElementById("visit");
+  if (!foot) return;
+  const show = () => foot.classList.add("is-in");
+  if (!("IntersectionObserver" in window)) {
+    show();
+    return;
+  }
+  const io = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        show();
+        io.disconnect();
+      }
+    },
+    { threshold: 0.2 }
+  );
+  io.observe(foot);
+}
+
 fillServices();
 fillTimes();
 document.getElementById("dateInput").value = nextOpenDate();
 document.getElementById("dateInput").min = nextOpenDate();
 loadConfig();
 setupShowcase();
+setupFooterReveal();
