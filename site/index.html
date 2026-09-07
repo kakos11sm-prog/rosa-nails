@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ROSA — нігтьова студія · запис онлайн</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="logo" href="#top">ROSA</a>
+    <nav class="nav">
+      <a href="#services">Послуги</a>
+      <a href="#looks">Роботи</a>
+      <a href="#masters">Майстри</a>
+      <a href="#book">Запис</a>
+    </nav>
+    <a class="btn btn-sm" href="#book">Записатись</a>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <p class="eyebrow">Київ · Оболонь · студія на 2 крісла</p>
+      <h1>Манікюр, який тримається довше, ніж плани на вихідні.</h1>
+      <p class="lede">Чисте покриття, спокійний дизайн, запис без переписок у Direct. Оля або Катя — слот одразу в журналі студії.</p>
+      <div class="hero-acts">
+        <a class="btn" href="#book">Записатись</a>
+        <a class="btn btn-ghost" id="botLink" href="https://t.me/" target="_blank" rel="noreferrer">Запис у Telegram</a>
+      </div>
+      <dl class="facts">
+        <div><dt>Слот</dt><dd>90 хвилин</dd></div>
+        <div><dt>Графік</dt><dd>10:00–20:30</dd></div>
+        <div><dt>Вихідний</dt><dd>понеділок</dd></div>
+      </dl>
+    </section>
+
+    <section id="services" class="block">
+      <header class="block-h">
+        <h2>Послуги</h2>
+        <p>Ціни фіксовані. Матеріали входить у вартість.</p>
+      </header>
+      <div class="cards" id="serviceCards"></div>
+    </section>
+
+    <section id="looks" class="block">
+      <header class="block-h">
+        <h2>Роботи</h2>
+        <p>Те, що найчастіше просять повторити.</p>
+      </header>
+      <div class="looks">
+        <article class="look look-a"><span>Молочний френч</span></article>
+        <article class="look look-b"><span>Ягідний глянець</span></article>
+        <article class="look look-c"><span>Нюд + блиск</span></article>
+        <article class="look look-d"><span>Тонка геометрія</span></article>
+      </div>
+    </section>
+
+    <section id="masters" class="block">
+      <header class="block-h">
+        <h2>Майстри</h2>
+        <p>Можна обрати в формі або написати боту.</p>
+      </header>
+      <div class="people">
+        <article class="person">
+          <div class="avatar" aria-hidden="true">ОЛ</div>
+          <h3>Оля</h3>
+          <p>Апаратний манікюр, укріплення, спокійний нюд. 6 років.</p>
+        </article>
+        <article class="person">
+          <div class="avatar" aria-hidden="true">КА</div>
+          <h3>Катя</h3>
+          <p>Дизайн, френч, педикюр. Любить складні форми.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="book" class="block book">
+      <header class="block-h">
+        <h2>Запис</h2>
+        <p>Заявка приходить адміністратору в Telegram і в журнал студії.</p>
+      </header>
+      <form class="form" id="bookForm">
+        <label>Ім’я
+          <input name="name" required maxlength="80" autocomplete="name" placeholder="Марія" />
+        </label>
+        <label>Телефон
+          <input name="phone" required maxlength="20" autocomplete="tel" placeholder="+380…" />
+        </label>
+        <label>Послуга
+          <select name="service" id="serviceSelect" required></select>
+        </label>
+        <label>Майстер
+          <select name="master" required>
+            <option value="Оля">Оля</option>
+            <option value="Катя">Катя</option>
+          </select>
+        </label>
+        <label>Дата
+          <input name="date" id="dateInput" type="date" required />
+        </label>
+        <label>Час
+          <select name="time" id="timeSelect" required></select>
+        </label>
+        <p class="form-note" id="formNote" hidden></p>
+        <button class="btn btn-wide" type="submit" id="submitBtn">Підтвердити запис</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div>
+      <p>ROSA · Оболонь, вул. Героїв Дніпра, 32</p>
+      <p>+380 67 000 00 00 · @rosa.nails</p>
+    </div>
+    <p>Сайт + запис для студії</p>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
