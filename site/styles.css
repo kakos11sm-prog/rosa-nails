@@ -284,6 +284,7 @@ h1 {
   border: 1px solid var(--line);
 }
 .avatar-elizaveta { object-position: 50% 46%; filter: brightness(1.04); }
+.avatar-alya { object-position: 50% 38%; filter: brightness(1.06); }
 .person h3 { margin: 0 0 4px; }
 .person p { margin: 0; color: var(--muted); font-size: 0.9rem; }
 
