@@ -1,9 +1,9 @@
 const SERVICES = [
-  { name: "Манікюр + покриття", mins: 90, price: 650 },
-  { name: "Манікюр + дизайн", mins: 110, price: 850 },
-  { name: "Педикюр + покриття", mins: 90, price: 750 },
-  { name: "Зняття / корекція", mins: 45, price: 300 },
-  { name: "Комплекс руки + ноги", mins: 180, price: 1300 },
+  { name: "Манікюр + покриття", mins: 90, price: 650, img: "/static/img/look-nude.png" },
+  { name: "Манікюр + дизайн", mins: 110, price: 850, img: "/static/img/look-geo.png" },
+  { name: "Педикюр + покриття", mins: 90, price: 750, img: "/static/img/look-pedi.png" },
+  { name: "Зняття / корекція", mins: 45, price: 300, img: "/static/img/look-berry.png" },
+  { name: "Комплекс руки + ноги", mins: 180, price: 1300, img: "/static/img/look-french.png" },
 ];
 
 const TIMES = ["10:00", "11:30", "13:00", "14:30", "16:00", "17:30", "19:00"];
@@ -12,10 +12,12 @@ function fillServices() {
   const cards = document.getElementById("serviceCards");
   const select = document.getElementById("serviceSelect");
   cards.innerHTML = SERVICES.map(
-    (s) => `<article class="card">
-      <h3>${s.name}</h3>
-      <p>${s.mins} хвилин</p>
-      <div class="price">${s.price} грн</div>
+    (s, i) => `<article class="card" style="--d:${0.06 + i * 0.07}s">
+      <img src="${s.img}" alt="${s.name}" />
+      <div>
+        <h3>${s.name}</h3>
+        <p>${s.mins} хв · <span class="price">${s.price} грн</span></p>
+      </div>
     </article>`
   ).join("");
   select.innerHTML = SERVICES.map((s) => `<option value="${s.name}">${s.name} · ${s.price} грн</option>`).join("");
@@ -153,10 +155,9 @@ function setupShowcase() {
   play();
 }
 
-function setupFooterReveal() {
-  const foot = document.getElementById("visit");
-  if (!foot) return;
-  const show = () => foot.classList.add("is-in");
+function revealOnView(el) {
+  if (!el) return;
+  const show = () => el.classList.add("is-in");
   if (!("IntersectionObserver" in window)) {
     show();
     return;
@@ -168,9 +169,14 @@ function setupFooterReveal() {
         io.disconnect();
       }
     },
-    { threshold: 0.2 }
+    { threshold: 0.18 }
   );
-  io.observe(foot);
+  io.observe(el);
+}
+
+function setupFooterReveal() {
+  revealOnView(document.getElementById("visit"));
+  revealOnView(document.getElementById("services"));
 }
 
 fillServices();
