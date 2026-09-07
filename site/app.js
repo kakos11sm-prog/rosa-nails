@@ -80,8 +80,82 @@ document.getElementById("bookForm").addEventListener("submit", async (e) => {
   }
 });
 
+function visibleShots() {
+  return window.matchMedia("(max-width: 820px)").matches ? 2 : 3;
+}
+
+function setupShowcase() {
+  const track = document.getElementById("showcaseTrack");
+  const dots = document.getElementById("showcaseDots");
+  const stage = document.getElementById("showcase");
+  if (!track || !dots) return;
+
+  const total = track.children.length;
+  let index = 0;
+  let timer = 0;
+
+  function maxIndex() {
+    return Math.max(0, total - visibleShots());
+  }
+
+  function renderDots() {
+    dots.innerHTML = "";
+    const last = maxIndex();
+    for (let i = 0; i <= last; i += 1) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.setAttribute("aria-label", `Роботи ${i + 1}`);
+      btn.className = i === index ? "is-on" : "";
+      btn.addEventListener("click", () => go(i));
+      dots.appendChild(btn);
+    }
+  }
+
+  function go(next) {
+    index = Math.max(0, Math.min(maxIndex(), next));
+    const card = track.children[0];
+    const stepPx = card.getBoundingClientRect().width + 12;
+    track.style.transform = `translateX(-${index * stepPx}px)`;
+    [...dots.children].forEach((dot, i) => dot.classList.toggle("is-on", i === index));
+  }
+
+  function step(dir) {
+    const last = maxIndex();
+    if (index + dir > last) go(0);
+    else if (index + dir < 0) go(last);
+    else go(index + dir);
+  }
+
+  function play() {
+    window.clearInterval(timer);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    timer = window.setInterval(() => step(1), 3800);
+  }
+
+  document.getElementById("showcasePrev").addEventListener("click", () => {
+    step(-1);
+    play();
+  });
+  document.getElementById("showcaseNext").addEventListener("click", () => {
+    step(1);
+    play();
+  });
+  stage.addEventListener("mouseenter", () => window.clearInterval(timer));
+  stage.addEventListener("mouseleave", play);
+  window.addEventListener("resize", () => {
+    if (index > maxIndex()) index = maxIndex();
+    renderDots();
+    go(index);
+  });
+
+  renderDots();
+  go(0);
+  play();
+}
+
 fillServices();
 fillTimes();
 document.getElementById("dateInput").value = nextOpenDate();
 document.getElementById("dateInput").min = nextOpenDate();
 loadConfig();
+setupShowcase();

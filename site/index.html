@@ -26,7 +26,7 @@
       <div class="hero-copy">
         <p class="eyebrow">Київ · Оболонь · студія на 2 крісла</p>
         <h1>Манікюр, який тримається довше, ніж плани на вихідні.</h1>
-        <p class="lede">Чисте покриття, спокійний дизайн, запис без переписок у Direct. Оля або Катя — слот одразу в журналі студії.</p>
+        <p class="lede">Кілька робіт одразу — оберіть настрій і запишіться без переписок у Direct.</p>
         <div class="hero-acts">
           <a class="btn" href="#book">Записатись</a>
           <a class="btn btn-ghost" id="botLink" href="https://t.me/" target="_blank" rel="noreferrer">Запис у Telegram</a>
@@ -37,9 +37,39 @@
           <div><dt>Вихідний</dt><dd>понеділок</dd></div>
         </dl>
       </div>
-      <figure class="hero-photo">
-        <img src="/static/img/hero.png" alt="Молочний френч у студії ROSA" />
-      </figure>
+
+      <div class="showcase" id="showcase">
+        <p class="showcase-kicker">Роботи студії</p>
+        <div class="showcase-window">
+          <div class="showcase-track" id="showcaseTrack">
+            <figure class="shot">
+              <img src="/static/img/hero.png" alt="Класика в студії" />
+              <figcaption>Класика</figcaption>
+            </figure>
+            <figure class="shot">
+              <img src="/static/img/look-french.png" alt="Молочний френч" />
+              <figcaption>Молочний френч</figcaption>
+            </figure>
+            <figure class="shot">
+              <img src="/static/img/look-berry.png" alt="Ягідний глянець" />
+              <figcaption>Ягідний глянець</figcaption>
+            </figure>
+            <figure class="shot">
+              <img src="/static/img/look-nude.png" alt="Нюд з блиском" />
+              <figcaption>Нюд + блиск</figcaption>
+            </figure>
+            <figure class="shot">
+              <img src="/static/img/look-geo.png" alt="Тонка геометрія" />
+              <figcaption>Геометрія</figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="showcase-bar">
+          <button class="showcase-btn" type="button" id="showcasePrev" aria-label="Попередні роботи">‹</button>
+          <div class="showcase-dots" id="showcaseDots"></div>
+          <button class="showcase-btn" type="button" id="showcaseNext" aria-label="Наступні роботи">›</button>
+        </div>
+      </div>
     </section>
 
     <section id="services" class="block">
