@@ -282,7 +282,7 @@ h1 {
   margin-bottom: 12px;
   border: 1px solid var(--line);
 }
-.avatar-elizaveta { object-position: 50% 36%; filter: brightness(1.05); }
+.avatar-elizaveta { object-position: 50% 48%; filter: brightness(1.05); }
 .person h3 { margin: 0 0 4px; }
 .person p { margin: 0; color: var(--muted); font-size: 0.9rem; }
 
