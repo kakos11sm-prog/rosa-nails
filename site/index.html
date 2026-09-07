@@ -23,24 +23,29 @@
 
   <main id="top">
     <section class="hero">
-      <p class="eyebrow">Київ · Оболонь · студія на 2 крісла</p>
-      <h1>Манікюр, який тримається довше, ніж плани на вихідні.</h1>
-      <p class="lede">Чисте покриття, спокійний дизайн, запис без переписок у Direct. Оля або Катя — слот одразу в журналі студії.</p>
-      <div class="hero-acts">
-        <a class="btn" href="#book">Записатись</a>
-        <a class="btn btn-ghost" id="botLink" href="https://t.me/" target="_blank" rel="noreferrer">Запис у Telegram</a>
+      <div class="hero-copy">
+        <p class="eyebrow">Київ · Оболонь · студія на 2 крісла</p>
+        <h1>Манікюр, який тримається довше, ніж плани на вихідні.</h1>
+        <p class="lede">Чисте покриття, спокійний дизайн, запис без переписок у Direct. Оля або Катя — слот одразу в журналі студії.</p>
+        <div class="hero-acts">
+          <a class="btn" href="#book">Записатись</a>
+          <a class="btn btn-ghost" id="botLink" href="https://t.me/" target="_blank" rel="noreferrer">Запис у Telegram</a>
+        </div>
+        <dl class="facts">
+          <div><dt>Слот</dt><dd>90 хвилин</dd></div>
+          <div><dt>Графік</dt><dd>10:00–20:30</dd></div>
+          <div><dt>Вихідний</dt><dd>понеділок</dd></div>
+        </dl>
       </div>
-      <dl class="facts">
-        <div><dt>Слот</dt><dd>90 хвилин</dd></div>
-        <div><dt>Графік</dt><dd>10:00–20:30</dd></div>
-        <div><dt>Вихідний</dt><dd>понеділок</dd></div>
-      </dl>
+      <figure class="hero-photo">
+        <img src="/static/img/hero.png" alt="Молочний френч у студії ROSA" />
+      </figure>
     </section>
 
     <section id="services" class="block">
       <header class="block-h">
         <h2>Послуги</h2>
-        <p>Ціни фіксовані. Матеріали входить у вартість.</p>
+        <p>Ціни фіксовані. Матеріали входять у вартість.</p>
       </header>
       <div class="cards" id="serviceCards"></div>
     </section>
@@ -51,10 +56,22 @@
         <p>Те, що найчастіше просять повторити.</p>
       </header>
       <div class="looks">
-        <article class="look look-a"><span>Молочний френч</span></article>
-        <article class="look look-b"><span>Ягідний глянець</span></article>
-        <article class="look look-c"><span>Нюд + блиск</span></article>
-        <article class="look look-d"><span>Тонка геометрія</span></article>
+        <article class="look look-wide">
+          <img src="/static/img/look-french.png" alt="Молочний френч" />
+          <span>Молочний френч</span>
+        </article>
+        <article class="look">
+          <img src="/static/img/look-berry.png" alt="Ягідний глянець" />
+          <span>Ягідний глянець</span>
+        </article>
+        <article class="look">
+          <img src="/static/img/look-nude.png" alt="Нюд з блиском" />
+          <span>Нюд + блиск</span>
+        </article>
+        <article class="look">
+          <img src="/static/img/look-geo.png" alt="Тонка геометрія" />
+          <span>Тонка геометрія</span>
+        </article>
       </div>
     </section>
 
@@ -65,12 +82,12 @@
       </header>
       <div class="people">
         <article class="person">
-          <div class="avatar" aria-hidden="true">ОЛ</div>
+          <img class="avatar-img" src="/static/img/master-olya.png" alt="Оля, майстер ROSA" />
           <h3>Оля</h3>
           <p>Апаратний манікюр, укріплення, спокійний нюд. 6 років.</p>
         </article>
         <article class="person">
-          <div class="avatar" aria-hidden="true">КА</div>
+          <img class="avatar-img" src="/static/img/master-katya.png" alt="Катя, майстер ROSA" />
           <h3>Катя</h3>
           <p>Дизайн, френч, педикюр. Любить складні форми.</p>
         </article>
