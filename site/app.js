@@ -8,6 +8,21 @@ const SERVICES = [
 
 const TIMES = ["10:00", "11:30", "13:00", "14:30", "16:00", "17:30", "19:00"];
 
+const LOOKS = [
+  { name: "Молочний френч", img: "/static/img/look-french.png", tag: "Френч", featured: true },
+  { name: "Омбре", img: "/static/img/look-ombre.png", tag: "Нюд", wide: true },
+  { name: "Нюд + блиск", img: "/static/img/look-nude.png", tag: "Нюд" },
+  { name: "Ягідний глянець", img: "/static/img/look-berry.png", tag: "Яскраві" },
+  { name: "Кішечка", img: "/static/img/look-cateye.png", tag: "Яскраві" },
+  { name: "Хром", img: "/static/img/look-chrome.png", tag: "Дизайн" },
+  { name: "Квіти", img: "/static/img/look-floral.png", tag: "Дизайн" },
+  { name: "Геометрія", img: "/static/img/look-geo.png", tag: "Дизайн" },
+  { name: "Весільний", img: "/static/img/look-bridal.png", tag: "Весілля" },
+  { name: "Вечірній", img: "/static/img/look-evening.png", tag: "Вечір" },
+  { name: "Класика", img: "/static/img/hero.png", tag: "Нюд" },
+  { name: "Педикюр", img: "/static/img/look-pedi.png", tag: "Педикюр" },
+];
+
 function fillServices() {
   const cards = document.getElementById("serviceCards");
   const select = document.getElementById("serviceSelect");
@@ -28,6 +43,43 @@ function nextOpenDate() {
   d.setDate(d.getDate() + 1);
   while (d.getDay() === 1) d.setDate(d.getDate() + 1);
   return d.toISOString().slice(0, 10);
+}
+
+function fillLooks() {
+  const grid = document.getElementById("looksGrid");
+  const filters = document.getElementById("lookFilters");
+  if (!grid || !filters) return;
+
+  const tags = ["Усі", ...new Set(LOOKS.map((l) => l.tag))];
+  let active = "Усі";
+
+  function paint() {
+    filters.innerHTML = tags
+      .map(
+        (t) =>
+          `<button type="button" class="chip-btn${t === active ? " is-on" : ""}" data-tag="${t}">${t}</button>`
+      )
+      .join("");
+    const rows = active === "Усі" ? LOOKS : LOOKS.filter((l) => l.tag === active);
+    grid.innerHTML = rows
+      .map((l, i) => {
+        const extra = l.featured && active === "Усі" ? " look-wide" : l.wide && active === "Усі" ? " look-span" : "";
+        return `<article class="look${extra}" style="--d:${0.04 + i * 0.05}s">
+          <img src="${l.img}" alt="${l.name}" />
+          <span>${l.name}</span>
+        </article>`;
+      })
+      .join("");
+  }
+
+  filters.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-tag]");
+    if (!btn) return;
+    active = btn.dataset.tag;
+    paint();
+  });
+
+  paint();
 }
 
 function fillTimes() {
@@ -177,9 +229,11 @@ function revealOnView(el) {
 function setupFooterReveal() {
   revealOnView(document.getElementById("visit"));
   revealOnView(document.getElementById("services"));
+  revealOnView(document.getElementById("looks"));
 }
 
 fillServices();
+fillLooks();
 fillTimes();
 document.getElementById("dateInput").value = nextOpenDate();
 document.getElementById("dateInput").min = nextOpenDate();
