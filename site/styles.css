@@ -448,10 +448,8 @@ h1 {
   .hero, .people, .form, .facts, .foot-inner { grid-template-columns: 1fr; }
   .cards { grid-template-columns: 1fr 1fr; }
   .looks { grid-template-columns: 1fr 1fr; grid-auto-rows: 140px; }
-  .look-wide, .look-span { grid-column: span 2; }
+  .look-wide, .look-span { grid-column: span 2; grid-row: span 1; }
   .hero { min-height: 0; gap: 22px; padding-top: 22px; }
   .shot { flex-basis: calc((100% - 12px) / 2); min-height: 220px; }
   .shot img { height: 220px; }
-  .looks { grid-template-rows: 240px 180px 180px 180px; }
-  .look-wide { grid-row: auto; }
 }
