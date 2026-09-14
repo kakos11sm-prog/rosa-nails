@@ -25,7 +25,7 @@ const LOOKS = [
 
 function fillServices() {
   const cards = document.getElementById("serviceCards");
-  const select = document.getElementById("serviceSelect");
+  if (!cards) return;
   cards.innerHTML = SERVICES.map(
     (s, i) => `<article class="card" style="--d:${0.06 + i * 0.07}s">
       <img src="${s.img}" alt="${s.name}" />
@@ -35,14 +35,6 @@ function fillServices() {
       </div>
     </article>`
   ).join("");
-  select.innerHTML = SERVICES.map((s) => `<option value="${s.name}">${s.name} · ${s.price} грн</option>`).join("");
-}
-
-function nextOpenDate() {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  while (d.getDay() === 1) d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
 }
 
 function fillLooks() {
@@ -82,16 +74,12 @@ function fillLooks() {
   paint();
 }
 
-function fillTimes() {
-  const sel = document.getElementById("timeSelect");
-  sel.innerHTML = TIMES.map((t) => `<option>${t}</option>`).join("");
-}
-
 async function loadConfig() {
   try {
     const res = await fetch("/api/config");
     const data = await res.json();
     const link = document.getElementById("botLink");
+    if (!link) return;
     if (data.bot_url) {
       link.href = data.bot_url;
     } else {
@@ -102,37 +90,6 @@ async function loadConfig() {
     /* offline */
   }
 }
-
-function showNote(text, ok) {
-  const el = document.getElementById("formNote");
-  el.hidden = false;
-  el.textContent = text;
-  el.className = "form-note " + (ok ? "is-ok" : "is-bad");
-}
-
-document.getElementById("bookForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById("submitBtn");
-  const payload = Object.fromEntries(new FormData(e.target).entries());
-  btn.disabled = true;
-  try {
-    const res = await fetch("/api/book", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "не вдалося записати");
-    showNote("Записано. Студія отримає заявку в Telegram.", true);
-    e.target.reset();
-    document.getElementById("dateInput").value = nextOpenDate();
-    fillTimes();
-  } catch (err) {
-    showNote(String(err.message || err), false);
-  } finally {
-    btn.disabled = false;
-  }
-});
 
 function visibleShots() {
   return window.matchMedia("(max-width: 820px)").matches ? 2 : 3;
@@ -234,9 +191,6 @@ function setupFooterReveal() {
 
 fillServices();
 fillLooks();
-fillTimes();
-document.getElementById("dateInput").value = nextOpenDate();
-document.getElementById("dateInput").min = nextOpenDate();
 loadConfig();
 setupShowcase();
 setupFooterReveal();

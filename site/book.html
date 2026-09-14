@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ROSA — запис онлайн</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <a class="logo" href="/">ROSA</a>
+    <a class="btn btn-sm btn-ghost" href="/">На сайт</a>
+  </header>
+  <main class="band band-blush">
+    <div class="wrap status-box book-page">
+      <p class="eyebrow">Онлайн</p>
+      <h1>Заплануйте візит</h1>
+      <p class="lede">Оберіть майстра, послугу і час. Студія підтвердить заявку — статус побачите на наступній сторінці.</p>
+      <form class="book-flow" id="bookForm">
+        <input type="hidden" name="master" id="masterSelect" required />
+        <input type="hidden" name="service" id="serviceSelect" required />
+        <input type="hidden" name="date" id="dateInput" required />
+        <input type="hidden" name="time" id="timeSelect" />
+
+        <article class="step is-open" data-step="master">
+          <button type="button" class="step-tab" data-open="master">
+            <span>
+              <small>Майстер</small>
+              <strong id="masterSummary">Оберіть майстра</strong>
+            </span>
+            <i>›</i>
+          </button>
+          <div class="step-panel">
+            <div class="pick-people">
+              <button type="button" class="pick-person" data-master="Аля">
+                <img class="avatar-alya" src="/static/img/master-alya.png" alt="" />
+                <span>Аля</span>
+              </button>
+              <button type="button" class="pick-person" data-master="Єлизавета">
+                <img class="avatar-elizaveta" src="/static/img/master-elizaveta.png" alt="" />
+                <span>Єлизавета</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <article class="step" data-step="service">
+          <button type="button" class="step-tab" data-open="service">
+            <span>
+              <small>Послуга</small>
+              <strong id="serviceSummary">Оберіть послугу</strong>
+            </span>
+            <i>›</i>
+          </button>
+          <div class="step-panel">
+            <div class="pick-services" id="servicePicks"></div>
+          </div>
+        </article>
+
+        <article class="step" data-step="when">
+          <button type="button" class="step-tab" data-open="when">
+            <span>
+              <small>Дата і час</small>
+              <strong id="whenSummary">Виберіть дату і час</strong>
+            </span>
+            <i>›</i>
+          </button>
+          <div class="step-panel">
+            <div class="picker" id="datePicker"></div>
+            <div class="time-field" id="timeField" hidden></div>
+            <p class="form-hint" id="slotsHint"></p>
+          </div>
+        </article>
+
+        <article class="step" data-step="contacts">
+          <button type="button" class="step-tab" data-open="contacts">
+            <span>
+              <small>Контакти</small>
+              <strong>Ім’я і телефон</strong>
+            </span>
+            <i>›</i>
+          </button>
+          <div class="step-panel contacts">
+            <label>Ім’я
+              <input name="name" required maxlength="80" autocomplete="name" placeholder="Марія" />
+            </label>
+            <label>Телефон
+              <input name="phone" required maxlength="20" autocomplete="tel" placeholder="+380…" />
+            </label>
+          </div>
+        </article>
+
+        <p class="form-note" id="formNote" hidden></p>
+        <button class="btn btn-wide" type="submit" id="submitBtn">Оформити запис</button>
+      </form>
+    </div>
+  </main>
+  <script src="/static/book.js"></script>
+</body>
+</html>

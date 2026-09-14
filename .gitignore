@@ -2,3 +2,5 @@
 .env
 __pycache__/
 *.pyc
+secrets/
+google-service*.json

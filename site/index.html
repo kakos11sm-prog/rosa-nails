@@ -17,19 +17,20 @@
       <a href="#looks">Роботи</a>
       <a href="#masters">Майстри</a>
       <a href="#visit">Адреса</a>
-      <a href="#book">Запис</a>
+      <a href="/book">Запис</a>
     </nav>
-    <a class="btn btn-sm" href="#book">Записатись</a>
+    <a class="btn btn-sm" href="/book">Записатись</a>
   </header>
 
   <main id="top">
-    <section class="hero">
+    <section class="band band-hero">
+    <div class="hero">
       <div class="hero-copy">
         <p class="eyebrow">Запоріжжя · Вознесенівський · студія на 2 крісла</p>
         <h1>Манікюр, який тримається довше, ніж плани на вихідні.</h1>
         <p class="lede">Кілька робіт одразу — оберіть настрій і запишіться без переписок у Direct.</p>
         <div class="hero-acts">
-          <a class="btn" href="#book">Записатись</a>
+          <a class="btn" href="/book">Записатись</a>
           <a class="btn btn-ghost" id="botLink" href="https://t.me/" target="_blank" rel="noreferrer">Запис у Telegram</a>
         </div>
         <dl class="facts">
@@ -71,17 +72,22 @@
           <button class="showcase-btn" type="button" id="showcaseNext" aria-label="Наступні роботи">›</button>
         </div>
       </div>
+    </div>
     </section>
 
-    <section id="services" class="block services">
+    <section id="services" class="band band-soft services">
+      <div class="wrap">
       <header class="block-h">
+        <p class="eyebrow">Прайс</p>
         <h2>Послуги</h2>
         <p>Ціни фіксовані. Матеріали входять у вартість.</p>
       </header>
       <div class="cards" id="serviceCards"></div>
+      </div>
     </section>
 
-    <section id="looks" class="block looks-block">
+    <section id="looks" class="band band-white looks-block">
+      <div class="wrap">
       <header class="block-h">
         <p class="eyebrow">Портфоліо студії</p>
         <h2>Роботи</h2>
@@ -89,12 +95,19 @@
       </header>
       <div class="look-filters" id="lookFilters"></div>
       <div class="looks" id="looksGrid"></div>
+      <p class="looks-more">
+        Подивитись більше робіт —
+        <a href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a>
+      </p>
+      </div>
     </section>
 
-    <section id="masters" class="block">
+    <section id="masters" class="band band-soft">
+      <div class="wrap">
       <header class="block-h">
+        <p class="eyebrow">Команда</p>
         <h2>Майстри</h2>
-        <p>Аля або Єлизавета — оберіть у формі або напишіть боту.</p>
+        <p>Аля або Єлизавета — оберіть на сторінці запису.</p>
       </header>
       <div class="people">
         <article class="person">
@@ -108,38 +121,18 @@
           <p>Манікюр, покриття, акуратна робота. Запоріжжя.</p>
         </article>
       </div>
+      </div>
     </section>
 
-    <section id="book" class="block book">
+    <section id="book" class="band band-blush book">
+      <div class="wrap">
       <header class="block-h">
-        <h2>Запис</h2>
-        <p>Заявка приходить адміністратору в Telegram і в журнал студії.</p>
+        <p class="eyebrow">Онлайн</p>
+        <h2>Запис на окремій сторінці</h2>
+        <p>Майстер, послуга, дата і статус відповіді — без прокрутки лендінгу.</p>
       </header>
-      <form class="form" id="bookForm">
-        <label>Ім’я
-          <input name="name" required maxlength="80" autocomplete="name" placeholder="Марія" />
-        </label>
-        <label>Телефон
-          <input name="phone" required maxlength="20" autocomplete="tel" placeholder="+380…" />
-        </label>
-        <label>Послуга
-          <select name="service" id="serviceSelect" required></select>
-        </label>
-        <label>Майстер
-          <select name="master" required>
-            <option value="Аля">Аля</option>
-            <option value="Єлизавета">Єлизавета</option>
-          </select>
-        </label>
-        <label>Дата
-          <input name="date" id="dateInput" type="date" required />
-        </label>
-        <label>Час
-          <select name="time" id="timeSelect" required></select>
-        </label>
-        <p class="form-note" id="formNote" hidden></p>
-        <button class="btn btn-wide" type="submit" id="submitBtn">Підтвердити запис</button>
-      </form>
+      <a class="btn" href="/book">Записатись</a>
+      </div>
     </section>
   </main>
 
@@ -148,7 +141,7 @@
       <div class="foot-col">
         <a class="logo" href="#top">ROSA</a>
         <p>10:00–20:30 · вихідний понеділок</p>
-        <p>+380 67 000 00 00 · @rosa.nails</p>
+        <p>+380 67 000 00 00 · <a href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a></p>
       </div>
       <div class="foot-col foot-find">
         <p class="visit-label">Як нас знайти</p>
