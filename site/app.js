@@ -78,17 +78,14 @@ async function loadConfig() {
   try {
     const res = await fetch("/api/config");
     const data = await res.json();
-    document.querySelectorAll(".js-bot-link").forEach((link) => {
-      if (data.bot_url) {
-        link.href = data.bot_url;
-        link.removeAttribute("aria-disabled");
-        return;
-      }
+    const link = document.getElementById("botLink");
+    if (!link) return;
+    if (data.bot_url) {
+      link.href = data.bot_url;
+    } else {
+      link.textContent = "Бот підключимо після токена";
       link.removeAttribute("href");
-      link.setAttribute("aria-disabled", "true");
-      const label = link.querySelector("[data-bot-label]");
-      if (label) label.textContent = "Бот підключимо після токена";
-    });
+    }
   } catch (_) {
     /* offline */
   }
