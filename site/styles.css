@@ -38,7 +38,7 @@ img { max-width: 100%; display: block; }
   background: rgba(255, 253, 252, 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
-  transition: padding 0.35s ease, gap 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+  transition: padding 0.35s ease, gap 0.35s ease, box-shadow 0.35s ease, background 0.35s ease, transform 0.35s ease, opacity 0.3s ease;
 }
 .top.is-slim {
   padding: 6px 22px;
@@ -226,7 +226,8 @@ img { max-width: 100%; display: block; }
   background: #fff;
   border-bottom: 1px solid var(--line);
   box-shadow: 0 8px 20px rgba(196, 111, 123, 0.06);
-  transition: top 0.35s ease;
+  .visit-bar {
+  transition: top 0.35s ease, transform 0.35s ease, opacity 0.3s ease;
 }
 body:has(.top.is-slim) .visit-bar { top: 46px; }
 .visit-bar[hidden] { display: none !important; }
@@ -443,7 +444,12 @@ h1 {
 .block-h .eyebrow { margin: 0 0 10px; }
 .block-h h2 + p { margin: 16px 0 22px; color: var(--muted); }
 
-.price-stick { height: 1px; margin: 0; }
+body.is-price-focus .top,
+body.is-price-focus .visit-bar {
+  transform: translateY(-120%);
+  opacity: 0;
+  pointer-events: none;
+}
 .price-head {
   max-width: none;
   position: sticky;
@@ -462,6 +468,8 @@ body:has(.top.is-slim) .price-head { top: 56px; }
   transition: max-height 0.28s ease, opacity 0.28s ease, margin 0.28s ease;
 }
 .price-head.is-stuck {
+  top: 0;
+  z-index: 9;
   width: 100vw;
   max-width: 100vw;
   margin-left: calc(50% - 50vw);

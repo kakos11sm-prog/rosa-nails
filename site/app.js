@@ -163,30 +163,49 @@ function fillPrice() {
   paintBoard();
   paintHeading();
 
+  let passedStick = false;
+  let servicesOnScreen = true;
+
+  function syncChrome() {
+    const hideTop = passedStick && servicesOnScreen;
+    document.body.classList.toggle("is-price-focus", hideTop);
+    if (head) head.classList.toggle("is-stuck", hideTop);
+    paintHeading();
+  }
+
   const stick = document.querySelector(".price-stick");
   if (stick && head && "IntersectionObserver" in window) {
     const stickIo = new IntersectionObserver(
       ([entry]) => {
-        head.classList.toggle("is-stuck", !entry.isIntersecting);
-        paintHeading();
+        passedStick = !entry.isIntersecting;
+        syncChrome();
       },
-      { threshold: 0, rootMargin: "-70px 0px 0px 0px" }
+      { threshold: 0, rootMargin: "-8px 0px 0px 0px" }
     );
     stickIo.observe(stick);
   }
 
   const section = document.getElementById("services");
   if (section && "IntersectionObserver" in window) {
-    const io = new IntersectionObserver(
+    const stayIo = new IntersectionObserver(
+      ([entry]) => {
+        servicesOnScreen = entry.isIntersecting;
+        syncChrome();
+      },
+      { threshold: 0, rootMargin: "0px 0px -20% 0px" }
+    );
+    stayIo.observe(section);
+
+    const hintIo = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
           window.setTimeout(hintSwitch, 280);
-          io.disconnect();
+          hintIo.disconnect();
         }
       },
       { threshold: 0.4 }
     );
-    io.observe(section);
+    hintIo.observe(section);
   }
 }
 
