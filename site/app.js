@@ -166,6 +166,9 @@ function fillPrice() {
   const topBar = document.querySelector("header.top");
   const section = document.getElementById("services");
 
+  const brow = document.querySelector(".price-eyebrow");
+  const browText = brow && brow.firstElementChild;
+
   function slideChrome() {
     if (!topBar || !head || !section) return;
     const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -179,6 +182,24 @@ function fillPrice() {
     const progress = quiet ? (cover > 0.5 ? 1 : 0) : cover;
     topBar.style.transform = `translateY(${(-progress * 100).toFixed(2)}%)`;
     topBar.style.pointerEvents = progress > 0.55 ? "none" : "";
+
+    if (brow && browText) {
+      const full = browText.scrollHeight || 18;
+      const overlap = Math.max(0, headerH - brow.getBoundingClientRect().top);
+      const rest = Math.max(0, full - overlap);
+      const shown = rest / full;
+      if (quiet) {
+        brow.style.height = shown > 0.5 ? "" : "0px";
+        brow.style.opacity = shown > 0.5 ? "1" : "0";
+        brow.style.marginBottom = shown > 0.5 ? "" : "0px";
+        browText.style.transform = "";
+      } else {
+        brow.style.height = `${rest.toFixed(1)}px`;
+        brow.style.opacity = shown.toFixed(3);
+        brow.style.marginBottom = `${(14 * shown).toFixed(1)}px`;
+        browText.style.transform = overlap > 0 ? `translateY(${-overlap}px)` : "";
+      }
+    }
   }
 
   let chromeRaf = 0;

@@ -443,6 +443,14 @@ h1 {
 .block-h .eyebrow { margin: 0 0 10px; }
 .block-h h2 + p { margin: 16px 0 22px; color: var(--muted); }
 
+.price-eyebrow {
+  overflow: hidden;
+  margin: 0 0 14px;
+}
+.price-eyebrow span {
+  display: block;
+}
+
 .price-head {
   max-width: none;
   position: sticky;
