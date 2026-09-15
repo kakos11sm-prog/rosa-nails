@@ -55,6 +55,9 @@ img { max-width: 100%; display: block; }
   transition: font-size 0.35s ease, letter-spacing 0.35s ease;
 }
 .top .logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: clamp(1.42rem, 5.6vw, 1.9rem);
   font-style: italic;
   font-weight: 700;
@@ -64,9 +67,51 @@ img { max-width: 100%; display: block; }
   flex: 1 1 auto;
   min-width: 0;
 }
+.logo-word {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 3px;
+  background: linear-gradient(105deg, #f4cdd2 0%, #c46f7b 36%, #eeb6bd 58%, #b85a6a 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: logoShine 7s ease-in-out infinite;
+}
+.logo-word::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 8%;
+  bottom: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, #e2b4ba 18%, #c46f7b 50%, #e2b4ba 82%, transparent);
+}
+.logo-spark {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #ffe8eb, #c46f7b);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  filter: drop-shadow(0 0 3px rgba(196, 111, 123, 0.45));
+  animation: sparkTwinkle 2.6s ease-in-out infinite;
+}
+@keyframes logoShine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes sparkTwinkle {
+  0%, 100% { transform: scale(0.85) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.15) rotate(18deg); opacity: 1; }
+}
 .top.is-slim .logo {
   font-size: clamp(1.18rem, 4.6vw, 1.42rem);
   letter-spacing: 0.02em;
+}
+.top.is-slim .logo-spark {
+  width: 8px;
+  height: 8px;
 }
 .nav {
   display: flex;
@@ -1009,6 +1054,7 @@ h1 {
   .top, .logo, .nav, .top-acts, .top-acts .btn-sm, .icon-btn, .icon-btn svg, .top > .btn-sm, .visit-bar {
     transition: none;
   }
+  .logo-word, .logo-spark { animation: none !important; }
   .foot-col, .foot-map, .chips span, .card, .look { opacity: 1; transform: none; animation: none; }
   .seal-ring, .seal-check, .seal-x, .seal-halo, .status-dots i, .status-sparks span, .status-seal {
     animation: none !important;
