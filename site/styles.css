@@ -453,13 +453,6 @@ h1 {
 }
 .price-title h2 { margin: 0; }
 .price-title h2::after { display: none; }
-.price-who {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 1.55rem;
-  color: var(--muted);
-  font-weight: 500;
-}
 .price-pick {
   display: flex;
   flex-wrap: wrap;
@@ -1177,7 +1170,6 @@ h1 {
   .top.is-slim .logo { font-size: 1.28rem; letter-spacing: 0.01em; }
   .price-title { flex-wrap: nowrap; gap: 6px 8px; }
   .price-title h2 { font-size: 1.55rem; }
-  .price-who { font-size: 1.15rem; }
   .price-master { padding: 8px 12px; font-size: 0.8rem; }
   .lede { font-size: 0.98rem; margin-bottom: 16px; }
   .people, .form, .pick-people, .slot-grid { grid-template-columns: 1fr 1fr; }
