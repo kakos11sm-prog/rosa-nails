@@ -163,38 +163,37 @@ function fillPrice() {
   paintBoard();
   paintHeading();
 
-  let passedStick = false;
-  let servicesOnScreen = true;
-
-  function syncChrome() {
-    const stuck = passedStick && servicesOnScreen;
-    if (head) head.classList.toggle("is-stuck", stuck);
-    paintHeading();
-  }
-
-  const stick = document.querySelector(".price-stick");
-  if (stick && head && "IntersectionObserver" in window) {
-    const stickIo = new IntersectionObserver(
-      ([entry]) => {
-        passedStick = !entry.isIntersecting;
-        syncChrome();
-      },
-      { threshold: 0, rootMargin: "-8px 0px 0px 0px" }
-    );
-    stickIo.observe(stick);
-  }
-
+  const topBar = document.querySelector("header.top");
   const section = document.getElementById("services");
-  if (section && "IntersectionObserver" in window) {
-    const stayIo = new IntersectionObserver(
-      ([entry]) => {
-        servicesOnScreen = entry.isIntersecting;
-        syncChrome();
-      },
-      { threshold: 0, rootMargin: "0px 0px -20% 0px" }
-    );
-    stayIo.observe(section);
 
+  function slideChrome() {
+    if (!topBar || !head || !section) return;
+    const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const headerH = topBar.offsetHeight || 1;
+    const barTop = head.getBoundingClientRect().top;
+    const leave = section.getBoundingClientRect().bottom;
+    let cover = Math.min(1, Math.max(0, (headerH - barTop) / headerH));
+    if (leave < headerH) {
+      cover *= Math.min(1, Math.max(0, leave / headerH));
+    }
+    const progress = quiet ? (cover > 0.5 ? 1 : 0) : cover;
+    topBar.style.transform = `translateY(${(-progress * 100).toFixed(2)}%)`;
+    topBar.style.pointerEvents = progress > 0.55 ? "none" : "";
+  }
+
+  let chromeRaf = 0;
+  const onChrome = () => {
+    if (chromeRaf) return;
+    chromeRaf = window.requestAnimationFrame(() => {
+      chromeRaf = 0;
+      slideChrome();
+    });
+  };
+  window.addEventListener("scroll", onChrome, { passive: true });
+  window.addEventListener("resize", onChrome);
+  slideChrome();
+
+  if (section && "IntersectionObserver" in window) {
     const hintIo = new IntersectionObserver(
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) {
