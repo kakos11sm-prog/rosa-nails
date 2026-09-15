@@ -226,7 +226,6 @@ img { max-width: 100%; display: block; }
   background: #fff;
   border-bottom: 1px solid var(--line);
   box-shadow: 0 8px 20px rgba(196, 111, 123, 0.06);
-  .visit-bar {
   transition: top 0.35s ease, transform 0.35s ease, opacity 0.3s ease;
 }
 body:has(.top.is-slim) .visit-bar { top: 46px; }
