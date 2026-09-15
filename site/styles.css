@@ -453,29 +453,27 @@ h1 {
 }
 .price-title h2 { margin: 0; }
 .price-title h2::after { display: none; }
-.price-pick { width: min(100%, 380px); }
+.price-pick { width: min(100%, 360px); }
 .price-switch {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding: 5px;
+  padding: 4px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #fffdfc, #f6e8eb);
-  border: 1px solid #edd8db;
-  box-shadow: inset 0 1px 0 #fff, 0 10px 22px rgba(196, 111, 123, 0.1);
+  background: transparent;
+  border: 1px solid var(--line);
 }
 .price-switch-glider {
   position: absolute;
-  top: 5px;
-  left: 5px;
-  width: calc((100% - 10px) / 2);
-  height: calc(100% - 10px);
+  top: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / 2);
+  height: calc(100% - 8px);
   border-radius: 999px;
-  background: linear-gradient(110deg, #f0c4ca 0%, #c46f7b 42%, #e8a8b0 68%, #b85a6a 100%);
-  background-size: 200% 100%;
-  box-shadow: 0 8px 16px rgba(196, 111, 123, 0.28);
-  animation: logoShine 6s ease-in-out infinite;
-  transition: transform 0.38s cubic-bezier(0.22, 0.8, 0.28, 1);
+  background: var(--blush);
+  box-shadow: none;
+  animation: none;
+  transition: transform 0.35s ease;
   z-index: 0;
 }
 .price-switch.is-liza .price-switch-glider { transform: translateX(100%); }
@@ -486,17 +484,17 @@ h1 {
   border: 0;
   background: transparent;
   border-radius: 999px;
-  padding: 12px 10px;
+  padding: 10px 10px;
   cursor: pointer;
   color: var(--muted);
-  font: 600 0.95rem/1 var(--font);
+  font: 500 0.9rem/1 var(--font);
   transition: color 0.25s ease;
 }
-.price-master.is-on { color: #fff; }
+.price-master.is-on { color: var(--rose-2); font-weight: 600; }
 .price-switch-hint {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 .price-group { margin: 0 0 28px; }
 .price-group:last-child { margin-bottom: 0; }
