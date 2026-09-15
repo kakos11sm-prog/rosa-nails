@@ -445,10 +445,14 @@ h1 {
 
 body.is-price-focus .top,
 body.is-price-focus .visit-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
   transform: translateY(-120%);
   opacity: 0;
   pointer-events: none;
 }
+.price-stick { height: 1px; margin: 0; }
 .price-head {
   max-width: none;
   position: sticky;
@@ -460,7 +464,12 @@ body.is-price-focus .visit-bar {
   backdrop-filter: none;
   transition: padding 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-radius 0.3s ease, margin 0.3s ease;
 }
-body:has(.top.is-slim) .price-head { top: 56px; }
+body:has(.top.is-slim) .price-head:not(.is-stuck) { top: 56px; }
+.price-head.is-stuck,
+body:has(.top.is-slim) .price-head.is-stuck,
+body.is-price-focus .price-head {
+  top: 0;
+}
 .price-head .eyebrow {
   overflow: hidden;
   max-height: 2.2em;
@@ -1351,8 +1360,14 @@ a.price-card:hover {
   .top .logo { font-size: 1.62rem; letter-spacing: 0.01em; }
   .top.is-slim .logo { font-size: 1.28rem; letter-spacing: 0.01em; }
   .price-head { top: 66px; padding: 6px 0 10px; }
-  body:has(.top.is-slim) .price-head { top: 52px; }
-  .price-head.is-stuck { padding: 9px 16px; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
+  body:has(.top.is-slim) .price-head:not(.is-stuck) { top: 52px; }
+  .price-head.is-stuck,
+  body:has(.top.is-slim) .price-head.is-stuck {
+    top: 0;
+    padding: 9px 16px;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
   .price-head.is-stuck h2 { font-size: 1rem; }
   .price-head.is-stuck .price-pick { max-width: 220px; }
   .price-title {
