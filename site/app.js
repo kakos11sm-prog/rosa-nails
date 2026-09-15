@@ -165,11 +165,25 @@ function fillPrice() {
 
   let passedStick = false;
   let servicesOnScreen = true;
+  let chromeOn = false;
+  let chromeTimer = 0;
 
   function syncChrome() {
     const hideTop = passedStick && servicesOnScreen;
-    document.body.classList.toggle("is-price-focus", hideTop);
-    if (head) head.classList.toggle("is-stuck", hideTop);
+    if (hideTop === chromeOn) return;
+    chromeOn = hideTop;
+    window.clearTimeout(chromeTimer);
+    if (hideTop) {
+      document.body.classList.add("is-price-focus");
+      if (head) head.classList.add("is-stuck");
+      paintHeading();
+      return;
+    }
+    document.body.classList.remove("is-price-focus");
+    chromeTimer = window.setTimeout(() => {
+      if (!chromeOn && head) head.classList.remove("is-stuck");
+      paintHeading();
+    }, 180);
     paintHeading();
   }
 
