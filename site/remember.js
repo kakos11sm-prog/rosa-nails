@@ -83,4 +83,13 @@ async function rosaShowVisitBar() {
   }
 }
 
+function rosaSlimHeader() {
+  const top = document.querySelector("header.top");
+  if (!top) return;
+  const paint = () => top.classList.toggle("is-slim", window.scrollY > 16);
+  paint();
+  window.addEventListener("scroll", paint, { passive: true });
+}
+
 rosaShowVisitBar();
+rosaSlimHeader();

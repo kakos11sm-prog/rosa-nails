@@ -38,6 +38,13 @@ img { max-width: 100%; display: block; }
   background: rgba(255, 253, 252, 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
+  transition: padding 0.35s ease, gap 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+}
+.top.is-slim {
+  padding: 6px 22px;
+  gap: 12px;
+  background: rgba(255, 253, 252, 0.97);
+  box-shadow: 0 8px 22px rgba(196, 111, 123, 0.08);
 }
 .logo {
   font-family: var(--serif);
@@ -45,15 +52,37 @@ img { max-width: 100%; display: block; }
   letter-spacing: 0.18em;
   text-decoration: none;
   font-weight: 600;
+  transition: font-size 0.35s ease, letter-spacing 0.35s ease;
 }
-.nav { display: flex; gap: 16px; margin-left: auto; font-size: 0.88rem; color: var(--muted); }
+.top.is-slim .logo {
+  font-size: 1.16rem;
+  letter-spacing: 0.14em;
+}
+.nav {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+  font-size: 0.88rem;
+  color: var(--muted);
+  max-width: 40rem;
+  overflow: hidden;
+  transition: opacity 0.3s ease, max-width 0.35s ease, margin 0.35s ease, gap 0.35s ease;
+}
 .nav a { text-decoration: none; }
 .nav a:hover { color: var(--ink); }
-.top-acts { display: flex; align-items: center; gap: 8px; }
+.top.is-slim .nav {
+  opacity: 0;
+  max-width: 0;
+  margin-left: 0;
+  gap: 0;
+  pointer-events: none;
+}
+.top-acts { display: flex; align-items: center; gap: 8px; transition: gap 0.35s ease; }
 .top-acts .btn-sm {
   height: 38px;
   padding: 0 16px;
   box-sizing: border-box;
+  transition: height 0.35s ease, padding 0.35s ease, font-size 0.35s ease, box-shadow 0.35s ease;
 }
 .icon-btn {
   width: 38px;
@@ -69,9 +98,39 @@ img { max-width: 100%; display: block; }
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 8px 18px rgba(196, 111, 123, 0.16);
+  transition: width 0.35s ease, height 0.35s ease, box-shadow 0.35s ease;
 }
-.icon-btn svg { width: 38px; height: 38px; display: block; }
+.icon-btn svg {
+  width: 38px;
+  height: 38px;
+  display: block;
+  transition: width 0.35s ease, height 0.35s ease;
+}
 .icon-btn:hover { opacity: 0.88; }
+.top.is-slim .top-acts { gap: 6px; }
+.top.is-slim .top-acts .btn-sm {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 0.74rem;
+}
+.top.is-slim .icon-btn,
+.top.is-slim .icon-btn svg {
+  width: 28px;
+  height: 28px;
+}
+.top.is-slim .icon-btn { box-shadow: 0 4px 10px rgba(196, 111, 123, 0.12); }
+.top > .btn-sm {
+  height: 38px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  margin-left: auto;
+  transition: height 0.35s ease, padding 0.35s ease, font-size 0.35s ease;
+}
+.top.is-slim > .btn-sm {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 0.74rem;
+}
 
 .btn {
   display: inline-flex;
@@ -111,7 +170,9 @@ img { max-width: 100%; display: block; }
   background: #fff;
   border-bottom: 1px solid var(--line);
   box-shadow: 0 8px 20px rgba(196, 111, 123, 0.06);
+  transition: top 0.35s ease;
 }
+body:has(.top.is-slim) .visit-bar { top: 46px; }
 .visit-bar[hidden] { display: none !important; }
 .visit-bar.is-ok { background: #f4f8f5; }
 .visit-bar.is-no { background: #fbf4f4; }
@@ -934,6 +995,9 @@ h1 {
 .foot.is-in .chips span:nth-child(4) { animation-delay: 0.46s; }
 
 @media (prefers-reduced-motion: reduce) {
+  .top, .logo, .nav, .top-acts, .top-acts .btn-sm, .icon-btn, .icon-btn svg, .top > .btn-sm, .visit-bar {
+    transition: none;
+  }
   .foot-col, .foot-map, .chips span, .card, .look { opacity: 1; transform: none; animation: none; }
   .seal-ring, .seal-check, .seal-x, .seal-halo, .status-dots i, .status-sparks span, .status-seal {
     animation: none !important;
@@ -955,8 +1019,10 @@ h1 {
   }
   .hero-copy { padding-left: 12px; }
   .top { padding: 12px 16px; gap: 10px; }
+  .top.is-slim { padding: 5px 14px; }
   .top-acts { margin-left: auto; }
   .logo { font-size: 1.28rem; letter-spacing: 0.14em; }
+  .top.is-slim .logo { font-size: 1.02rem; letter-spacing: 0.12em; }
   h1 { font-size: clamp(1.9rem, 8vw, 2.5rem); line-height: 1.18; }
   .lede { font-size: 0.98rem; margin-bottom: 16px; }
   .people, .form, .pick-people, .slot-grid { grid-template-columns: 1fr 1fr; }
@@ -974,5 +1040,6 @@ h1 {
     align-items: stretch;
     gap: 8px;
   }
+  body:has(.top.is-slim) .visit-bar { top: 42px; }
   .visit-bar .btn { width: 100%; }
 }
