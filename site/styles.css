@@ -443,22 +443,15 @@ h1 {
 .block-h .eyebrow { margin: 0 0 10px; }
 .block-h h2 + p { margin: 16px 0 22px; color: var(--muted); }
 
-body.is-price-focus .top,
-body.is-price-focus .visit-bar {
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
-}
 .price-stick { height: 1px; margin: 0; }
 .price-head {
   max-width: none;
   position: sticky;
   top: 0;
-  z-index: 7;
+  z-index: 9;
   margin: 0 -4px 8px;
   padding: 8px 4px 12px;
   background: transparent;
-  transition: padding 0.45s ease;
 }
 .price-head .eyebrow {
   overflow: hidden;
