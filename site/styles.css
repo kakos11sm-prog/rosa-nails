@@ -462,7 +462,7 @@ body:has(.top.is-slim) .price-head { top: 46px; }
   transition: max-height 0.28s ease, opacity 0.28s ease, margin 0.28s ease;
 }
 .price-head.is-stuck {
-  padding: 8px 4px;
+  padding: 4px;
   box-shadow: 0 8px 18px rgba(196, 111, 123, 0.08);
   border-bottom: 1px solid var(--line);
 }
@@ -473,16 +473,24 @@ body:has(.top.is-slim) .price-head { top: 46px; }
 }
 .price-head.is-stuck .price-title {
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 10px 14px;
+  gap: 8px;
   margin: 0;
 }
 .price-head.is-stuck h2 {
-  font-size: 1.28rem;
+  font-size: 1.12rem;
   white-space: nowrap;
 }
-.price-head.is-stuck .price-pick { width: auto; margin-left: auto; }
+.price-head.is-stuck .price-pick {
+  width: auto;
+  flex: 1 1 auto;
+  max-width: 220px;
+  min-width: 0;
+  margin-left: auto;
+}
+.price-head.is-stuck .price-switch { padding: 2px; }
+.price-head.is-stuck .price-master { padding: 6px 8px; font-size: 0.78rem; }
 .price-head.is-stuck .price-switch-hint { display: none; }
 .price-title {
   display: flex;
@@ -1324,13 +1332,21 @@ a.price-card:hover {
   .logo { font-size: 1.28rem; letter-spacing: 0.14em; }
   .top .logo { font-size: 1.62rem; letter-spacing: 0.01em; }
   .top.is-slim .logo { font-size: 1.28rem; letter-spacing: 0.01em; }
-  .price-head { top: 56px; }
+  .price-head { top: 56px; padding: 4px 0 10px; }
   body:has(.top.is-slim) .price-head { top: 42px; }
-  .price-head.is-stuck h2 { font-size: 1.05rem; }
-  .price-title { gap: 12px; }
-  .price-title h2 { font-size: 1.55rem; }
-  .price-pick { width: 100%; }
-  .price-master { padding: 11px 8px; font-size: 0.88rem; }
+  .price-head.is-stuck { padding: 2px 0; }
+  .price-head.is-stuck h2 { font-size: 0.92rem; }
+  .price-title {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+  }
+  .price-title h2 { font-size: 1.15rem; }
+  .price-pick { width: auto; flex: 1; max-width: 196px; margin-left: auto; }
+  .price-switch-hint { display: none; }
+  .price-master { padding: 8px 6px; font-size: 0.78rem; }
   .lede { font-size: 0.98rem; margin-bottom: 16px; }
   .people, .form, .pick-people, .slot-grid { grid-template-columns: 1fr 1fr; }
   .facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }

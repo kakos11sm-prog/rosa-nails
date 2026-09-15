@@ -134,11 +134,8 @@ function fillPrice() {
   const heading = document.getElementById("priceHeading");
 
   function paintHeading() {
-    if (!heading || !head) return;
-    const label = PRICE.masters.find((m) => m.id === active)?.label || "";
-    heading.textContent = head.classList.contains("is-stuck")
-      ? `Послуги майстра ${label}`
-      : "Послуги майстра";
+    if (!heading) return;
+    heading.textContent = "Послуги майстра";
   }
 
   function hintSwitch() {
