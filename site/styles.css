@@ -50,9 +50,14 @@ img { max-width: 100%; display: block; }
 .nav a { text-decoration: none; }
 .nav a:hover { color: var(--ink); }
 .top-acts { display: flex; align-items: center; gap: 8px; }
+.top-acts .btn-sm {
+  height: 38px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
 .icon-btn {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -61,10 +66,12 @@ img { max-width: 100%; display: block; }
   padding: 0;
   background: transparent;
   text-decoration: none;
-  border-radius: 10px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(196, 111, 123, 0.16);
 }
-.icon-btn svg { width: 34px; height: 34px; display: block; }
-.icon-btn:hover { opacity: 0.82; }
+.icon-btn svg { width: 38px; height: 38px; display: block; }
+.icon-btn:hover { opacity: 0.88; }
 
 .btn {
   display: inline-flex;
