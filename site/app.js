@@ -83,8 +83,7 @@ async function loadConfig() {
     if (data.bot_url) {
       link.href = data.bot_url;
     } else {
-      link.textContent = "Бот підключимо після токена";
-      link.removeAttribute("href");
+      link.hidden = true;
     }
   } catch (_) {
     /* offline */
