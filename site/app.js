@@ -1,10 +1,39 @@
-const SERVICES = [
-  { name: "Манікюр + покриття", mins: 90, price: 650, img: "/static/img/look-nude.png" },
-  { name: "Манікюр + дизайн", mins: 110, price: 850, img: "/static/img/look-geo.png" },
-  { name: "Педикюр + покриття", mins: 90, price: 750, img: "/static/img/look-pedi.png" },
-  { name: "Зняття / корекція", mins: 45, price: 300, img: "/static/img/look-berry.png" },
-  { name: "Комплекс руки + ноги", mins: 180, price: 1300, img: "/static/img/look-french.png" },
-];
+const PRICE = {
+  masters: [
+    { id: "Аля", label: "Аля", tag: "Майстер Аля", img: "/static/img/master-alya.png" },
+    { id: "Єлизавета", label: "Єлизавета", tag: "Топ-майстер Ліза", img: "/static/img/master-elizaveta.png" },
+  ],
+  sections: [
+    {
+      title: "Манікюр",
+      items: [
+        { name: "Комплекс з покриттям", note: "Зняття, манікюр, форма, покриття", prices: { Аля: 650, Єлизавета: 700 } },
+        { name: "Комплекс з укріпленням", note: "Зняття, манікюр, укріплення, ремонт, покриття", prices: { Аля: 750, Єлизавета: 800 } },
+        { name: "Гігієнічний манікюр без покриття", note: "Манікюр, опил форми, покриття прозорим лаком", prices: { Аля: 450, Єлизавета: 450 } },
+        { name: "Зняття без подальшого покриття", note: "", prices: { Аля: 100, Єлизавета: 100 } },
+      ],
+    },
+    {
+      title: "Нарощення",
+      items: [
+        { name: "Нарощення (довжина 1–2)", note: "Кожна наступна довжина +50 грн", prices: { Аля: 900, Єлизавета: 1000 } },
+        { name: "Нарощення на тіпсі", note: "Потрібно перенарощувати кожну другу корекцію", prices: { Аля: 850, Єлизавета: 900 } },
+        { name: "Відновлення архітектури", note: "1 ніготь / усі · підняття клюючих, дорощування кутів, ремонт тріщин", prices: { Аля: "10 / 50", Єлизавета: "10 / 50" } },
+        { name: "Нарощення 1 нігтя", note: "", prices: { Аля: 50, Єлизавета: 50 } },
+      ],
+    },
+    {
+      title: "Педикюр",
+      items: [
+        { name: "Комплекс гігієна", note: "Зняття, обробка стопи і пальців, покриття прозорим лаком", prices: { Аля: 700, Єлизавета: 700 } },
+        { name: "Комплекс з покриттям", note: "Зняття, обробка стопи і пальців, покриття гель-лак", prices: { Аля: 800, Єлизавета: 800 } },
+        { name: "Покриття тільки пальці", note: "Зняття, обробка пальців, покриття гель-лак", prices: { Аля: 650, Єлизавета: 650 } },
+        { name: "Педикюр без покриття", note: "Зняття, обробка пальців, покриття прозорим лаком", prices: { Аля: 550, Єлизавета: 550 } },
+        { name: "Зняття покриття", note: "", prices: { Аля: 100, Єлизавета: 100 } },
+      ],
+    },
+  ],
+};
 
 const TIMES = ["10:00", "11:30", "13:00", "14:30", "16:00", "17:30", "19:00"];
 
@@ -23,18 +52,58 @@ const LOOKS = [
   { name: "Педикюр", img: "/static/img/look-pedi.png", tag: "Педикюр" },
 ];
 
-function fillServices() {
-  const cards = document.getElementById("serviceCards");
-  if (!cards) return;
-  cards.innerHTML = SERVICES.map(
-    (s, i) => `<article class="card" style="--d:${0.06 + i * 0.07}s">
-      <img src="${s.img}" alt="${s.name}" />
-      <div>
-        <h3>${s.name}</h3>
-        <p>${s.mins} хв · <span class="price">${s.price} грн</span></p>
-      </div>
-    </article>`
-  ).join("");
+function money(value) {
+  return typeof value === "number" ? `${value} грн` : `${value} грн`;
+}
+
+function fillPrice() {
+  const pick = document.getElementById("priceMasters");
+  const board = document.getElementById("priceBoard");
+  if (!pick || !board) return;
+  let active = PRICE.masters[0].id;
+
+  function paintMasters() {
+    pick.innerHTML = PRICE.masters
+      .map(
+        (m) => `<button type="button" class="price-master${m.id === active ? " is-on" : ""}" data-master="${m.id}">
+          <img src="${m.img}" alt="" />
+          <span><strong>${m.label}</strong><em>${m.tag}</em></span>
+        </button>`
+      )
+      .join("");
+  }
+
+  function paintBoard() {
+    board.innerHTML = PRICE.sections
+      .map(
+        (section) => `<div class="price-group">
+          <h3>${section.title}</h3>
+          <dl>
+            ${section.items
+              .map((item) => {
+                const value = item.prices[active];
+                return `<div class="price-row">
+                  <dt><strong>${item.name}</strong>${item.note ? `<span>${item.note}</span>` : ""}</dt>
+                  <dd>${money(value)}</dd>
+                </div>`;
+              })
+              .join("")}
+          </dl>
+        </div>`
+      )
+      .join("");
+  }
+
+  pick.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-master]");
+    if (!btn) return;
+    active = btn.dataset.master;
+    paintMasters();
+    paintBoard();
+  });
+
+  paintMasters();
+  paintBoard();
 }
 
 function fillLooks() {
@@ -188,7 +257,7 @@ function setupFooterReveal() {
   revealOnView(document.getElementById("looks"));
 }
 
-fillServices();
+fillPrice();
 fillLooks();
 loadConfig();
 setupShowcase();

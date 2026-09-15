@@ -1,9 +1,16 @@
 const SERVICES = [
-  { name: "Манікюр + покриття", mins: 90, price: 650, img: "/static/img/look-nude.png" },
-  { name: "Манікюр + дизайн", mins: 110, price: 850, img: "/static/img/look-geo.png" },
-  { name: "Педикюр + покриття", mins: 90, price: 750, img: "/static/img/look-pedi.png" },
-  { name: "Зняття / корекція", mins: 45, price: 300, img: "/static/img/look-berry.png" },
-  { name: "Комплекс руки + ноги", mins: 180, price: 1300, img: "/static/img/look-french.png" },
+  { name: "Комплекс з покриттям", mins: 90, price: { Аля: 650, Єлизавета: 700 }, img: "/static/img/look-nude.png", group: "Манікюр" },
+  { name: "Комплекс з укріпленням", mins: 110, price: { Аля: 750, Єлизавета: 800 }, img: "/static/img/look-geo.png", group: "Манікюр" },
+  { name: "Гігієнічний манікюр без покриття", mins: 60, price: 450, img: "/static/img/look-french.png", group: "Манікюр" },
+  { name: "Зняття без подальшого покриття", mins: 30, price: 100, img: "/static/img/look-berry.png", group: "Манікюр" },
+  { name: "Нарощення (довжина 1–2)", mins: 150, price: { Аля: 900, Єлизавета: 1000 }, img: "/static/img/look-ombre.png", group: "Нарощення" },
+  { name: "Нарощення на тіпсі", mins: 150, price: { Аля: 850, Єлизавета: 900 }, img: "/static/img/look-bridal.png", group: "Нарощення" },
+  { name: "Нарощення 1 нігтя", mins: 45, price: 50, img: "/static/img/look-chrome.png", group: "Нарощення" },
+  { name: "Педикюр: комплекс гігієна", mins: 90, price: 700, img: "/static/img/look-pedi.png", group: "Педикюр" },
+  { name: "Педикюр: комплекс з покриттям", mins: 90, price: 800, img: "/static/img/look-pedi.png", group: "Педикюр" },
+  { name: "Педикюр: покриття тільки пальці", mins: 75, price: 650, img: "/static/img/look-pedi.png", group: "Педикюр" },
+  { name: "Педикюр без покриття", mins: 60, price: 550, img: "/static/img/look-pedi.png", group: "Педикюр" },
+  { name: "Педикюр: зняття покриття", mins: 30, price: 100, img: "/static/img/look-pedi.png", group: "Педикюр" },
 ];
 
 const pickerState = { year: 0, month: 0, open: new Set() };
@@ -22,13 +29,32 @@ function ymd(date) {
   return `${y}-${m}-${d}`;
 }
 
+function servicePrice(item, master) {
+  if (typeof item.price === "number") return item.price;
+  if (master && item.price[master] != null) return item.price[master];
+  return Math.min(...Object.values(item.price));
+}
+
 function fillServicePicks() {
-  document.getElementById("servicePicks").innerHTML = SERVICES.map(
-    (s) => `<button type="button" class="pick-service" data-service="${s.name}">
-      <img src="${s.img}" alt="" />
-      <span><strong>${s.name}</strong><em>${s.price} грн · ${s.mins} хв</em></span>
-    </button>`
-  ).join("");
+  const box = document.getElementById("servicePicks");
+  const master = document.getElementById("masterSelect").value;
+  const groups = [...new Set(SERVICES.map((s) => s.group))];
+  box.innerHTML = groups
+    .map((group) => {
+      const rows = SERVICES.filter((s) => s.group === group)
+        .map((s) => {
+          const price = servicePrice(s, master);
+          const label = master ? `${price} грн · ${s.mins} хв` : `від ${price} грн · ${s.mins} хв`;
+          const on = s.name === document.getElementById("serviceSelect").value ? " is-on" : "";
+          return `<button type="button" class="pick-service${on}" data-service="${s.name}">
+            <img src="${s.img}" alt="" />
+            <span><strong>${s.name}</strong><em>${label}</em></span>
+          </button>`;
+        })
+        .join("");
+      return `<p class="slot-label">${group}</p>${rows}`;
+    })
+    .join("");
 }
 
 function updateWhenSummary() {
@@ -192,7 +218,15 @@ document.getElementById("bookForm").addEventListener("click", (e) => {
     document.getElementById("masterSelect").value = person.dataset.master;
     document.getElementById("masterSummary").textContent = person.dataset.master;
     document.querySelectorAll("[data-master]").forEach((el) => el.classList.toggle("is-on", el === person));
-    if (document.getElementById("serviceSelect").value) refreshDays();
+    fillServicePicks();
+    const chosen = document.getElementById("serviceSelect").value;
+    if (chosen) {
+      const info = SERVICES.find((s) => s.name === chosen);
+      if (info) {
+        document.getElementById("serviceSummary").textContent = `${info.name} · ${servicePrice(info, person.dataset.master)} грн`;
+      }
+      refreshDays();
+    }
     openStep("service");
     return;
   }
@@ -201,7 +235,7 @@ document.getElementById("bookForm").addEventListener("click", (e) => {
     document.getElementById("serviceSelect").value = service.dataset.service;
     const info = SERVICES.find((s) => s.name === service.dataset.service);
     document.getElementById("serviceSummary").textContent = info
-      ? `${info.name} · ${info.price} грн`
+      ? `${info.name} · ${servicePrice(info, document.getElementById("masterSelect").value)} грн`
       : service.dataset.service;
     document.querySelectorAll("[data-service]").forEach((el) => el.classList.toggle("is-on", el === service));
     if (document.getElementById("masterSelect").value) refreshDays();
