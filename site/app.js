@@ -1,35 +1,35 @@
 const PRICE = {
   masters: [
-    { id: "Аля", label: "Аля", tag: "Майстер Аля", img: "/static/img/master-alya.png" },
-    { id: "Єлизавета", label: "Єлизавета", tag: "Топ-майстер Ліза", img: "/static/img/master-elizaveta.png" },
+    { id: "Аля", label: "Аля" },
+    { id: "Єлизавета", label: "Ліза" },
   ],
   sections: [
     {
       title: "Манікюр",
       items: [
-        { name: "Комплекс з покриттям", note: "Зняття, манікюр, форма, покриття", prices: { Аля: 650, Єлизавета: 700 } },
-        { name: "Комплекс з укріпленням", note: "Зняття, манікюр, укріплення, ремонт, покриття", prices: { Аля: 750, Єлизавета: 800 } },
-        { name: "Гігієнічний манікюр без покриття", note: "Манікюр, опил форми, покриття прозорим лаком", prices: { Аля: 450, Єлизавета: 450 } },
-        { name: "Зняття без подальшого покриття", note: "", prices: { Аля: 100, Єлизавета: 100 } },
+        { name: "Комплекс з покриттям", note: "Зняття, манікюр, форма, покриття", img: "/static/img/look-nude.png", prices: { Аля: 650, Єлизавета: 700 } },
+        { name: "Комплекс з укріпленням", note: "Зняття, манікюр, укріплення, ремонт, покриття", img: "/static/img/look-geo.png", prices: { Аля: 750, Єлизавета: 800 } },
+        { name: "Гігієнічний манікюр без покриття", note: "Манікюр, опил форми, покриття прозорим лаком", img: "/static/img/look-french.png", prices: { Аля: 450, Єлизавета: 450 } },
+        { name: "Зняття без подальшого покриття", note: "", img: "/static/img/look-berry.png", prices: { Аля: 100, Єлизавета: 100 } },
       ],
     },
     {
       title: "Нарощення",
       items: [
-        { name: "Нарощення (довжина 1–2)", note: "Кожна наступна довжина +50 грн", prices: { Аля: 900, Єлизавета: 1000 } },
-        { name: "Нарощення на тіпсі", note: "Потрібно перенарощувати кожну другу корекцію", prices: { Аля: 850, Єлизавета: 900 } },
-        { name: "Відновлення архітектури", note: "1 ніготь / усі · підняття клюючих, дорощування кутів, ремонт тріщин", prices: { Аля: "10 / 50", Єлизавета: "10 / 50" } },
-        { name: "Нарощення 1 нігтя", note: "", prices: { Аля: 50, Єлизавета: 50 } },
+        { name: "Нарощення (довжина 1–2)", note: "Кожна наступна довжина +50 грн", img: "/static/img/look-ombre.png", prices: { Аля: 900, Єлизавета: 1000 } },
+        { name: "Нарощення на тіпсі", note: "Потрібно перенарощувати кожну другу корекцію", img: "/static/img/look-bridal.png", prices: { Аля: 850, Єлизавета: 900 } },
+        { name: "Відновлення архітектури", note: "1 ніготь / усі · підняття клюючих, дорощування кутів, ремонт тріщин", img: "/static/img/look-chrome.png", prices: { Аля: "10 / 50", Єлизавета: "10 / 50" } },
+        { name: "Нарощення 1 нігтя", note: "", img: "/static/img/look-evening.png", prices: { Аля: 50, Єлизавета: 50 } },
       ],
     },
     {
       title: "Педикюр",
       items: [
-        { name: "Комплекс гігієна", note: "Зняття, обробка стопи і пальців, покриття прозорим лаком", prices: { Аля: 700, Єлизавета: 700 } },
-        { name: "Комплекс з покриттям", note: "Зняття, обробка стопи і пальців, покриття гель-лак", prices: { Аля: 800, Єлизавета: 800 } },
-        { name: "Покриття тільки пальці", note: "Зняття, обробка пальців, покриття гель-лак", prices: { Аля: 650, Єлизавета: 650 } },
-        { name: "Педикюр без покриття", note: "Зняття, обробка пальців, покриття прозорим лаком", prices: { Аля: 550, Єлизавета: 550 } },
-        { name: "Зняття покриття", note: "", prices: { Аля: 100, Єлизавета: 100 } },
+        { name: "Комплекс гігієна", note: "Зняття, обробка стопи і пальців, покриття прозорим лаком", img: "/static/img/look-pedi.png", prices: { Аля: 700, Єлизавета: 700 } },
+        { name: "Комплекс з покриттям", note: "Зняття, обробка стопи і пальців, покриття гель-лак", img: "/static/img/look-pedi.png", prices: { Аля: 800, Єлизавета: 800 } },
+        { name: "Покриття тільки пальці", note: "Зняття, обробка пальців, покриття гель-лак", img: "/static/img/look-pedi.png", prices: { Аля: 650, Єлизавета: 650 } },
+        { name: "Педикюр без покриття", note: "Зняття, обробка пальців, покриття прозорим лаком", img: "/static/img/look-pedi.png", prices: { Аля: 550, Єлизавета: 550 } },
+        { name: "Зняття покриття", note: "", img: "/static/img/look-pedi.png", prices: { Аля: 100, Єлизавета: 100 } },
       ],
     },
   ],
@@ -65,10 +65,7 @@ function fillPrice() {
   function paintMasters() {
     pick.innerHTML = PRICE.masters
       .map(
-        (m) => `<button type="button" class="price-master${m.id === active ? " is-on" : ""}" data-master="${m.id}">
-          <img src="${m.img}" alt="" />
-          <span><strong>${m.label}</strong><em>${m.tag}</em></span>
-        </button>`
+        (m) => `<button type="button" class="price-master${m.id === active ? " is-on" : ""}" data-master="${m.id}">${m.label}</button>`
       )
       .join("");
   }
@@ -76,17 +73,15 @@ function fillPrice() {
   function paintBoard() {
     board.innerHTML = PRICE.sections
       .map(
-        (section) => `<div class="price-group">
+        (section, si) => `<div class="price-group">
           <h3>${section.title}</h3>
           <dl>
             ${section.items
-              .map((item) => {
-                const value = item.prices[active];
-                return `<div class="price-row">
+              .map((item, ii) => `<div class="price-row">
+                  <img src="${item.img}" alt="" />
                   <dt><strong>${item.name}</strong>${item.note ? `<span>${item.note}</span>` : ""}</dt>
-                  <dd>${money(value)}</dd>
-                </div>`;
-              })
+                  <dd data-price-key="${si}-${ii}">${money(item.prices[active])}</dd>
+                </div>`)
               .join("")}
           </dl>
         </div>`
@@ -94,12 +89,25 @@ function fillPrice() {
       .join("");
   }
 
+  function swapPrices() {
+    board.querySelectorAll("[data-price-key]").forEach((dd) => {
+      const [si, ii] = dd.dataset.priceKey.split("-").map(Number);
+      const next = money(PRICE.sections[si].items[ii].prices[active]);
+      if (dd.textContent === next) return;
+      dd.classList.add("is-out");
+      window.setTimeout(() => {
+        dd.textContent = next;
+        dd.classList.remove("is-out");
+      }, 180);
+    });
+  }
+
   pick.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-master]");
-    if (!btn) return;
+    if (!btn || btn.dataset.master === active) return;
     active = btn.dataset.master;
     paintMasters();
-    paintBoard();
+    swapPrices();
   });
 
   paintMasters();

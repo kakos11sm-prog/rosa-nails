@@ -444,36 +444,26 @@ h1 {
 .block-h h2 + p { margin: 16px 0 22px; color: var(--muted); }
 
 .price-pick {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 0 0 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 26px;
 }
 .price-master {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
+  appearance: none;
+  border: 1px solid #edd8db;
   background: #fff;
-  border-radius: 18px;
+  border-radius: 999px;
+  padding: 10px 20px;
   cursor: pointer;
-  text-align: left;
   color: var(--ink);
-  font: inherit;
+  font: 600 0.92rem/1 var(--font);
 }
-.price-master img {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
+.price-master.is-on {
+  background: var(--rose);
+  border-color: var(--rose);
+  color: #fff;
 }
-.price-master span { display: flex; flex-direction: column; gap: 2px; }
-.price-master strong { font-size: 1rem; }
-.price-master em { font-style: normal; color: var(--muted); font-size: 0.78rem; }
-.price-master.is-on { border-color: var(--rose); background: #f8eef0; }
 .price-group { margin: 0 0 26px; }
 .price-group:last-child { margin-bottom: 0; }
 .price-group h3 {
@@ -487,12 +477,18 @@ h1 {
 .price-group dl { margin: 0; }
 .price-row {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 14px;
-  align-items: start;
+  grid-template-columns: 58px 1fr auto;
+  gap: 12px;
+  align-items: center;
   margin: 0;
   padding: 12px 0;
   border-bottom: 1px solid var(--line);
+}
+.price-row img {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  object-fit: cover;
 }
 .price-row dt { margin: 0; }
 .price-row dt strong { display: block; font-size: 0.95rem; font-weight: 600; }
@@ -503,6 +499,11 @@ h1 {
   font-weight: 700;
   white-space: nowrap;
   font-size: 0.95rem;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.price-row dd.is-out {
+  opacity: 0;
+  transform: translateY(7px);
 }
 
 .cards {
@@ -1117,6 +1118,7 @@ h1 {
     transition: none;
   }
   .logo-word, .logo-spark { animation: none !important; }
+  .price-row dd { transition: none; }
   .foot-col, .foot-map, .chips span, .card, .look { opacity: 1; transform: none; animation: none; }
   .seal-ring, .seal-check, .seal-x, .seal-halo, .status-dots i, .status-sparks span, .status-seal {
     animation: none !important;
