@@ -105,29 +105,62 @@ function fillPrice() {
       .join("");
   }
 
-  function swapPrices() {
-    board.querySelectorAll("[data-price-key]").forEach((dd) => {
-      const [si, ii] = dd.dataset.priceKey.split("-").map(Number);
-      const next = money(PRICE.sections[si].items[ii].prices[active]);
-      if (dd.textContent === next) return;
-      dd.classList.add("is-out");
-      window.setTimeout(() => {
-        dd.textContent = next;
-        dd.classList.remove("is-out");
-      }, 180);
-    });
+  function swapBoard(toLiza) {
+    const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (quiet) {
+      paintBoard();
+      return;
+    }
+    const out = toLiza ? "is-out-left" : "is-out-right";
+    const inn = toLiza ? "is-in-right" : "is-in-left";
+    board.classList.remove("is-in-left", "is-in-right", "is-hint");
+    board.classList.add(out);
+    window.setTimeout(() => {
+      paintBoard();
+      board.classList.remove(out);
+      void board.offsetWidth;
+      board.classList.add(inn);
+      window.setTimeout(() => board.classList.remove(inn), 420);
+    }, 220);
+  }
+
+  function hintSwitch() {
+    const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const sw = pick.querySelector(".price-switch");
+    if (quiet || !sw) return;
+    sw.classList.add("is-hint");
+    board.classList.add("is-hint");
+    window.setTimeout(() => {
+      sw.classList.remove("is-hint");
+      board.classList.remove("is-hint");
+    }, 1400);
   }
 
   pick.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-master]");
     if (!btn || btn.dataset.master === active) return;
+    const toLiza = btn.dataset.master === "Єлизавета";
     active = btn.dataset.master;
     paintMasters();
-    swapPrices();
+    swapBoard(toLiza);
   });
 
   paintMasters();
   paintBoard();
+
+  const section = document.getElementById("services");
+  if (section && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          window.setTimeout(hintSwitch, 280);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.4 }
+    );
+    io.observe(section);
+  }
 }
 
 function fillLooks() {

@@ -496,7 +496,51 @@ h1 {
   color: var(--muted);
   font-size: 0.78rem;
 }
-.price-group { margin: 0 0 28px; }
+.price-board {
+  overflow: hidden;
+}
+.price-board.is-out-left {
+  transform: translateX(-36px);
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+.price-board.is-out-right {
+  transform: translateX(36px);
+  opacity: 0;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+}
+.price-board.is-in-right { animation: priceInRight 0.4s ease; }
+.price-board.is-in-left { animation: priceInLeft 0.4s ease; }
+.price-board.is-hint { animation: priceHop 1.2s ease; }
+@keyframes priceInRight {
+  from { transform: translateX(36px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes priceInLeft {
+  from { transform: translateX(-36px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes priceHop {
+  0%, 100% { transform: none; }
+  30% { transform: translateX(-14px); }
+  55% { transform: translateX(8px); }
+  78% { transform: translateX(-5px); }
+}
+.price-switch.is-hint { animation: priceHop 1.2s ease; }
+.price-switch.is-hint:not(.is-liza) .price-switch-glider {
+  animation: peekLiza 1.2s ease;
+}
+.price-switch.is-hint.is-liza .price-switch-glider {
+  animation: peekAlya 1.2s ease;
+}
+@keyframes peekLiza {
+  0%, 100% { transform: translateX(0); }
+  35%, 58% { transform: translateX(55%); }
+}
+@keyframes peekAlya {
+  0%, 100% { transform: translateX(100%); }
+  35%, 58% { transform: translateX(45%); }
+}
 .price-group:last-child { margin-bottom: 0; }
 .price-group h3 {
   font-family: var(--serif);
@@ -1154,6 +1198,7 @@ h1 {
   .logo-word, .logo-spark { animation: none !important; }
   .price-card .price { transition: none; }
   .price-switch-glider { animation: none; transition: none; }
+  .price-board, .price-switch { animation: none !important; transition: none !important; }
   .foot-col, .foot-map, .chips span, .card, .look { opacity: 1; transform: none; animation: none; }
   .seal-ring, .seal-check, .seal-x, .seal-halo, .status-dots i, .status-sparks span, .status-seal {
     animation: none !important;
