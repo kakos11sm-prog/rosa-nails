@@ -51,20 +51,20 @@ img { max-width: 100%; display: block; }
 .nav a:hover { color: var(--ink); }
 .top-acts { display: flex; align-items: center; gap: 8px; }
 .icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 50%;
-  border: 1px solid #edd8db;
-  background: #fff;
-  color: var(--ink);
+  border: 0;
+  padding: 0;
+  background: transparent;
   text-decoration: none;
+  border-radius: 10px;
 }
-.icon-btn svg { width: 16px; height: 16px; display: block; }
-.icon-btn:hover { border-color: var(--rose); color: var(--rose-2); }
+.icon-btn svg { width: 34px; height: 34px; display: block; }
+.icon-btn:hover { opacity: 0.82; }
 
 .btn {
   display: inline-flex;
