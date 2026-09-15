@@ -1,7 +1,7 @@
 const PRICE = {
   masters: [
     { id: "Аля", label: "Аля" },
-    { id: "Єлизавета", label: "Ліза" },
+    { id: "Єлизавета", label: "Єлизавета" },
   ],
   sections: [
     {
