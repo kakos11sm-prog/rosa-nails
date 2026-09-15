@@ -66,8 +66,10 @@ async function rosaShowVisitBar() {
       data.status === "confirmed"
         ? "Ваш запис підтверджено"
         : data.status === "cancelled"
-          ? "Цей запис не підтвердили"
-          : "Заявка ще на підтвердженні";
+          ? "Цей запис скасовано"
+          : data.status === "offered"
+            ? "Студія пропонує інший час"
+            : "Заявка ще на підтвердженні";
     bar.hidden = false;
     bar.classList.toggle("is-ok", data.status === "confirmed");
     bar.classList.toggle("is-no", data.status === "cancelled");

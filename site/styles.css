@@ -1008,6 +1008,29 @@ a.price-card:hover {
 }
 .status-facts dt { color: var(--muted); font-size: 0.75rem; }
 .status-facts dd { margin: 3px 0 0; font-weight: 600; }
+.status-offers { margin: 0 0 18px; }
+.status-offers .slot-label { margin-top: 0; }
+.slot-btn.is-busy {
+  cursor: default;
+  color: var(--muted);
+  background: #f6f1f2;
+  text-decoration: line-through;
+}
+.slot-btn.is-offer { border-color: var(--rose); }
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font: 600 0.92rem/1 var(--font);
+  cursor: pointer;
+}
+.status-error { color: var(--bad); margin: 0 0 14px; }
 
 .status-scene {
   position: relative;
