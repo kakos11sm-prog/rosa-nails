@@ -75,15 +75,18 @@ function fillPrice() {
       .map(
         (section, si) => `<div class="price-group">
           <h3>${section.title}</h3>
-          <dl>
+          <div class="price-cards">
             ${section.items
-              .map((item, ii) => `<div class="price-row">
+              .map((item, ii) => `<article class="price-card">
                   <img src="${item.img}" alt="" />
-                  <dt><strong>${item.name}</strong>${item.note ? `<span>${item.note}</span>` : ""}</dt>
-                  <dd data-price-key="${si}-${ii}">${money(item.prices[active])}</dd>
-                </div>`)
+                  <div>
+                    <h4>${item.name}</h4>
+                    ${item.note ? `<p>${item.note}</p>` : ""}
+                    <strong class="price" data-price-key="${si}-${ii}">${money(item.prices[active])}</strong>
+                  </div>
+                </article>`)
               .join("")}
-          </dl>
+          </div>
         </div>`
       )
       .join("");
