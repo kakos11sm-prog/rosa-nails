@@ -6,6 +6,7 @@ const SERVICES = [
   { name: "Нарощення (довжина 1–2)", mins: 150, price: { Аля: 900, Єлизавета: 1000 }, img: "/static/img/look-ombre.png", group: "Нарощення" },
   { name: "Нарощення на тіпсі", mins: 150, price: { Аля: 850, Єлизавета: 900 }, img: "/static/img/look-bridal.png", group: "Нарощення" },
   { name: "Нарощення 1 нігтя", mins: 45, price: 50, img: "/static/img/look-chrome.png", group: "Нарощення" },
+  { name: "Відновлення архітектури", mins: 45, price: 50, img: "/static/img/look-evening.png", group: "Нарощення" },
   { name: "Педикюр: комплекс гігієна", mins: 90, price: 700, img: "/static/img/look-pedi.png", group: "Педикюр" },
   { name: "Педикюр: комплекс з покриттям", mins: 90, price: 800, img: "/static/img/look-pedi.png", group: "Педикюр" },
   { name: "Педикюр: покриття тільки пальці", mins: 75, price: 650, img: "/static/img/look-pedi.png", group: "Педикюр" },
@@ -194,6 +195,29 @@ async function refreshSlots() {
   }
 }
 
+function applyFromQuery() {
+  const q = new URLSearchParams(location.search);
+  const master = q.get("master") || "";
+  const service = q.get("service") || "";
+  if (master !== "Аля" && master !== "Єлизавета") return;
+  document.getElementById("masterSelect").value = master;
+  document.getElementById("masterSummary").textContent = master;
+  document.querySelectorAll("[data-master]").forEach((el) => {
+    el.classList.toggle("is-on", el.dataset.master === master);
+  });
+  fillServicePicks();
+  const info = SERVICES.find((s) => s.name === service);
+  if (!info) {
+    openStep("service");
+    return;
+  }
+  document.getElementById("serviceSelect").value = info.name;
+  document.getElementById("serviceSummary").textContent = `${info.name} · ${servicePrice(info, master)} грн`;
+  fillServicePicks();
+  refreshDays();
+  openStep("when");
+}
+
 function showNote(text, ok) {
   const el = document.getElementById("formNote");
   el.hidden = false;
@@ -206,6 +230,7 @@ pickerState.year = start.getFullYear();
 pickerState.month = start.getMonth();
 fillServicePicks();
 paintPicker();
+applyFromQuery();
 
 document.getElementById("bookForm").addEventListener("click", (e) => {
   const tab = e.target.closest("[data-open]");

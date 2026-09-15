@@ -25,11 +25,11 @@ const PRICE = {
     {
       title: "Педикюр",
       items: [
-        { name: "Комплекс гігієна", note: "Зняття, обробка стопи і пальців, покриття прозорим лаком", img: "/static/img/look-pedi.png", prices: { Аля: 700, Єлизавета: 700 } },
-        { name: "Комплекс з покриттям", note: "Зняття, обробка стопи і пальців, покриття гель-лак", img: "/static/img/look-pedi.png", prices: { Аля: 800, Єлизавета: 800 } },
-        { name: "Покриття тільки пальці", note: "Зняття, обробка пальців, покриття гель-лак", img: "/static/img/look-pedi.png", prices: { Аля: 650, Єлизавета: 650 } },
+        { name: "Комплекс гігієна", note: "Зняття, обробка стопи і пальців, покриття прозорим лаком", img: "/static/img/look-pedi.png", book: "Педикюр: комплекс гігієна", prices: { Аля: 700, Єлизавета: 700 } },
+        { name: "Комплекс з покриттям", note: "Зняття, обробка стопи і пальців, покриття гель-лак", img: "/static/img/look-pedi.png", book: "Педикюр: комплекс з покриттям", prices: { Аля: 800, Єлизавета: 800 } },
+        { name: "Покриття тільки пальці", note: "Зняття, обробка пальців, покриття гель-лак", img: "/static/img/look-pedi.png", book: "Педикюр: покриття тільки пальці", prices: { Аля: 650, Єлизавета: 650 } },
         { name: "Педикюр без покриття", note: "Зняття, обробка пальців, покриття прозорим лаком", img: "/static/img/look-pedi.png", prices: { Аля: 550, Єлизавета: 550 } },
-        { name: "Зняття покриття", note: "", img: "/static/img/look-pedi.png", prices: { Аля: 100, Єлизавета: 100 } },
+        { name: "Зняття покриття", note: "", img: "/static/img/look-pedi.png", book: "Педикюр: зняття покриття", prices: { Аля: 100, Єлизавета: 100 } },
       ],
     },
   ],
@@ -90,14 +90,17 @@ function fillPrice() {
           <h3>${section.title}</h3>
           <div class="price-cards">
             ${section.items
-              .map((item, ii) => `<article class="price-card">
+              .map((item, ii) => {
+                const q = new URLSearchParams({ master: active, service: item.book || item.name });
+                return `<a class="price-card" href="/book?${q.toString()}">
                   <img src="${item.img}" alt="" />
                   <div>
                     <h4>${item.name}</h4>
                     ${item.note ? `<p>${item.note}</p>` : ""}
                     <strong class="price" data-price-key="${si}-${ii}">${money(item.prices[active])}</strong>
                   </div>
-                </article>`)
+                </a>`;
+              })
               .join("")}
           </div>
         </div>`
