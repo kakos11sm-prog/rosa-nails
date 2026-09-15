@@ -81,6 +81,7 @@ function fillPrice() {
       btn.classList.toggle("is-on", on);
       btn.setAttribute("aria-selected", on ? "true" : "false");
     });
+    paintHeading();
   }
 
   function paintBoard() {
@@ -129,6 +130,17 @@ function fillPrice() {
     }, 220);
   }
 
+  const head = document.querySelector(".price-head");
+  const heading = document.getElementById("priceHeading");
+
+  function paintHeading() {
+    if (!heading || !head) return;
+    const label = PRICE.masters.find((m) => m.id === active)?.label || "";
+    heading.textContent = head.classList.contains("is-stuck")
+      ? `Послуги майстра ${label}`
+      : "Послуги майстра";
+  }
+
   function hintSwitch() {
     const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const sw = pick.querySelector(".price-switch");
@@ -152,6 +164,19 @@ function fillPrice() {
 
   paintMasters();
   paintBoard();
+  paintHeading();
+
+  const stick = document.querySelector(".price-stick");
+  if (stick && head && "IntersectionObserver" in window) {
+    const stickIo = new IntersectionObserver(
+      ([entry]) => {
+        head.classList.toggle("is-stuck", !entry.isIntersecting);
+        paintHeading();
+      },
+      { threshold: 0, rootMargin: "-70px 0px 0px 0px" }
+    );
+    stickIo.observe(stick);
+  }
 
   const section = document.getElementById("services");
   if (section && "IntersectionObserver" in window) {

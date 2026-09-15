@@ -443,7 +443,47 @@ h1 {
 .block-h .eyebrow { margin: 0 0 10px; }
 .block-h h2 + p { margin: 16px 0 22px; color: var(--muted); }
 
-.price-head { max-width: none; }
+.price-stick { height: 1px; margin: 0; }
+.price-head {
+  max-width: none;
+  position: sticky;
+  top: 62px;
+  z-index: 6;
+  margin: 0 -4px 8px;
+  padding: 8px 4px 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  transition: padding 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+body:has(.top.is-slim) .price-head { top: 46px; }
+.price-head .eyebrow {
+  overflow: hidden;
+  max-height: 2.2em;
+  transition: max-height 0.28s ease, opacity 0.28s ease, margin 0.28s ease;
+}
+.price-head.is-stuck {
+  padding: 8px 4px;
+  box-shadow: 0 8px 18px rgba(196, 111, 123, 0.08);
+  border-bottom: 1px solid var(--line);
+}
+.price-head.is-stuck .eyebrow {
+  max-height: 0;
+  opacity: 0;
+  margin: 0;
+}
+.price-head.is-stuck .price-title {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin: 0;
+}
+.price-head.is-stuck h2 {
+  font-size: 1.28rem;
+  white-space: nowrap;
+}
+.price-head.is-stuck .price-pick { width: auto; margin-left: auto; }
+.price-head.is-stuck .price-switch-hint { display: none; }
 .price-title {
   display: flex;
   flex-direction: column;
@@ -1244,7 +1284,7 @@ a.price-card:hover {
   .logo-word, .logo-spark { animation: none !important; }
   .price-card .price { transition: none; }
   .price-switch-glider { animation: none; transition: none; }
-  .price-board, .price-switch { animation: none !important; transition: none !important; }
+  .price-head, .price-head .eyebrow { transition: none; }
   .foot-col, .foot-map, .chips span, .card, .look { opacity: 1; transform: none; animation: none; }
   .seal-ring, .seal-check, .seal-x, .seal-halo, .status-dots i, .status-sparks span, .status-seal {
     animation: none !important;
@@ -1284,6 +1324,9 @@ a.price-card:hover {
   .logo { font-size: 1.28rem; letter-spacing: 0.14em; }
   .top .logo { font-size: 1.62rem; letter-spacing: 0.01em; }
   .top.is-slim .logo { font-size: 1.28rem; letter-spacing: 0.01em; }
+  .price-head { top: 56px; }
+  body:has(.top.is-slim) .price-head { top: 42px; }
+  .price-head.is-stuck h2 { font-size: 1.05rem; }
   .price-title { gap: 12px; }
   .price-title h2 { font-size: 1.55rem; }
   .price-pick { width: 100%; }
