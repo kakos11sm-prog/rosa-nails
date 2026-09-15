@@ -447,24 +447,27 @@ h1 {
 .price-head {
   max-width: none;
   position: sticky;
-  top: 62px;
+  top: 72px;
   z-index: 6;
   margin: 0 -4px 8px;
   padding: 8px 4px 12px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  transition: padding 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  background: transparent;
+  backdrop-filter: none;
+  transition: padding 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-radius 0.3s ease, margin 0.3s ease;
 }
-body:has(.top.is-slim) .price-head { top: 46px; }
+body:has(.top.is-slim) .price-head { top: 56px; }
 .price-head .eyebrow {
   overflow: hidden;
   max-height: 2.2em;
   transition: max-height 0.28s ease, opacity 0.28s ease, margin 0.28s ease;
 }
 .price-head.is-stuck {
-  padding: 4px;
-  box-shadow: 0 8px 18px rgba(196, 111, 123, 0.08);
-  border-bottom: 1px solid var(--line);
+  padding: 8px 12px;
+  margin: 8px 0 10px;
+  border-radius: 16px;
+  background: var(--blush);
+  border: 1px solid #edd8db;
+  box-shadow: 0 8px 18px rgba(196, 111, 123, 0.1);
 }
 .price-head.is-stuck .eyebrow {
   max-height: 0;
@@ -485,12 +488,12 @@ body:has(.top.is-slim) .price-head { top: 46px; }
 .price-head.is-stuck .price-pick {
   width: auto;
   flex: 1 1 auto;
-  max-width: 220px;
+  max-width: 250px;
   min-width: 0;
   margin-left: auto;
 }
-.price-head.is-stuck .price-switch { padding: 2px; }
-.price-head.is-stuck .price-master { padding: 6px 8px; font-size: 0.78rem; }
+.price-head.is-stuck .price-switch { padding: 3px; }
+.price-head.is-stuck .price-master { padding: 8px 10px; font-size: 0.82rem; }
 .price-head.is-stuck .price-switch-hint { display: none; }
 .price-title {
   display: flex;
@@ -1332,10 +1335,11 @@ a.price-card:hover {
   .logo { font-size: 1.28rem; letter-spacing: 0.14em; }
   .top .logo { font-size: 1.62rem; letter-spacing: 0.01em; }
   .top.is-slim .logo { font-size: 1.28rem; letter-spacing: 0.01em; }
-  .price-head { top: 56px; padding: 4px 0 10px; }
-  body:has(.top.is-slim) .price-head { top: 42px; }
-  .price-head.is-stuck { padding: 2px 0; }
-  .price-head.is-stuck h2 { font-size: 0.92rem; }
+  .price-head { top: 66px; padding: 6px 0 10px; }
+  body:has(.top.is-slim) .price-head { top: 52px; }
+  .price-head.is-stuck { padding: 8px 10px; margin: 8px 2px 10px; }
+  .price-head.is-stuck h2 { font-size: 1rem; }
+  .price-head.is-stuck .price-pick { max-width: 220px; }
   .price-title {
     flex-direction: row;
     flex-wrap: nowrap;
