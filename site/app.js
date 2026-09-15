@@ -93,11 +93,13 @@ function fillPrice() {
               .map((item, ii) => {
                 const q = new URLSearchParams({ master: active, service: item.book || item.name });
                 return `<a class="price-card" href="/book?${q.toString()}">
-                  <img src="${item.img}" alt="" />
+                  <div class="price-card-pic">
+                    <img src="${item.img}" alt="" />
+                    <strong class="price">${money(item.prices[active])}</strong>
+                  </div>
                   <div>
                     <h4>${item.name}</h4>
-                    ${item.note ? `<p>${item.note}</p>` : ""}
-                    <strong class="price" data-price-key="${si}-${ii}">${money(item.prices[active])}</strong>
+                    ${item.note ? `<p>${item.note}</p>` : "<p></p>"}
                   </div>
                 </a>`;
               })
