@@ -55,18 +55,17 @@ img { max-width: 100%; display: block; }
   transition: font-size 0.35s ease, letter-spacing 0.35s ease;
 }
 .top .logo {
-  font-size: clamp(1.32rem, 5.4vw, 1.82rem);
+  font-size: clamp(1.42rem, 5.6vw, 1.9rem);
   font-style: italic;
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   white-space: nowrap;
-  background: linear-gradient(105deg, #ebb0b8 0%, #c46f7b 48%, #d48a94 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--rose-2);
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .top.is-slim .logo {
-  font-size: clamp(1.12rem, 4.4vw, 1.36rem);
+  font-size: clamp(1.18rem, 4.6vw, 1.42rem);
   letter-spacing: 0.02em;
 }
 .nav {
@@ -88,7 +87,8 @@ img { max-width: 100%; display: block; }
   gap: 0;
   pointer-events: none;
 }
-.top-acts { display: flex; align-items: center; gap: 8px; transition: gap 0.35s ease; }
+.top-acts { display: flex; align-items: center; gap: 8px; flex-shrink: 0; transition: gap 0.35s ease; }
+.btn-short { display: none; }
 .top-acts .btn-sm {
   height: 38px;
   padding: 0 16px;
@@ -1029,12 +1029,25 @@ h1 {
     padding: 16px 16px 8px;
   }
   .hero-copy { padding-left: 12px; }
-  .top { padding: 12px 16px; gap: 10px; }
-  .top.is-slim { padding: 5px 14px; }
-  .top-acts { margin-left: auto; }
+  .top { padding: 12px 16px; gap: 14px; }
+  .top.is-slim { padding: 6px 14px; gap: 12px; }
+  .top-acts { margin-left: auto; gap: 6px; }
+  .top-acts .btn-sm,
+  .top > .btn-sm {
+    height: 32px;
+    padding: 0 11px;
+    font-size: 0.78rem;
+  }
+  .icon-btn,
+  .icon-btn svg {
+    width: 32px;
+    height: 32px;
+  }
+  .btn-full { display: none; }
+  .btn-short { display: inline; }
   .logo { font-size: 1.28rem; letter-spacing: 0.14em; }
-  .top .logo { font-size: 1.4rem; letter-spacing: 0.02em; }
-  .top.is-slim .logo { font-size: 1.12rem; letter-spacing: 0.02em; }
+  .top .logo { font-size: 1.62rem; letter-spacing: 0.01em; }
+  .top.is-slim .logo { font-size: 1.28rem; letter-spacing: 0.01em; }
   h1 { font-size: clamp(1.9rem, 8vw, 2.5rem); line-height: 1.18; }
   .lede { font-size: 0.98rem; margin-bottom: 16px; }
   .people, .form, .pick-people, .slot-grid { grid-template-columns: 1fr 1fr; }
