@@ -257,6 +257,7 @@ document.getElementById("bookForm").addEventListener("submit", async (e) => {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "не вдалося записати");
+    if (data.booking && data.booking.id) rosaSaveBooking(data.booking.id);
     location.href = `/status/${data.booking.id}`;
   } catch (err) {
     showNote(String(err.message || err), false);

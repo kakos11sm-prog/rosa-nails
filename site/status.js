@@ -67,6 +67,7 @@ async function load() {
     const res = await fetch("/api/status/" + id, { cache: "no-store" });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "немає заявки");
+    if (typeof rosaSaveBooking === "function") rosaSaveBooking(data.id);
     paint(data.status, data);
     if (data.status === "pending" || data.status === "new") setTimeout(load, 8000);
   } catch (err) {

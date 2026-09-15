@@ -76,6 +76,36 @@ img { max-width: 100%; display: block; }
 .btn-wide { width: 100%; }
 .btn:disabled { opacity: 0.5; cursor: default; }
 
+.visit-bar {
+  position: sticky;
+  top: 62px;
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 22px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 8px 20px rgba(196, 111, 123, 0.06);
+}
+.visit-bar[hidden] { display: none !important; }
+.visit-bar.is-ok { background: #f4f8f5; }
+.visit-bar.is-no { background: #fbf4f4; }
+.visit-bar-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.visit-bar-when {
+  margin: 2px 0 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
 .band {
   position: relative;
   padding: 84px 22px;
@@ -902,4 +932,5 @@ h1 {
   .hero { min-height: 0; gap: 22px; padding-top: 22px; }
   .shot { flex-basis: calc((100% - 12px) / 2); min-height: 220px; }
   .shot img { height: 220px; }
+  .visit-bar { top: 56px; padding: 10px 18px; flex-wrap: wrap; }
 }
