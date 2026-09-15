@@ -267,6 +267,119 @@ def reject_booking(booking_id: str) -> dict:
     return row
 
 
+def _admin_chat() -> str:
+    return str(os.environ.get("TELEGRAM_ADMIN_CHAT_ID") or "").strip()
+
+
+def _telegram_call(method: str, payload: dict) -> bool:
+    token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
+    if not token:
+        return False
+    try:
+        import urllib.request
+
+        req = urllib.request.Request(
+            f"https://api.telegram.org/bot{token}/{method}",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=12)
+        return True
+    except OSError:
+        return False
+
+
+def apply_admin_decision(action: str, booking_id: str, chat_id: str = "") -> str:
+    if _admin_chat() and chat_id and chat_id != _admin_chat():
+        return "Підтверджувати може лише адміністратор студії."
+    if action == "ok":
+        row = confirm_booking(booking_id)
+        extra = " і в Google Календар" if row.get("google_event_id") else ""
+        sent = notify_client(row, client_decision_text(row, True))
+        return (
+            f"Записала{extra}.\n"
+            f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
+            f"{row.get('name')} · {row.get('phone')}\n#{row.get('id')}\n"
+            f"{'Клієнту написала в Telegram.' if sent else 'Клієнту в Telegram не написала — зателефонуйте.'}"
+        )
+    if action == "no":
+        row = reject_booking(booking_id)
+        sent = notify_client(row, client_decision_text(row, False))
+        phone = str(row.get("phone") or "")
+        return (
+            f"Відхилила. Слот вільний.\n"
+            f"{row.get('date')} {row.get('time')} · {row.get('master')}\n#{row.get('id')}\n"
+            f"{'Клієнту написала, що запис не підтверджено.' if sent else 'Клієнту в Telegram не написала — зателефонуйте: ' + phone}"
+        )
+    raise ValueError("незрозуміла дія")
+
+
+def handle_telegram_update(update: dict) -> None:
+    query = update.get("callback_query") or {}
+    if query:
+        data = str(query.get("data") or "")
+        qid = query.get("id")
+        message = query.get("message") or {}
+        chat_id = str((message.get("chat") or {}).get("id") or "")
+        mid = message.get("message_id")
+        if qid:
+            _telegram_call("answerCallbackQuery", {"callback_query_id": qid})
+        action, _, booking_id = data.partition(":")
+        try:
+            text = apply_admin_decision(action, booking_id, chat_id)
+        except ValueError as exc:
+            text = f"Не вийшло: {exc}"
+        if chat_id and mid:
+            _telegram_call("editMessageText", {"chat_id": chat_id, "message_id": mid, "text": text})
+        return
+    message = update.get("message") or {}
+    text = str(message.get("text") or "").strip()
+    chat_id = str((message.get("chat") or {}).get("id") or "")
+    if not text.startswith("/start") or not chat_id:
+        return
+    parts = text.split(maxsplit=1)
+    payload = parts[1].strip() if len(parts) > 1 else ""
+    if not payload.startswith("rosa_"):
+        return
+    try:
+        row = link_telegram(payload[5:], chat_id)
+    except ValueError as exc:
+        _telegram_call("sendMessage", {"chat_id": chat_id, "text": f"Не знайшла заявку: {exc}"})
+        return
+    status = row.get("status")
+    if status == "confirmed":
+        _telegram_call("sendMessage", {"chat_id": chat_id, "text": client_decision_text(row, True)})
+        return
+    if status == "cancelled":
+        _telegram_call("sendMessage", {"chat_id": chat_id, "text": client_decision_text(row, False)})
+        return
+    _telegram_call(
+        "sendMessage",
+        {
+            "chat_id": chat_id,
+            "text": (
+                f"Заявку #{row.get('id')} прив’язала до цього чату.\n"
+                f"{row.get('date')} {row.get('time')}, {row.get('master')}.\n"
+                f"Сюди напишемо, щойно студія підтвердить або відмовить."
+            ),
+        },
+    )
+
+
+def ensure_telegram_webhook() -> None:
+    token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
+    base = (
+        os.environ.get("TELEGRAM_WEBHOOK_URL")
+        or os.environ.get("RENDER_EXTERNAL_URL")
+        or ""
+    ).strip()
+    if not token or not base:
+        return
+    url = base.rstrip("/") + "/api/telegram"
+    _telegram_call("setWebhook", {"url": url, "allowed_updates": ["callback_query", "message"]})
+
+
 def telegram_ready() -> bool:
     return bool(
         (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
@@ -401,6 +514,12 @@ def list_bookings():
     return jsonify({"ok": True, "bookings": _load()})
 
 
+@app.post("/api/telegram")
+def telegram_webhook():
+    handle_telegram_update(request.get_json(silent=True) or {})
+    return "ok"
+
+
 @app.post("/api/book")
 def create_booking():
     payload = request.get_json(silent=True) or {}
@@ -426,7 +545,8 @@ DATA.parent.mkdir(parents=True, exist_ok=True)
 if not DATA.is_file():
     _save([])
 gcal.ensure_calendar_timezone()
+ensure_telegram_webhook()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "5051"))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False)

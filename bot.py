@@ -156,34 +156,22 @@ async def decide_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     query = update.callback_query
     if not query or not query.data:
         return
-    await query.answer()
+    try:
+        await query.answer()
+    except Exception:
+        pass
     chat_id = str(query.message.chat_id if query.message else "")
-    if _admin_chat() and chat_id != _admin_chat():
-        await query.edit_message_text("Підтверджувати може лише адміністратор студії.")
-        return
     action, _, booking_id = query.data.partition(":")
     try:
-        if action == "ok":
-            row = store.confirm_booking(booking_id)
-            extra = " і в Google Календар" if row.get("google_event_id") else ""
-            sent = store.notify_client(row, store.client_decision_text(row, True))
-            await query.edit_message_text(
-                f"Записала{extra}.\n"
-                f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
-                f"{row.get('name')} · {row.get('phone')}\n#{row.get('id')}\n"
-                f"{'Клієнту написала в Telegram.' if sent else 'Клієнту в Telegram не написала — зателефонуйте.'}"
-            )
-            return
-        if action == "no":
-            row = store.reject_booking(booking_id)
-            sent = store.notify_client(row, store.client_decision_text(row, False))
-            await query.edit_message_text(
-                f"Відхилила. Слот вільний.\n"
-                f"{row.get('date')} {row.get('time')} · {row.get('master')}\n#{row.get('id')}\n"
-                f"{'Клієнту написала, що запис не підтверджено.' if sent else 'Клієнту в Telegram не написала — зателефонуйте: ' + str(row.get('phone') or '')}"
-            )
+        text = store.apply_admin_decision(action, booking_id, chat_id)
     except ValueError as exc:
-        await query.edit_message_text(f"Не вийшло: {exc}")
+        text = f"Не вийшло: {exc}"
+    except Exception as exc:
+        text = f"Не вийшло: {exc}"
+    try:
+        await query.edit_message_text(text)
+    except Exception:
+        print(f"кнопка запису не спрацювала: {text}")
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -191,7 +179,19 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
+def _single_instance() -> None:
+    import socket
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        sock.bind(("127.0.0.1", 5053))
+    except OSError as exc:
+        raise SystemExit("бот ROSA вже запущено") from exc
+    globals()["_BOT_LOCK"] = sock
+
+
 def main() -> None:
+    _single_instance()
     token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
     if not token:
         raise SystemExit("немає TELEGRAM_BOT_TOKEN у файлі .env")
@@ -208,9 +208,9 @@ def main() -> None:
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
-    app.add_handler(conv)
     app.add_handler(CallbackQueryHandler(decide_booking, pattern=r"^(ok|no):"))
-    print("бот ROSA запущено")
+    app.add_handler(conv)
+    print("бот ROSA запущено", flush=True)
     app.run_polling(drop_pending_updates=True)
 
 
