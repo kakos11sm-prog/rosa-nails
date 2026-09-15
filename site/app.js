@@ -63,11 +63,24 @@ function fillPrice() {
   let active = PRICE.masters[0].id;
 
   function paintMasters() {
-    pick.innerHTML = PRICE.masters
-      .map(
-        (m) => `<button type="button" class="price-master${m.id === active ? " is-on" : ""}" data-master="${m.id}">${m.label}</button>`
-      )
-      .join("");
+    if (!pick.querySelector(".price-switch")) {
+      pick.innerHTML = `<div class="price-switch" role="tablist" aria-label="Майстер прайсу">
+          <i class="price-switch-glider" aria-hidden="true"></i>
+          ${PRICE.masters
+            .map(
+              (m) => `<button type="button" role="tab" class="price-master" data-master="${m.id}">${m.label}</button>`
+            )
+            .join("")}
+        </div>
+        <p class="price-switch-hint">Ціни різні — натисни і порівняй</p>`;
+    }
+    const sw = pick.querySelector(".price-switch");
+    sw.classList.toggle("is-liza", active === "Єлизавета");
+    pick.querySelectorAll("[data-master]").forEach((btn) => {
+      const on = btn.dataset.master === active;
+      btn.classList.toggle("is-on", on);
+      btn.setAttribute("aria-selected", on ? "true" : "false");
+    });
   }
 
   function paintBoard() {
