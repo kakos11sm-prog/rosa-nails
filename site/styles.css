@@ -499,20 +499,18 @@ h1 {
   flex: 0 0 100%;
   min-width: 100%;
   box-sizing: border-box;
-  padding: 20px 20px 18px 22px;
-  background:
-    linear-gradient(165deg, #fff 0%, var(--blush) 120%);
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--rose);
-  border-radius: 22px;
-  box-shadow: 0 16px 40px rgba(196, 111, 123, 0.14);
+  padding: 4px 2px 2px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 .why-ico { display: none; font-size: 1.15rem; line-height: 1; }
 body.is-edit .why-ico { display: inline-block; margin-bottom: 6px; }
 .why-card h3 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-family: var(--serif);
-  font-size: 1.38rem;
+  font-size: 1.45rem;
   font-weight: 500;
   letter-spacing: -0.02em;
   line-height: 1.2;
@@ -520,11 +518,10 @@ body.is-edit .why-ico { display: inline-block; margin-bottom: 6px; }
 }
 .why-card p {
   margin: 0;
-  color: var(--ink);
-  font-size: 0.95rem;
+  color: var(--muted);
+  font-size: 0.98rem;
   line-height: 1.55;
   white-space: pre-wrap;
-  opacity: 0.78;
 }
 .facts { display: none; }
 .facts div { margin: 0; }
