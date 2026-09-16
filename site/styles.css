@@ -416,7 +416,7 @@ body:has(.top.is-slim) .visit-bar { top: 46px; }
   font-family: var(--serif);
   font-size: 1.35rem;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--rose);
   line-height: 1.25;
   letter-spacing: -0.02em;
   overflow-wrap: break-word;
