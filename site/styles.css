@@ -484,14 +484,7 @@ body.is-edit .why-ico { display: inline-block; margin-bottom: 6px; }
   line-height: 1.5;
   white-space: pre-wrap;
 }
-.facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin: 0;
-  padding: 16px 0 0;
-  border-top: 1px solid var(--line);
-}
+.facts { display: none; }
 .facts div { margin: 0; }
 .facts dt { color: var(--muted); font-size: 0.75rem; }
 .facts dd { margin: 4px 0 0; font-weight: 600; }
