@@ -266,15 +266,17 @@ function setupShowcase() {
   const track = document.getElementById("showcaseTrack");
   const dots = document.getElementById("showcaseDots");
   const stage = document.getElementById("showcase");
-  if (!track || !dots) return;
+  if (!track || !dots || !stage) return;
 
-  const total = track.children.length;
-  if (!total) return;
   let index = 0;
   let timer = 0;
 
+  function shots() {
+    return [...track.children].filter((el) => el.classList.contains("shot"));
+  }
+
   function maxIndex() {
-    return Math.max(0, total - visibleShots());
+    return Math.max(0, shots().length - visibleShots());
   }
 
   function renderDots() {
@@ -292,7 +294,11 @@ function setupShowcase() {
 
   function go(next) {
     index = Math.max(0, Math.min(maxIndex(), next));
-    const card = track.children[0];
+    const card = shots()[0];
+    if (!card) {
+      track.style.transform = "";
+      return;
+    }
     const stepPx = card.getBoundingClientRect().width + 12;
     track.style.transform = `translateX(-${index * stepPx}px)`;
     [...dots.children].forEach((dot, i) => dot.classList.toggle("is-on", i === index));
@@ -307,29 +313,49 @@ function setupShowcase() {
 
   function play() {
     window.clearInterval(timer);
+    if (document.body.classList.contains("is-edit")) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (shots().length <= visibleShots()) return;
     timer = window.setInterval(() => step(1), 3800);
   }
 
-  document.getElementById("showcasePrev").addEventListener("click", () => {
-    step(-1);
-    play();
-  });
-  document.getElementById("showcaseNext").addEventListener("click", () => {
-    step(1);
-    play();
-  });
-  stage.addEventListener("mouseenter", () => window.clearInterval(timer));
-  stage.addEventListener("mouseleave", play);
-  window.addEventListener("resize", () => {
+  window.paintShowcase = function () {
     if (index > maxIndex()) index = maxIndex();
     renderDots();
     go(index);
-  });
+    play();
+  };
 
-  renderDots();
-  go(0);
-  play();
+  window.pauseShowcase = function () {
+    window.clearInterval(timer);
+  };
+
+  if (!setupShowcase.bound) {
+    setupShowcase.bound = true;
+    const prev = document.getElementById("showcasePrev");
+    const next = document.getElementById("showcaseNext");
+    if (prev) {
+      prev.addEventListener("click", () => {
+        step(-1);
+        play();
+      });
+    }
+    if (next) {
+      next.addEventListener("click", () => {
+        step(1);
+        play();
+      });
+    }
+    stage.addEventListener("mouseenter", () => window.clearInterval(timer));
+    stage.addEventListener("mouseleave", play);
+    window.addEventListener("resize", () => {
+      if (index > maxIndex()) index = maxIndex();
+      renderDots();
+      go(index);
+    });
+  }
+
+  window.paintShowcase();
 }
 
 function revealOnView(el) {
@@ -375,16 +401,18 @@ function applyLanding(data) {
   setText("heroEyebrow", hero.eyebrow);
   setText("heroTitle", hero.title);
   setText("heroLede", hero.lede);
+  setText("showcaseKicker", hero.showcase_kicker || "Роботи студії");
   (hero.facts || []).forEach((fact, i) => {
     setText("fact" + i + "Label", fact.label);
     setText("fact" + i + "Value", fact.value);
   });
   const track = document.getElementById("showcaseTrack");
-  if (track && (data.showcase || []).length) {
-    track.innerHTML = data.showcase
+  if (track) {
+    track.innerHTML = (data.showcase || [])
       .map(
-        (shot, i) => `<figure class="shot">
-          <img src="${shot.img}" alt="${shot.name || ""}" data-edit-img="showcase.${i}.img" />
+        (shot, i) => `<figure class="shot" data-edit-img="showcase.${i}.img">
+          <button type="button" class="edit-del" data-del-shot="${i}" aria-label="Прибрати фото">×</button>
+          <img src="${shot.img}" alt="${shot.name || ""}" />
           <figcaption data-edit="showcase.${i}.name">${shot.name || ""}</figcaption>
         </figure>`
       )
@@ -478,6 +506,7 @@ window.refreshSiteFromContent = function () {
   LOOKS = (pack.looks && pack.looks.items) || [];
   if (typeof window.paintPrice === "function") window.paintPrice();
   if (typeof window.paintLooks === "function") window.paintLooks();
+  if (typeof window.paintShowcase === "function") window.paintShowcase();
 };
 
 loadSite();

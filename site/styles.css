@@ -584,6 +584,7 @@ h1 {
   0%, 100% { transform: translateX(100%); }
   35%, 58% { transform: translateX(45%); }
 }
+.price-group { margin-bottom: 32px; }
 .price-group:last-child { margin-bottom: 0; }
 .price-group h3 {
   font-family: var(--serif);
@@ -1393,7 +1394,7 @@ a.price-card:hover {
   .visit-bar .btn { width: 100%; }
 }
 
-body.is-edit { padding-bottom: 88px; }
+body.is-edit { padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
 body.is-edit [data-edit],
 body.is-edit [data-edit-img] {
   outline: 1.5px dashed rgba(196, 111, 123, 0.55);
@@ -1411,13 +1412,22 @@ body.is-edit [data-edit]:focus {
   bottom: 0;
   z-index: 40;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   background: rgba(255, 253, 252, 0.96);
   border-top: 1px solid var(--line);
 }
-.edit-bar p { margin: 0; flex: 1; font-size: 0.82rem; color: var(--muted); }
+.edit-bar p { margin: 0; font-size: 0.8rem; line-height: 1.35; color: var(--muted); }
+.edit-bar-acts {
+  display: flex;
+  gap: 8px;
+}
+.edit-bar-acts .btn {
+  flex: 1;
+  min-height: 44px;
+}
 .edit-login {
   position: fixed;
   inset: 0;
@@ -1462,6 +1472,9 @@ body.is-edit .edit-plus {
   user-select: none;
 }
 body.is-edit .looks .edit-plus { grid-column: 1 / -1; justify-self: start; }
+body.is-edit .price-group .edit-plus { margin: 16px 0 0; }
+body.is-edit .price-board > .edit-plus { margin: 8px 0 12px; }
+body.is-edit .showcase .edit-plus { margin: 10px 0 0; }
 body.is-edit .edit-del {
   display: grid;
   place-items: center;

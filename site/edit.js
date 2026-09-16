@@ -159,11 +159,14 @@ function enableEditing() {
   const bar = document.createElement("div");
   bar.className = "edit-bar";
   bar.innerHTML = `
-    <p id="editNote">Плюсик додає майстра, розділ або послугу. Клік по тексту чи фото — правка. Потім «Зберегти».</p>
-    <button class="btn btn-sm" type="button" id="editSave">Зберегти</button>
-    <button class="btn btn-sm btn-ghost" type="button" id="editOut">Вийти</button>
+    <p id="editNote">Клік — текст або фото. Плюсик — додати.</p>
+    <div class="edit-bar-acts">
+      <button class="btn btn-sm" type="button" id="editSave">Зберегти</button>
+      <button class="btn btn-sm btn-ghost" type="button" id="editOut">Вийти</button>
+    </div>
   `;
   document.body.appendChild(bar);
+  if (typeof window.pauseShowcase === "function") window.pauseShowcase();
   document.getElementById("editSave").addEventListener("click", async () => {
     const note = document.getElementById("editNote");
     try {
@@ -189,7 +192,7 @@ function enableEditing() {
 
 function handleStructure(e) {
   const add = e.target.closest("[data-add], [data-add-item]");
-  const del = e.target.closest("[data-del-master], [data-del-section], [data-del-item], [data-del-look]");
+  const del = e.target.closest("[data-del-master], [data-del-section], [data-del-item], [data-del-look], [data-del-shot]");
   if (!add && !del) return false;
   e.preventDefault();
   e.stopPropagation();
@@ -201,6 +204,7 @@ function handleStructure(e) {
   pack.price.sections = pack.price.sections || [];
   pack.looks = pack.looks || { items: [] };
   pack.looks.items = pack.looks.items || [];
+  pack.showcase = pack.showcase || [];
   if (add) {
     if (add.dataset.add === "master") {
       const id = "m" + Date.now();
@@ -223,6 +227,9 @@ function handleStructure(e) {
     if (add.dataset.add === "look") {
       pack.looks.items.push({ name: "Нова робота", img: "/static/img/hero.png", tag: "Нюд" });
       if (typeof window.fillLooks === "function") window.fillLooks.active = "Усі";
+    }
+    if (add.dataset.add === "shot") {
+      pack.showcase.push({ name: "Нова робота", img: "/static/img/hero.png" });
     }
     if (add.dataset.addItem != null) {
       const si = Number(add.dataset.addItem);
@@ -271,6 +278,14 @@ function handleStructure(e) {
     }
     if (del.dataset.delLook != null) {
       pack.looks.items.splice(Number(del.dataset.delLook), 1);
+    }
+    if (del.dataset.delShot != null) {
+      if (pack.showcase.length < 2) {
+        const note = document.getElementById("editNote");
+        if (note) note.textContent = "Має лишитись хоч одне фото.";
+        return true;
+      }
+      pack.showcase.splice(Number(del.dataset.delShot), 1);
     }
   }
   markDirty();
