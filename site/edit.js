@@ -186,6 +186,7 @@ function enableEditing() {
   `;
   document.body.appendChild(bar);
   if (typeof window.pauseShowcase === "function") window.pauseShowcase();
+  if (typeof window.pauseWhy === "function") window.pauseWhy();
   document.getElementById("editSave").addEventListener("click", async () => {
     const note = document.getElementById("editNote");
     try {
@@ -343,7 +344,7 @@ function onEditPointer(e) {
   const text = e.target.closest("[data-edit]");
   const img = e.target.closest("[data-edit-img]");
   if (!img && !text) return;
-  if (e.target.closest(".edit-bar, .edit-login, .price-switch, .showcase-bar")) return;
+  if (e.target.closest(".edit-bar, .edit-login, .price-switch, .showcase-bar, .why-emoji")) return;
   e.preventDefault();
   e.stopPropagation();
   if (text) startTextEdit(text);
@@ -364,7 +365,7 @@ function bootEdit() {
       if (!editing) return;
       if (e.target.closest(".edit-bar, .edit-login")) return;
       if (handleStructure(e)) return;
-      if (e.target.closest(".price-switch, .showcase-bar")) return;
+      if (e.target.closest(".price-switch, .showcase-bar, .why-emoji")) return;
       const filterLabel = e.target.closest(".look-filters [data-edit]");
       if (filterLabel) {
         const btn = filterLabel.closest("[data-tag]");

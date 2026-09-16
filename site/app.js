@@ -419,7 +419,13 @@ function paintWhy(hero) {
   const box = document.getElementById("heroWhy");
   if (!box) return;
   const reasons = hero.reasons || [];
-  box.innerHTML = reasons
+  const tabs = reasons
+    .map(
+      (r, i) =>
+        `<button type="button" data-why="${i}" aria-label="${esc(r.title)}">${esc(r.icon)}</button>`
+    )
+    .join("");
+  const slides = reasons
     .map(
       (r, i) => `<article class="why-card">
         <button type="button" class="edit-del" data-del-reason="${i}" aria-label="Прибрати">×</button>
@@ -429,10 +435,67 @@ function paintWhy(hero) {
       </article>`
     )
     .join("");
-  box.insertAdjacentHTML(
-    "beforeend",
-    `<button type="button" class="edit-plus" data-add="reason">+ Причина</button>`
-  );
+  box.innerHTML = `<div class="why-emoji">${tabs}</div>
+    <div class="why-window"><div class="why-track">${slides}</div></div>
+    <button type="button" class="edit-plus" data-add="reason">+ Причина</button>`;
+}
+
+function setupWhy() {
+  const box = document.getElementById("heroWhy");
+  if (!box) return;
+  let index = 0;
+  let timer = 0;
+
+  function cards() {
+    return [...box.querySelectorAll(".why-card")];
+  }
+  function emojis() {
+    return [...box.querySelectorAll(".why-emoji button")];
+  }
+
+  function go(next) {
+    const list = cards();
+    if (!list.length) return;
+    index = ((next % list.length) + list.length) % list.length;
+    const track = box.querySelector(".why-track");
+    const card = list[0];
+    if (track && card) {
+      track.style.transform = `translateX(-${index * card.getBoundingClientRect().width}px)`;
+    }
+    emojis().forEach((btn, i) => btn.classList.toggle("is-on", i === index));
+  }
+
+  function play() {
+    window.clearInterval(timer);
+    if (document.body.classList.contains("is-edit")) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (cards().length < 2) return;
+    timer = window.setInterval(() => go(index + 1), 3800);
+  }
+
+  window.paintWhySlider = function () {
+    if (index >= cards().length) index = 0;
+    go(index);
+    play();
+  };
+  window.pauseWhy = function () {
+    window.clearInterval(timer);
+  };
+
+  if (!setupWhy.bound) {
+    setupWhy.bound = true;
+    box.addEventListener("click", (e) => {
+      const btn = e.target.closest(".why-emoji button");
+      if (!btn) return;
+      go(Number(btn.dataset.why));
+      play();
+    });
+    box.addEventListener("mouseenter", () => window.clearInterval(timer));
+    box.addEventListener("mouseleave", play);
+    window.addEventListener("resize", () => go(index));
+  }
+
+  window.paintWhySlider();
 }
 
 function applyLanding(data) {
@@ -541,6 +604,7 @@ async function loadSite() {
   fillLooks();
   loadConfig();
   setupShowcase();
+  setupWhy();
   setupFooterReveal();
 }
 
@@ -557,6 +621,7 @@ window.refreshSiteFromContent = function () {
   if (typeof window.paintPrice === "function") window.paintPrice();
   if (typeof window.paintLooks === "function") window.paintLooks();
   if (typeof window.paintShowcase === "function") window.paintShowcase();
+  if (typeof window.paintWhySlider === "function") window.paintWhySlider();
 };
 
 loadSite();
