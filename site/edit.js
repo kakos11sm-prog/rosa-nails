@@ -90,6 +90,9 @@ function stopTextEdit(el) {
   if (!path || !window.SITE_CONTENT) return;
   setPath(window.SITE_CONTENT, path, parseValue(path, el.textContent));
   markDirty();
+  if (/^masters\.\d+\.label$/.test(path) && typeof window.refreshSiteFromContent === "function") {
+    window.refreshSiteFromContent();
+  }
 }
 
 async function startImageEdit(el) {
@@ -156,7 +159,7 @@ function enableEditing() {
   const bar = document.createElement("div");
   bar.className = "edit-bar";
   bar.innerHTML = `
-    <p id="editNote">Затисни або натисни на текст чи фото — і міняй.</p>
+    <p id="editNote">Плюсик додає майстра, розділ або послугу. Клік по тексту чи фото — правка. Потім «Зберегти».</p>
     <button class="btn btn-sm" type="button" id="editSave">Зберегти</button>
     <button class="btn btn-sm btn-ghost" type="button" id="editOut">Вийти</button>
   `;
@@ -184,6 +187,97 @@ function enableEditing() {
   });
 }
 
+function handleStructure(e) {
+  const add = e.target.closest("[data-add], [data-add-item]");
+  const del = e.target.closest("[data-del-master], [data-del-section], [data-del-item], [data-del-look]");
+  if (!add && !del) return false;
+  e.preventDefault();
+  e.stopPropagation();
+  if (typeof e.stopImmediatePropagation === "function") e.stopImmediatePropagation();
+  const pack = window.SITE_CONTENT;
+  if (!pack) return true;
+  pack.masters = pack.masters || [];
+  pack.price = pack.price || { sections: [] };
+  pack.price.sections = pack.price.sections || [];
+  pack.looks = pack.looks || { items: [] };
+  pack.looks.items = pack.looks.items || [];
+  if (add) {
+    if (add.dataset.add === "master") {
+      const id = "m" + Date.now();
+      pack.masters.push({
+        id,
+        label: "Новий майстер",
+        bio: "Натисни і напиши про майстра",
+        img: "/static/img/master-alya.png",
+      });
+      pack.price.sections.forEach((section) => {
+        (section.items || []).forEach((item) => {
+          item.prices = item.prices || {};
+          item.prices[id] = 0;
+        });
+      });
+    }
+    if (add.dataset.add === "section") {
+      pack.price.sections.push({ title: "Новий розділ", items: [] });
+    }
+    if (add.dataset.add === "look") {
+      pack.looks.items.push({ name: "Нова робота", img: "/static/img/hero.png", tag: "Нюд" });
+      if (typeof window.fillLooks === "function") window.fillLooks.active = "Усі";
+    }
+    if (add.dataset.addItem != null) {
+      const si = Number(add.dataset.addItem);
+      const prices = {};
+      pack.masters.forEach((m) => {
+        prices[m.id] = 0;
+      });
+      const section = pack.price.sections[si];
+      if (section) {
+        section.items = section.items || [];
+        section.items.push({
+          name: "Нова послуга",
+          note: "Опис",
+          img: "/static/img/look-nude.png",
+          mins: 90,
+          prices,
+        });
+      }
+    }
+  }
+  if (del) {
+    if (del.dataset.delMaster != null) {
+      if (pack.masters.length < 2) {
+        const note = document.getElementById("editNote");
+        if (note) note.textContent = "Має лишитись хоч один майстер.";
+        return true;
+      }
+      const i = Number(del.dataset.delMaster);
+      const gone = pack.masters[i];
+      pack.masters.splice(i, 1);
+      if (gone) {
+        pack.price.sections.forEach((section) => {
+          (section.items || []).forEach((item) => {
+            if (item.prices) delete item.prices[gone.id];
+          });
+        });
+      }
+    }
+    if (del.dataset.delSection != null) {
+      pack.price.sections.splice(Number(del.dataset.delSection), 1);
+    }
+    if (del.dataset.delItem != null) {
+      const [si, ii] = del.dataset.delItem.split(":").map(Number);
+      const section = pack.price.sections[si];
+      if (section && section.items) section.items.splice(ii, 1);
+    }
+    if (del.dataset.delLook != null) {
+      pack.looks.items.splice(Number(del.dataset.delLook), 1);
+    }
+  }
+  markDirty();
+  if (typeof window.refreshSiteFromContent === "function") window.refreshSiteFromContent();
+  return true;
+}
+
 function onEditPointer(e) {
   if (!editing) return;
   const text = e.target.closest("[data-edit]");
@@ -209,6 +303,7 @@ function bootEdit() {
     (e) => {
       if (!editing) return;
       if (e.target.closest(".edit-bar, .edit-login")) return;
+      if (handleStructure(e)) return;
       if (e.target.closest(".price-switch, .showcase-bar, .look-filters")) return;
       const hit = e.target.closest("[data-edit], [data-edit-img]");
       if (hit) {

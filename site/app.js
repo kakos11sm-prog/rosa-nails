@@ -17,44 +17,46 @@ function money(value) {
 function fillPrice() {
   const pick = document.getElementById("priceMasters");
   const board = document.getElementById("priceBoard");
-    if (!pick || !board || !PRICE.masters.length) return;
-    let active = PRICE.masters[0].id;
+  if (!pick || !board || !PRICE.masters.length) return;
+  let active = PRICE.masters[0].id;
 
   function paintMasters() {
-    if (!pick.querySelector(".price-switch")) {
-      pick.innerHTML = `<div class="price-switch" role="tablist" aria-label="Майстер прайсу">
-          <i class="price-switch-glider" aria-hidden="true"></i>
-          ${PRICE.masters
-            .map(
-              (m) => `<button type="button" role="tab" class="price-master" data-master="${m.id}">${m.label}</button>`
-            )
-            .join("")}
-        </div>
-        <p class="price-switch-hint">Ціни різні — натисни і порівняй</p>`;
-    }
-    const sw = pick.querySelector(".price-switch");
-    sw.classList.toggle("is-liza", active === "Єлизавета");
+    const n = Math.max(1, PRICE.masters.length);
+    const idx = Math.max(0, PRICE.masters.findIndex((m) => m.id === active));
+    pick.innerHTML = `<div class="price-switch" role="tablist" aria-label="Майстер прайсу" style="--n:${n};--i:${idx}">
+        <i class="price-switch-glider" aria-hidden="true"></i>
+        ${PRICE.masters
+          .map(
+            (m) => `<button type="button" role="tab" class="price-master${m.id === active ? " is-on" : ""}" data-master="${m.id}">${m.label}</button>`
+          )
+          .join("")}
+      </div>
+      <p class="price-switch-hint">Ціни різні — натисни і порівняй</p>`;
     pick.querySelectorAll("[data-master]").forEach((btn) => {
-      const on = btn.dataset.master === active;
-      btn.classList.toggle("is-on", on);
-      btn.setAttribute("aria-selected", on ? "true" : "false");
+      btn.setAttribute("aria-selected", btn.dataset.master === active ? "true" : "false");
     });
     paintHeading();
   }
 
   function paintBoard() {
-    board.innerHTML = PRICE.sections
-      .map(
-        (section, si) => `<div class="price-group">
-          <h3 data-edit="price.sections.${si}.title">${section.title}</h3>
+    board.innerHTML =
+      PRICE.sections
+        .map(
+          (section, si) => `<div class="price-group">
+          <div class="price-group-h">
+            <h3 data-edit="price.sections.${si}.title">${section.title}</h3>
+            <button type="button" class="edit-del" data-del-section="${si}" aria-label="Прибрати розділ">×</button>
+          </div>
           <div class="price-cards">
-            ${section.items
+            ${(section.items || [])
               .map((item, ii) => {
                 const q = new URLSearchParams({ master: active, service: item.book || item.name });
+                const prices = item.prices || {};
                 return `<a class="price-card" href="/book?${q.toString()}">
+                  <span class="edit-del" data-del-item="${si}:${ii}" role="button" aria-label="Прибрати послугу">×</span>
                   <div class="price-card-pic">
                     <img src="${item.img}" alt="" data-edit-img="price.sections.${si}.items.${ii}.img" />
-                    <strong class="price" data-edit="price.sections.${si}.items.${ii}.prices.${active}">${money(item.prices[active])}</strong>
+                    <strong class="price" data-edit="price.sections.${si}.items.${ii}.prices.${active}">${money(prices[active])}</strong>
                   </div>
                   <div>
                     <h4 data-edit="price.sections.${si}.items.${ii}.name">${item.name}</h4>
@@ -64,19 +66,20 @@ function fillPrice() {
               })
               .join("")}
           </div>
+          <button type="button" class="edit-plus" data-add-item="${si}">+ Послуга</button>
         </div>`
-      )
-      .join("");
+        )
+        .join("") + `<button type="button" class="edit-plus" data-add="section">+ Розділ</button>`;
   }
 
-  function swapBoard(toLiza) {
+  function swapBoard(goingRight) {
     const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (quiet) {
       paintBoard();
       return;
     }
-    const out = toLiza ? "is-out-left" : "is-out-right";
-    const inn = toLiza ? "is-in-right" : "is-in-left";
+    const out = goingRight ? "is-out-left" : "is-out-right";
+    const inn = goingRight ? "is-in-right" : "is-in-left";
     board.classList.remove("is-in-left", "is-in-right", "is-hint");
     board.classList.add(out);
     window.setTimeout(() => {
@@ -99,7 +102,7 @@ function fillPrice() {
   function hintSwitch() {
     const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const sw = pick.querySelector(".price-switch");
-    if (quiet || !sw) return;
+    if (quiet || !sw || PRICE.masters.length < 2) return;
     sw.classList.add("is-hint");
     board.classList.add("is-hint");
     window.setTimeout(() => {
@@ -108,14 +111,24 @@ function fillPrice() {
     }, 1400);
   }
 
-  pick.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-master]");
-    if (!btn || btn.dataset.master === active) return;
-    const toSecond = PRICE.masters[1] && btn.dataset.master === PRICE.masters[1].id;
-    active = btn.dataset.master;
+  window.paintPrice = function () {
+    if (!PRICE.masters.some((m) => m.id === active)) active = PRICE.masters[0] && PRICE.masters[0].id;
     paintMasters();
-    swapBoard(toSecond);
-  });
+    paintBoard();
+  };
+
+  if (!fillPrice.bound) {
+    fillPrice.bound = true;
+    pick.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-master]");
+      if (!btn || btn.dataset.master === active) return;
+      const from = PRICE.masters.findIndex((m) => m.id === active);
+      const to = PRICE.masters.findIndex((m) => m.id === btn.dataset.master);
+      active = btn.dataset.master;
+      paintMasters();
+      swapBoard(to > from);
+    });
+  }
 
   paintMasters();
   paintBoard();
@@ -191,10 +204,9 @@ function fillLooks() {
   const filters = document.getElementById("lookFilters");
   if (!grid || !filters) return;
 
-  const tags = ["Усі", ...new Set(LOOKS.map((l) => l.tag))];
-  let active = "Усі";
-
   function paint() {
+    const tags = ["Усі", ...new Set(LOOKS.map((l) => l.tag))];
+    const active = fillLooks.active || "Усі";
     filters.innerHTML = tags
       .map(
         (t) =>
@@ -202,23 +214,30 @@ function fillLooks() {
       )
       .join("");
     const rows = LOOKS.map((l, i) => ({ l, i })).filter((row) => active === "Усі" || row.l.tag === active);
-    grid.innerHTML = rows
-      .map(({ l, i }) => {
-        const extra = l.featured && active === "Усі" ? " look-wide" : l.wide && active === "Усі" ? " look-span" : "";
-        return `<article class="look${extra}" style="--d:${0.04 + i * 0.05}s" data-edit-img="looks.items.${i}.img">
+    grid.innerHTML =
+      rows
+        .map(({ l, i }) => {
+          const extra = l.featured && active === "Усі" ? " look-wide" : l.wide && active === "Усі" ? " look-span" : "";
+          return `<article class="look${extra}" style="--d:${0.04 + i * 0.05}s" data-edit-img="looks.items.${i}.img">
+          <button type="button" class="edit-del" data-del-look="${i}" aria-label="Прибрати роботу">×</button>
           <img src="${l.img}" alt="${l.name}" />
           <span data-edit="looks.items.${i}.name">${l.name}</span>
         </article>`;
-      })
-      .join("");
+        })
+        .join("") + `<button type="button" class="edit-plus" data-add="look">+ Робота</button>`;
   }
 
-  filters.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-tag]");
-    if (!btn) return;
-    active = btn.dataset.tag;
-    paint();
-  });
+  fillLooks.active = "Усі";
+  window.paintLooks = paint;
+  if (!fillLooks.bound) {
+    fillLooks.bound = true;
+    filters.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-tag]");
+      if (!btn) return;
+      fillLooks.active = btn.dataset.tag;
+      paint();
+    });
+  }
 
   paint();
 }
@@ -374,10 +393,11 @@ function applyLanding(data) {
   setText("teamEyebrow", team.eyebrow);
   setText("teamTitle", team.title);
   const people = document.getElementById("mastersList");
-  if (people && (data.masters || []).length) {
-    people.innerHTML = data.masters
+  if (people) {
+    people.innerHTML = (data.masters || [])
       .map(
         (m, i) => `<article class="person">
+          <button type="button" class="edit-del" data-del-master="${i}" aria-label="Прибрати майстра">×</button>
           <img class="avatar-img" src="${m.img}" alt="${m.label || m.id}" data-edit-img="masters.${i}.img" />
           <h3 data-edit="masters.${i}.label">${m.label || m.id}</h3>
           <p data-edit="masters.${i}.bio">${m.bio || ""}</p>
@@ -446,5 +466,18 @@ async function loadSite() {
   setupShowcase();
   setupFooterReveal();
 }
+
+window.refreshSiteFromContent = function () {
+  const pack = window.SITE_CONTENT || {};
+  applyLanding(pack);
+  PRICE = {
+    title: pack.price && pack.price.title,
+    masters: (pack.masters || []).map((m) => ({ id: m.id, label: m.label || m.id })),
+    sections: (pack.price && pack.price.sections) || [],
+  };
+  LOOKS = (pack.looks && pack.looks.items) || [];
+  if (typeof window.paintPrice === "function") window.paintPrice();
+  if (typeof window.paintLooks === "function") window.paintLooks();
+};
 
 loadSite();
