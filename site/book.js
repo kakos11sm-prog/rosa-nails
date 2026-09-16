@@ -1,4 +1,4 @@
-const SERVICES = [
+let SERVICES = [
   { name: "Комплекс з покриттям", mins: 90, price: { Аля: 650, Єлизавета: 700 }, img: "/static/img/look-nude.png", group: "Манікюр" },
   { name: "Комплекс з укріпленням", mins: 110, price: { Аля: 750, Єлизавета: 800 }, img: "/static/img/look-geo.png", group: "Манікюр" },
   { name: "Гігієнічний манікюр без покриття", mins: 60, price: 450, img: "/static/img/look-french.png", group: "Манікюр" },
@@ -199,7 +199,8 @@ function applyFromQuery() {
   const q = new URLSearchParams(location.search);
   const master = q.get("master") || "";
   const service = q.get("service") || "";
-  if (master !== "Аля" && master !== "Єлизавета") return;
+  const allowed = [...document.querySelectorAll("[data-master]")].map((el) => el.dataset.master);
+  if (!allowed.includes(master)) return;
   document.getElementById("masterSelect").value = master;
   document.getElementById("masterSummary").textContent = master;
   document.querySelectorAll("[data-master]").forEach((el) => {
@@ -228,9 +229,47 @@ function showNote(text, ok) {
 const start = new Date(nextOpenDate() + "T12:00:00");
 pickerState.year = start.getFullYear();
 pickerState.month = start.getMonth();
-fillServicePicks();
-paintPicker();
-applyFromQuery();
+
+async function bootBook() {
+  try {
+    const res = await fetch("/api/content", { cache: "no-store" });
+    const data = await res.json();
+    const pack = data.content || {};
+    const rows = [];
+    for (const section of (pack.price && pack.price.sections) || []) {
+      for (const item of section.items || []) {
+        rows.push({
+          name: item.book || item.name,
+          mins: item.mins || 90,
+          price: item.prices,
+          img: item.img,
+          group: section.title,
+        });
+      }
+    }
+    if (rows.length) SERVICES = rows;
+    const box = document.querySelector(".pick-people");
+    if (box && (pack.masters || []).length) {
+      box.innerHTML = pack.masters
+        .map(
+          (m) => `<button type="button" class="pick-person" data-master="${m.id}">
+            <img src="${m.img}" alt="" />
+            <span>${m.label || m.id}</span>
+          </button>`
+        )
+        .join("");
+    }
+    const brand = document.querySelector(".logo-word");
+    if (brand && pack.studio && pack.studio.brand) brand.textContent = pack.studio.brand;
+  } catch (_) {
+    /* keep fallbacks */
+  }
+  fillServicePicks();
+  paintPicker();
+  applyFromQuery();
+}
+
+bootBook();
 
 document.getElementById("bookForm").addEventListener("click", (e) => {
   const tab = e.target.closest("[data-open]");

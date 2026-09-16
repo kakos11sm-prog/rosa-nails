@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Кабінет студії</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <link rel="stylesheet" href="/static/admin.css" />
+</head>
+<body class="admin-body">
+  <div id="loginBox" class="admin-login">
+    <p class="eyebrow">Lissa Nails</p>
+    <h1>Кабінет студії</h1>
+    <p class="lede">Тут можна змінити фото, написи і ціни. На сайт зайде одразу після збереження.</p>
+    <form id="loginForm">
+      <label>Пароль
+        <input type="password" name="password" autocomplete="current-password" required />
+      </label>
+      <p class="form-hint status-error" id="loginError" hidden></p>
+      <button class="btn btn-wide" type="submit">Увійти</button>
+    </form>
+  </div>
+
+  <div id="desk" hidden>
+    <header class="top admin-top">
+      <a class="logo" href="/"><span class="logo-word">Lissa Nails</span></a>
+      <span class="admin-kicker">Кабінет</span>
+      <button class="btn btn-sm btn-ghost" type="button" id="logoutBtn">Вийти</button>
+    </header>
+    <nav class="admin-nav" id="adminNav">
+      <button type="button" class="is-on" data-tab="site">Сайт</button>
+      <button type="button" data-tab="masters">Майстри</button>
+      <button type="button" data-tab="price">Прайс</button>
+      <button type="button" data-tab="looks">Роботи</button>
+      <button type="button" data-tab="contacts">Контакти</button>
+    </nav>
+    <main class="admin-main" id="adminMain"></main>
+    <div class="admin-save">
+      <p id="saveNote"></p>
+      <button class="btn" type="button" id="saveBtn">Зберегти на сайті</button>
+    </div>
+  </div>
+  <script src="/static/admin.js"></script>
+</body>
+</html>

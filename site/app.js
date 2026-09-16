@@ -1,56 +1,14 @@
-const PRICE = {
+let PRICE = {
   masters: [
     { id: "Аля", label: "Аля" },
     { id: "Єлизавета", label: "Єлизавета" },
   ],
-  sections: [
-    {
-      title: "Манікюр",
-      items: [
-        { name: "Комплекс з покриттям", note: "Зняття, манікюр, форма, покриття", img: "/static/img/look-nude.png", prices: { Аля: 650, Єлизавета: 700 } },
-        { name: "Комплекс з укріпленням", note: "Зняття, манікюр, укріплення, ремонт, покриття", img: "/static/img/look-geo.png", prices: { Аля: 750, Єлизавета: 800 } },
-        { name: "Гігієнічний манікюр без покриття", note: "Манікюр, опил форми, покриття прозорим лаком", img: "/static/img/look-french.png", prices: { Аля: 450, Єлизавета: 450 } },
-        { name: "Зняття без подальшого покриття", note: "", img: "/static/img/look-berry.png", prices: { Аля: 100, Єлизавета: 100 } },
-      ],
-    },
-    {
-      title: "Нарощення",
-      items: [
-        { name: "Нарощення (довжина 1–2)", note: "Кожна наступна довжина +50 грн", img: "/static/img/look-ombre.png", prices: { Аля: 900, Єлизавета: 1000 } },
-        { name: "Нарощення на тіпсі", note: "Потрібно перенарощувати кожну другу корекцію", img: "/static/img/look-bridal.png", prices: { Аля: 850, Єлизавета: 900 } },
-        { name: "Відновлення архітектури", note: "1 ніготь / усі · підняття клюючих, дорощування кутів, ремонт тріщин", img: "/static/img/look-chrome.png", prices: { Аля: "10 / 50", Єлизавета: "10 / 50" } },
-        { name: "Нарощення 1 нігтя", note: "", img: "/static/img/look-evening.png", prices: { Аля: 50, Єлизавета: 50 } },
-      ],
-    },
-    {
-      title: "Педикюр",
-      items: [
-        { name: "Комплекс гігієна", note: "Зняття, обробка стопи і пальців, покриття прозорим лаком", img: "/static/img/look-pedi.png", book: "Педикюр: комплекс гігієна", prices: { Аля: 700, Єлизавета: 700 } },
-        { name: "Комплекс з покриттям", note: "Зняття, обробка стопи і пальців, покриття гель-лак", img: "/static/img/look-pedi.png", book: "Педикюр: комплекс з покриттям", prices: { Аля: 800, Єлизавета: 800 } },
-        { name: "Покриття тільки пальці", note: "Зняття, обробка пальців, покриття гель-лак", img: "/static/img/look-pedi.png", book: "Педикюр: покриття тільки пальці", prices: { Аля: 650, Єлизавета: 650 } },
-        { name: "Педикюр без покриття", note: "Зняття, обробка пальців, покриття прозорим лаком", img: "/static/img/look-pedi.png", prices: { Аля: 550, Єлизавета: 550 } },
-        { name: "Зняття покриття", note: "", img: "/static/img/look-pedi.png", book: "Педикюр: зняття покриття", prices: { Аля: 100, Єлизавета: 100 } },
-      ],
-    },
-  ],
+  sections: [],
 };
 
 const TIMES = ["10:00", "11:30", "13:00", "14:30", "16:00", "17:30", "19:00"];
 
-const LOOKS = [
-  { name: "Молочний френч", img: "/static/img/look-french.png", tag: "Френч", featured: true },
-  { name: "Омбре", img: "/static/img/look-ombre.png", tag: "Нюд", wide: true },
-  { name: "Нюд + блиск", img: "/static/img/look-nude.png", tag: "Нюд" },
-  { name: "Ягідний глянець", img: "/static/img/look-berry.png", tag: "Яскраві" },
-  { name: "Кішечка", img: "/static/img/look-cateye.png", tag: "Яскраві" },
-  { name: "Хром", img: "/static/img/look-chrome.png", tag: "Дизайн" },
-  { name: "Квіти", img: "/static/img/look-floral.png", tag: "Дизайн" },
-  { name: "Геометрія", img: "/static/img/look-geo.png", tag: "Дизайн" },
-  { name: "Весільний", img: "/static/img/look-bridal.png", tag: "Весілля" },
-  { name: "Вечірній", img: "/static/img/look-evening.png", tag: "Вечір" },
-  { name: "Класика", img: "/static/img/hero.png", tag: "Нюд" },
-  { name: "Педикюр", img: "/static/img/look-pedi.png", tag: "Педикюр" },
-];
+let LOOKS = [];
 
 function money(value) {
   return typeof value === "number" ? `${value} грн` : `${value} грн`;
@@ -59,8 +17,8 @@ function money(value) {
 function fillPrice() {
   const pick = document.getElementById("priceMasters");
   const board = document.getElementById("priceBoard");
-  if (!pick || !board) return;
-  let active = PRICE.masters[0].id;
+    if (!pick || !board || !PRICE.masters.length) return;
+    let active = PRICE.masters[0].id;
 
   function paintMasters() {
     if (!pick.querySelector(".price-switch")) {
@@ -135,7 +93,7 @@ function fillPrice() {
 
   function paintHeading() {
     if (!heading) return;
-    heading.textContent = "Послуги майстра";
+    heading.textContent = PRICE.title || "Послуги майстра";
   }
 
   function hintSwitch() {
@@ -153,10 +111,10 @@ function fillPrice() {
   pick.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-master]");
     if (!btn || btn.dataset.master === active) return;
-    const toLiza = btn.dataset.master === "Єлизавета";
+    const toSecond = PRICE.masters[1] && btn.dataset.master === PRICE.masters[1].id;
     active = btn.dataset.master;
     paintMasters();
-    swapBoard(toLiza);
+    swapBoard(toSecond);
   });
 
   paintMasters();
@@ -292,6 +250,7 @@ function setupShowcase() {
   if (!track || !dots) return;
 
   const total = track.children.length;
+  if (!total) return;
   let index = 0;
   let timer = 0;
 
@@ -379,8 +338,112 @@ function setupFooterReveal() {
   revealOnView(document.getElementById("looks"));
 }
 
-fillPrice();
-fillLooks();
-loadConfig();
-setupShowcase();
-setupFooterReveal();
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el && value != null && value !== "") el.textContent = value;
+}
+
+function applyLanding(data) {
+  const studio = data.studio || {};
+  const hero = data.hero || {};
+  const team = data.team || {};
+  const price = data.price || {};
+  const looks = data.looks || {};
+  const book = data.book || {};
+  document.querySelectorAll("#brandName").forEach((el) => {
+    el.textContent = studio.brand || "Lissa Nails";
+  });
+  setText("heroEyebrow", hero.eyebrow);
+  setText("heroTitle", hero.title);
+  setText("heroLede", hero.lede);
+  (hero.facts || []).forEach((fact, i) => {
+    setText("fact" + i + "Label", fact.label);
+    setText("fact" + i + "Value", fact.value);
+  });
+  const track = document.getElementById("showcaseTrack");
+  if (track && (data.showcase || []).length) {
+    track.innerHTML = data.showcase
+      .map(
+        (shot) => `<figure class="shot">
+          <img src="${shot.img}" alt="${shot.name || ""}" />
+          <figcaption>${shot.name || ""}</figcaption>
+        </figure>`
+      )
+      .join("");
+  }
+  setText("teamEyebrow", team.eyebrow);
+  setText("teamTitle", team.title);
+  const people = document.getElementById("mastersList");
+  if (people && (data.masters || []).length) {
+    people.innerHTML = data.masters
+      .map(
+        (m) => `<article class="person">
+          <img class="avatar-img" src="${m.img}" alt="${m.label || m.id}" />
+          <h3>${m.label || m.id}</h3>
+          <p>${m.bio || ""}</p>
+        </article>`
+      )
+      .join("");
+  }
+  setText("priceEyebrow", price.eyebrow);
+  setText("priceHeading", price.title);
+  setText("looksEyebrow", looks.eyebrow);
+  setText("looksTitle", looks.title);
+  setText("looksLede", looks.lede);
+  const looksInsta = document.getElementById("looksInsta");
+  if (looksInsta && studio.instagram) {
+    looksInsta.href = studio.instagram;
+    looksInsta.textContent = studio.instagram_name || looksInsta.textContent;
+  }
+  setText("bookEyebrow", book.eyebrow);
+  setText("bookTitle", book.title);
+  setText("bookLede", book.lede);
+  setText("footBrand", studio.brand);
+  setText("footHours", studio.hours);
+  setText("footPhone", studio.phone);
+  setText("footAddr", studio.address);
+  setText("footAddrNote", studio.address_note);
+  const footInsta = document.getElementById("footInsta");
+  if (footInsta && studio.instagram) {
+    footInsta.href = studio.instagram;
+    footInsta.textContent = studio.instagram_name || footInsta.textContent;
+  }
+  const ig = document.getElementById("igLink");
+  if (ig && studio.instagram) ig.href = studio.instagram;
+  const chips = document.getElementById("footChips");
+  if (chips && (studio.chips || []).length) {
+    chips.innerHTML = studio.chips.map((c) => `<span>${c}</span>`).join("");
+  }
+  const lat = studio.map_lat;
+  const lng = studio.map_lng;
+  if (lat && lng) {
+    const route = document.getElementById("footRoute");
+    const map = document.getElementById("footMap");
+    if (route) route.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    if (map) map.src = `https://maps.google.com/maps?q=${lat},${lng}&hl=uk&z=17&output=embed`;
+  }
+}
+
+async function loadSite() {
+  try {
+    const res = await fetch("/api/content", { cache: "no-store" });
+    const data = await res.json();
+    const pack = data.content || {};
+    applyLanding(pack);
+    PRICE = {
+      title: pack.price && pack.price.title,
+      masters: (pack.masters || []).map((m) => ({ id: m.id, label: m.label || m.id })),
+      sections: (pack.price && pack.price.sections) || [],
+    };
+    LOOKS = (pack.looks && pack.looks.items) || [];
+  } catch (_) {
+    /* keep fallbacks */
+  }
+  fillPrice();
+  fillLooks();
+  loadConfig();
+  setupShowcase();
+  setupFooterReveal();
+}
+
+loadSite();

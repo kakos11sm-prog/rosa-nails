@@ -2,6 +2,7 @@
 """ROSA — нігтьова студія. Запис на сайті, заявки в журнал і в Telegram."""
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import uuid
@@ -10,17 +11,25 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, session
 
 import gcal
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data" / "bookings.json"
+CONTENT_FILE = ROOT / "data" / "content.json"
 SITE = ROOT / "site"
+UPLOADS = SITE / "img" / "uploads"
 
 load_dotenv(ROOT / ".env")
 
 app = Flask(__name__, static_folder=str(SITE), static_url_path="/static")
+app.secret_key = (os.environ.get("SECRET_KEY") or "rosa-local-dev").strip()
+app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = bool(os.environ.get("RENDER"))
+app.permanent_session_lifetime = timedelta(days=30)
 
 CLOSED_WEEKDAY = 0  # понеділок
 TZ = ZoneInfo("Europe/Kyiv")
@@ -45,12 +54,53 @@ SERVICE_MINUTES = {
     "Зняття / корекція": 45,
     "Комплекс руки + ноги": 180,
 }
-SERVICES = set(SERVICE_MINUTES)
-MASTERS = {"Аля", "Єлизавета"}
+def load_content() -> dict:
+    if CONTENT_FILE.is_file():
+        try:
+            data = json.loads(CONTENT_FILE.read_text(encoding="utf-8"))
+            if isinstance(data, dict) and data:
+                return data
+        except (OSError, json.JSONDecodeError):
+            pass
+    return {}
+
+
+def save_content(data: dict) -> None:
+    CONTENT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    CONTENT_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def catalog_services() -> dict[str, int]:
+    names: dict[str, int] = {}
+    for section in (load_content().get("price") or {}).get("sections") or []:
+        if not isinstance(section, dict):
+            continue
+        for item in section.get("items") or []:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("book") or item.get("name") or "").strip()
+            if not name:
+                continue
+            try:
+                mins = int(item.get("mins") or 90)
+            except (TypeError, ValueError):
+                mins = 90
+            names[name] = mins
+    return names or dict(SERVICE_MINUTES)
+
+
+def catalog_masters() -> set[str]:
+    ids = []
+    for master in load_content().get("masters") or []:
+        if isinstance(master, dict):
+            ident = str(master.get("id") or "").strip()
+            if ident:
+                ids.append(ident)
+    return set(ids) or {"Аля", "Єлизавета"}
 
 
 def service_minutes(name: str) -> int:
-    return SERVICE_MINUTES.get(name, 90)
+    return catalog_services().get(name, 90)
 
 
 def slot_bounds(date: str, time: str, minutes: int) -> tuple[datetime, datetime]:
@@ -176,9 +226,9 @@ def add_booking(payload: dict) -> dict:
 
     if not name or not phone:
         raise ValueError("вкажіть ім’я і телефон")
-    if service not in SERVICES:
+    if service not in catalog_services():
         raise ValueError("оберіть послугу зі списку")
-    if master not in MASTERS:
+    if master not in catalog_masters():
         raise ValueError("оберіть майстра")
     if time not in TIMES:
         raise ValueError("цей час не в графіку")
@@ -787,6 +837,87 @@ def book_page():
     return send_from_directory(SITE, "book.html")
 
 
+@app.get("/admin")
+def admin_page():
+    return send_from_directory(SITE, "admin.html")
+
+
+@app.get("/api/content")
+def public_content():
+    resp = jsonify({"ok": True, "content": load_content()})
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+def _admin_ok() -> bool:
+    return bool(session.get("admin"))
+
+
+def _admin_password() -> str:
+    return (os.environ.get("ADMIN_PASSWORD") or "").strip()
+
+
+@app.get("/api/admin/me")
+def admin_me():
+    if not _admin_password():
+        return jsonify({"ok": False, "error": "адмінку ще не ввімкнено", "ready": False}), 503
+    return jsonify({"ok": True, "ready": True, "in": _admin_ok()})
+
+
+@app.post("/api/admin/login")
+def admin_login():
+    password = _admin_password()
+    if not password:
+        return jsonify({"ok": False, "error": "адмінку ще не ввімкнено"}), 503
+    given = str((request.get_json(silent=True) or {}).get("password") or "")
+    if not given or not hmac.compare_digest(given, password):
+        return jsonify({"ok": False, "error": "не той пароль"}), 401
+    session.clear()
+    session["admin"] = True
+    session.permanent = True
+    return jsonify({"ok": True})
+
+
+@app.post("/api/admin/logout")
+def admin_logout():
+    session.clear()
+    return jsonify({"ok": True})
+
+
+@app.post("/api/admin/content")
+def admin_save_content():
+    if not _admin_ok():
+        return jsonify({"ok": False, "error": "увійдіть"}), 401
+    payload = request.get_json(silent=True) or {}
+    if not isinstance(payload, dict) or not payload:
+        return jsonify({"ok": False, "error": "порожньо"}), 400
+    save_content(payload)
+    return jsonify({"ok": True})
+
+
+@app.post("/api/admin/upload")
+def admin_upload():
+    if not _admin_ok():
+        return jsonify({"ok": False, "error": "увійдіть"}), 401
+    file = request.files.get("file")
+    if not file or not file.filename:
+        return jsonify({"ok": False, "error": "немає файлу"}), 400
+    name = str(file.filename).lower()
+    ext = ".jpg"
+    if name.endswith(".png"):
+        ext = ".png"
+    elif name.endswith(".webp"):
+        ext = ".webp"
+    elif name.endswith(".jpeg") or name.endswith(".jpg"):
+        ext = ".jpg"
+    else:
+        return jsonify({"ok": False, "error": "лише jpg, png або webp"}), 400
+    UPLOADS.mkdir(parents=True, exist_ok=True)
+    dest = UPLOADS / f"{uuid.uuid4().hex}{ext}"
+    file.save(dest)
+    return jsonify({"ok": True, "url": f"/static/img/uploads/{dest.name}"})
+
+
 @app.get("/status/<booking_id>")
 def status_page(booking_id):
     return send_from_directory(SITE, "status.html")
@@ -846,7 +977,7 @@ def list_slots():
     master = str(request.args.get("master") or "").strip()
     date = str(request.args.get("date") or "").strip()
     service = str(request.args.get("service") or "").strip()
-    if master and master not in MASTERS:
+    if master and master not in catalog_masters():
         return jsonify({"ok": False, "error": "оберіть майстра"}), 400
     times = free_times(master, date, service) if master and date else []
     resp = jsonify({"ok": True, "times": times, "calendar": gcal.configured()})
@@ -858,7 +989,7 @@ def list_slots():
 def list_days():
     master = str(request.args.get("master") or "").strip()
     service = str(request.args.get("service") or "").strip()
-    if master and master not in MASTERS:
+    if master and master not in catalog_masters():
         return jsonify({"ok": False, "error": "оберіть майстра"}), 400
     days = open_dates(master, service) if master else []
     resp = jsonify({"ok": True, "days": days})

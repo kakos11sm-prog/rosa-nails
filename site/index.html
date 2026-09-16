@@ -11,7 +11,7 @@
 </head>
 <body>
   <header class="top">
-    <a class="logo" href="#top"><span class="logo-word">Lissa Nails</span><span class="logo-spark" aria-hidden="true"></span></a>
+    <a class="logo" href="#top"><span class="logo-word" id="brandName">Lissa Nails</span><span class="logo-spark" aria-hidden="true"></span></a>
     <nav class="nav">
       <a href="#masters">Майстри</a>
       <a href="#services">Послуги</a>
@@ -21,7 +21,7 @@
     </nav>
     <div class="top-acts">
       <a class="btn btn-sm" href="/book"><span class="btn-full">Записатись</span><span class="btn-short">Запис</span></a>
-      <a class="icon-btn" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer" aria-label="Instagram">
+      <a class="icon-btn" id="igLink" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer" aria-label="Instagram">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <defs>
             <radialGradient id="igGrad" cx="30%" cy="107%" r="150%">
@@ -51,41 +51,20 @@
     <section class="band band-hero">
     <div class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Запоріжжя · Вознесенівський · студія на 2 крісла</p>
-        <h1>Манікюр, який тримається довше, ніж плани на вихідні.</h1>
-        <p class="lede">Кілька робіт одразу — оберіть настрій і запишіться без переписок у Direct.</p>
+        <p class="eyebrow" id="heroEyebrow">Запоріжжя · Вознесенівський · студія на 2 крісла</p>
+        <h1 id="heroTitle">Манікюр, який тримається довше, ніж плани на вихідні.</h1>
+        <p class="lede" id="heroLede">Кілька робіт одразу — оберіть настрій і запишіться без переписок у Direct.</p>
         <dl class="facts">
-          <div><dt>Слот</dt><dd>90 хвилин</dd></div>
-          <div><dt>Графік</dt><dd>10:00–20:30</dd></div>
-          <div><dt>Вихідний</dt><dd>понеділок</dd></div>
+          <div><dt id="fact0Label">Слот</dt><dd id="fact0Value">90 хвилин</dd></div>
+          <div><dt id="fact1Label">Графік</dt><dd id="fact1Value">10:00–20:30</dd></div>
+          <div><dt id="fact2Label">Вихідний</dt><dd id="fact2Value">понеділок</dd></div>
         </dl>
       </div>
 
       <div class="showcase" id="showcase">
         <p class="showcase-kicker">Роботи студії</p>
         <div class="showcase-window">
-          <div class="showcase-track" id="showcaseTrack">
-            <figure class="shot">
-              <img src="/static/img/hero.png" alt="Класика в студії" />
-              <figcaption>Класика</figcaption>
-            </figure>
-            <figure class="shot">
-              <img src="/static/img/look-french.png" alt="Молочний френч" />
-              <figcaption>Молочний френч</figcaption>
-            </figure>
-            <figure class="shot">
-              <img src="/static/img/look-berry.png" alt="Ягідний глянець" />
-              <figcaption>Ягідний глянець</figcaption>
-            </figure>
-            <figure class="shot">
-              <img src="/static/img/look-nude.png" alt="Нюд з блиском" />
-              <figcaption>Нюд + блиск</figcaption>
-            </figure>
-            <figure class="shot">
-              <img src="/static/img/look-geo.png" alt="Тонка геометрія" />
-              <figcaption>Геометрія</figcaption>
-            </figure>
-          </div>
+          <div class="showcase-track" id="showcaseTrack"></div>
         </div>
         <div class="showcase-bar">
           <button class="showcase-btn" type="button" id="showcasePrev" aria-label="Попередні роботи">‹</button>
@@ -99,27 +78,16 @@
     <section id="masters" class="band band-soft">
       <div class="wrap">
       <header class="block-h">
-        <p class="eyebrow">Команда</p>
-        <h2>Майстри</h2>
+        <p class="eyebrow" id="teamEyebrow">Команда</p>
+        <h2 id="teamTitle">Майстри</h2>
       </header>
-      <div class="people">
-        <article class="person">
-          <img class="avatar-img avatar-alya" src="/static/img/master-alya.png" alt="Майстер Аля, світле волосся" />
-          <h3>Аля</h3>
-          <p>Апаратний манікюр, укріплення, спокійний нюд.</p>
-        </article>
-        <article class="person">
-          <img class="avatar-img avatar-elizaveta" src="/static/img/master-elizaveta.png" alt="Майстер Єлизавета, довге світле волосся, окуляри" />
-          <h3>Єлизавета</h3>
-          <p>Манікюр, покриття, акуратна робота. Запоріжжя.</p>
-        </article>
-      </div>
+      <div class="people" id="mastersList"></div>
       </div>
     </section>
 
     <section id="services" class="band band-white services">
       <div class="wrap">
-      <p class="eyebrow price-eyebrow"><span>Прайс</span></p>
+      <p class="eyebrow price-eyebrow"><span id="priceEyebrow">Прайс</span></p>
       <header class="block-h price-head">
         <div class="price-title">
           <h2 id="priceHeading">Послуги майстра</h2>
@@ -133,15 +101,15 @@
     <section id="looks" class="band band-soft looks-block">
       <div class="wrap">
       <header class="block-h">
-        <p class="eyebrow">Портфоліо студії</p>
-        <h2>Роботи</h2>
-        <p>Френч, нюд, весілля, вечір, квіти, хром — обирайте настрій.</p>
+        <p class="eyebrow" id="looksEyebrow">Портфоліо студії</p>
+        <h2 id="looksTitle">Роботи</h2>
+        <p id="looksLede">Френч, нюд, весілля, вечір, квіти, хром — обирайте настрій.</p>
       </header>
       <div class="look-filters" id="lookFilters"></div>
       <div class="looks" id="looksGrid"></div>
       <p class="looks-more">
         Подивитись більше робіт —
-        <a href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a>
+        <a id="looksInsta" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a>
       </p>
       </div>
     </section>
@@ -149,9 +117,9 @@
     <section id="book" class="band band-blush book">
       <div class="wrap">
       <header class="block-h">
-        <p class="eyebrow">Онлайн</p>
-        <h2>Запис на окремій сторінці</h2>
-        <p>Майстер, послуга, дата і статус відповіді — без прокрутки лендінгу.</p>
+        <p class="eyebrow" id="bookEyebrow">Онлайн</p>
+        <h2 id="bookTitle">Запис на окремій сторінці</h2>
+        <p id="bookLede">Майстер, послуга, дата і статус відповіді — без прокрутки лендінгу.</p>
       </header>
       <a class="btn" href="/book">Записатись</a>
       </div>
@@ -161,21 +129,21 @@
   <footer class="foot" id="visit">
     <div class="foot-inner">
       <div class="foot-col">
-        <a class="logo" href="#top">ROSA</a>
-        <p>10:00–20:30 · вихідний понеділок</p>
-        <p>+380 67 000 00 00 · <a href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a></p>
+        <a class="logo" href="#top" id="footBrand">ROSA</a>
+        <p id="footHours">10:00–20:30 · вихідний понеділок</p>
+        <p><span id="footPhone">+380 67 000 00 00</span> · <a id="footInsta" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a></p>
       </div>
       <div class="foot-col foot-find">
         <p class="visit-label">Як нас знайти</p>
-        <p class="foot-addr">вул. Дмитра Донцова, 6</p>
-        <p>Запоріжжя, 69000 · 3 хв від Соборного</p>
-        <div class="chips">
+        <p class="foot-addr" id="footAddr">вул. Дмитра Донцова, 6</p>
+        <p id="footAddrNote">Запоріжжя, 69000 · 3 хв від Соборного</p>
+        <div class="chips" id="footChips">
           <span>зупинка Донцова</span>
           <span>авт. 17, 18, 29</span>
           <span>трол. 3, 8, 14</span>
           <span>вокзал → 18</span>
         </div>
-        <a class="btn btn-sm" href="https://www.google.com/maps/dir/?api=1&destination=47.8354747,35.1433714" target="_blank" rel="noreferrer">Маршрут</a>
+        <a class="btn btn-sm" id="footRoute" href="https://www.google.com/maps/dir/?api=1&destination=47.8354747,35.1433714" target="_blank" rel="noreferrer">Маршрут</a>
       </div>
       <div class="foot-map">
         <iframe
@@ -183,6 +151,7 @@
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"
           src="https://maps.google.com/maps?q=47.8354747,35.1433714&hl=uk&z=17&output=embed"
+          id="footMap"
         ></iframe>
       </div>
     </div>

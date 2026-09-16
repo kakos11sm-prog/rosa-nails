@@ -24,8 +24,8 @@ load_dotenv(ROOT / ".env")
 
 SERVICE, MASTER, DATE, TIME, NAME, PHONE = range(6)
 
-SERVICES = list(store.SERVICES)
-MASTERS = list(store.MASTERS)
+SERVICES = list(store.catalog_services())
+MASTERS = list(store.catalog_masters())
 TIMES = store.TIMES
 
 
@@ -60,24 +60,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return ConversationHandler.END
     await update.message.reply_text(
         "ROSA · запис у студію.\nОберіть послугу:",
-        reply_markup=kb(SERVICES),
+        reply_markup=kb(list(store.catalog_services())),
     )
     return SERVICE
 
 
 async def service_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     text = (update.message.text or "").strip()
-    if text not in SERVICES:
+    if text not in store.catalog_services():
         await update.message.reply_text("Оберіть послугу з кнопок.")
         return SERVICE
     context.user_data["service"] = text
-    await update.message.reply_text("Майстер:", reply_markup=kb(MASTERS))
+    await update.message.reply_text("Майстер:", reply_markup=kb(list(store.catalog_masters())))
     return MASTER
 
 
 async def master_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     text = (update.message.text or "").strip()
-    if text not in MASTERS:
+    if text not in store.catalog_masters():
         await update.message.reply_text("Оберіть майстра з кнопок.")
         return MASTER
     context.user_data["master"] = text
