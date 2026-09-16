@@ -11,7 +11,7 @@
 </head>
 <body>
   <header class="top">
-    <a class="logo" href="#top"><span class="logo-word" id="brandName">Lissa Nails</span><span class="logo-spark" aria-hidden="true"></span></a>
+    <a class="logo" href="#top"><span class="logo-word" id="brandName" data-edit="studio.brand">Lissa Nails</span><span class="logo-spark" aria-hidden="true"></span></a>
     <nav class="nav">
       <a href="#masters">Майстри</a>
       <a href="#services">Послуги</a>
@@ -51,13 +51,13 @@
     <section class="band band-hero">
     <div class="hero">
       <div class="hero-copy">
-        <p class="eyebrow" id="heroEyebrow">Запоріжжя · Вознесенівський · студія на 2 крісла</p>
-        <h1 id="heroTitle">Манікюр, який тримається довше, ніж плани на вихідні.</h1>
-        <p class="lede" id="heroLede">Кілька робіт одразу — оберіть настрій і запишіться без переписок у Direct.</p>
+        <p class="eyebrow" id="heroEyebrow" data-edit="hero.eyebrow">Запоріжжя · Вознесенівський · студія на 2 крісла</p>
+        <h1 id="heroTitle" data-edit="hero.title">Манікюр, який тримається довше, ніж плани на вихідні.</h1>
+        <p class="lede" id="heroLede" data-edit="hero.lede">Кілька робіт одразу — оберіть настрій і запишіться без переписок у Direct.</p>
         <dl class="facts">
-          <div><dt id="fact0Label">Слот</dt><dd id="fact0Value">90 хвилин</dd></div>
-          <div><dt id="fact1Label">Графік</dt><dd id="fact1Value">10:00–20:30</dd></div>
-          <div><dt id="fact2Label">Вихідний</dt><dd id="fact2Value">понеділок</dd></div>
+          <div><dt id="fact0Label" data-edit="hero.facts.0.label">Слот</dt><dd id="fact0Value" data-edit="hero.facts.0.value">90 хвилин</dd></div>
+          <div><dt id="fact1Label" data-edit="hero.facts.1.label">Графік</dt><dd id="fact1Value" data-edit="hero.facts.1.value">10:00–20:30</dd></div>
+          <div><dt id="fact2Label" data-edit="hero.facts.2.label">Вихідний</dt><dd id="fact2Value" data-edit="hero.facts.2.value">понеділок</dd></div>
         </dl>
       </div>
 
@@ -78,8 +78,8 @@
     <section id="masters" class="band band-soft">
       <div class="wrap">
       <header class="block-h">
-        <p class="eyebrow" id="teamEyebrow">Команда</p>
-        <h2 id="teamTitle">Майстри</h2>
+        <p class="eyebrow" id="teamEyebrow" data-edit="team.eyebrow">Команда</p>
+        <h2 id="teamTitle" data-edit="team.title">Майстри</h2>
       </header>
       <div class="people" id="mastersList"></div>
       </div>
@@ -87,10 +87,10 @@
 
     <section id="services" class="band band-white services">
       <div class="wrap">
-      <p class="eyebrow price-eyebrow"><span id="priceEyebrow">Прайс</span></p>
+      <p class="eyebrow price-eyebrow"><span id="priceEyebrow" data-edit="price.eyebrow">Прайс</span></p>
       <header class="block-h price-head">
         <div class="price-title">
-          <h2 id="priceHeading">Послуги майстра</h2>
+          <h2 id="priceHeading" data-edit="price.title">Послуги майстра</h2>
           <div class="price-pick" id="priceMasters"></div>
         </div>
       </header>
@@ -101,15 +101,15 @@
     <section id="looks" class="band band-soft looks-block">
       <div class="wrap">
       <header class="block-h">
-        <p class="eyebrow" id="looksEyebrow">Портфоліо студії</p>
-        <h2 id="looksTitle">Роботи</h2>
-        <p id="looksLede">Френч, нюд, весілля, вечір, квіти, хром — обирайте настрій.</p>
+        <p class="eyebrow" id="looksEyebrow" data-edit="looks.eyebrow">Портфоліо студії</p>
+        <h2 id="looksTitle" data-edit="looks.title">Роботи</h2>
+        <p id="looksLede" data-edit="looks.lede">Френч, нюд, весілля, вечір, квіти, хром — обирайте настрій.</p>
       </header>
       <div class="look-filters" id="lookFilters"></div>
       <div class="looks" id="looksGrid"></div>
       <p class="looks-more">
         Подивитись більше робіт —
-        <a id="looksInsta" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a>
+        <a id="looksInsta" data-edit="studio.instagram_name" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a>
       </p>
       </div>
     </section>
@@ -117,9 +117,9 @@
     <section id="book" class="band band-blush book">
       <div class="wrap">
       <header class="block-h">
-        <p class="eyebrow" id="bookEyebrow">Онлайн</p>
-        <h2 id="bookTitle">Запис на окремій сторінці</h2>
-        <p id="bookLede">Майстер, послуга, дата і статус відповіді — без прокрутки лендінгу.</p>
+        <p class="eyebrow" id="bookEyebrow" data-edit="book.eyebrow">Онлайн</p>
+        <h2 id="bookTitle" data-edit="book.title">Запис на окремій сторінці</h2>
+        <p id="bookLede" data-edit="book.lede">Майстер, послуга, дата і статус відповіді — без прокрутки лендінгу.</p>
       </header>
       <a class="btn" href="/book">Записатись</a>
       </div>
@@ -129,14 +129,14 @@
   <footer class="foot" id="visit">
     <div class="foot-inner">
       <div class="foot-col">
-        <a class="logo" href="#top" id="footBrand">ROSA</a>
-        <p id="footHours">10:00–20:30 · вихідний понеділок</p>
-        <p><span id="footPhone">+380 67 000 00 00</span> · <a id="footInsta" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a></p>
+        <a class="logo" href="#top" id="footBrand" data-edit="studio.brand">ROSA</a>
+        <p id="footHours" data-edit="studio.hours">10:00–20:30 · вихідний понеділок</p>
+        <p><span id="footPhone" data-edit="studio.phone">+380 67 000 00 00</span> · <a id="footInsta" data-edit="studio.instagram_name" href="https://www.instagram.com/lissa.nails.zp/" target="_blank" rel="noreferrer">@lissa.nails.zp</a></p>
       </div>
       <div class="foot-col foot-find">
         <p class="visit-label">Як нас знайти</p>
-        <p class="foot-addr" id="footAddr">вул. Дмитра Донцова, 6</p>
-        <p id="footAddrNote">Запоріжжя, 69000 · 3 хв від Соборного</p>
+        <p class="foot-addr" id="footAddr" data-edit="studio.address">вул. Дмитра Донцова, 6</p>
+        <p id="footAddrNote" data-edit="studio.address_note">Запоріжжя, 69000 · 3 хв від Соборного</p>
         <div class="chips" id="footChips">
           <span>зупинка Донцова</span>
           <span>авт. 17, 18, 29</span>
@@ -158,5 +158,6 @@
   </footer>
   <script src="/static/remember.js"></script>
   <script src="/static/app.js"></script>
+  <script src="/static/edit.js"></script>
 </body>
 </html>

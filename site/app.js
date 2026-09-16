@@ -46,19 +46,19 @@ function fillPrice() {
     board.innerHTML = PRICE.sections
       .map(
         (section, si) => `<div class="price-group">
-          <h3>${section.title}</h3>
+          <h3 data-edit="price.sections.${si}.title">${section.title}</h3>
           <div class="price-cards">
             ${section.items
               .map((item, ii) => {
                 const q = new URLSearchParams({ master: active, service: item.book || item.name });
                 return `<a class="price-card" href="/book?${q.toString()}">
                   <div class="price-card-pic">
-                    <img src="${item.img}" alt="" />
-                    <strong class="price">${money(item.prices[active])}</strong>
+                    <img src="${item.img}" alt="" data-edit-img="price.sections.${si}.items.${ii}.img" />
+                    <strong class="price" data-edit="price.sections.${si}.items.${ii}.prices.${active}">${money(item.prices[active])}</strong>
                   </div>
                   <div>
-                    <h4>${item.name}</h4>
-                    ${item.note ? `<p>${item.note}</p>` : "<p></p>"}
+                    <h4 data-edit="price.sections.${si}.items.${ii}.name">${item.name}</h4>
+                    <p data-edit="price.sections.${si}.items.${ii}.note">${item.note || ""}</p>
                   </div>
                 </a>`;
               })
@@ -201,13 +201,13 @@ function fillLooks() {
           `<button type="button" class="chip-btn${t === active ? " is-on" : ""}" data-tag="${t}">${t}</button>`
       )
       .join("");
-    const rows = active === "Усі" ? LOOKS : LOOKS.filter((l) => l.tag === active);
+    const rows = LOOKS.map((l, i) => ({ l, i })).filter((row) => active === "Усі" || row.l.tag === active);
     grid.innerHTML = rows
-      .map((l, i) => {
+      .map(({ l, i }) => {
         const extra = l.featured && active === "Усі" ? " look-wide" : l.wide && active === "Усі" ? " look-span" : "";
-        return `<article class="look${extra}" style="--d:${0.04 + i * 0.05}s">
+        return `<article class="look${extra}" style="--d:${0.04 + i * 0.05}s" data-edit-img="looks.items.${i}.img">
           <img src="${l.img}" alt="${l.name}" />
-          <span>${l.name}</span>
+          <span data-edit="looks.items.${i}.name">${l.name}</span>
         </article>`;
       })
       .join("");
@@ -364,9 +364,9 @@ function applyLanding(data) {
   if (track && (data.showcase || []).length) {
     track.innerHTML = data.showcase
       .map(
-        (shot) => `<figure class="shot">
-          <img src="${shot.img}" alt="${shot.name || ""}" />
-          <figcaption>${shot.name || ""}</figcaption>
+        (shot, i) => `<figure class="shot">
+          <img src="${shot.img}" alt="${shot.name || ""}" data-edit-img="showcase.${i}.img" />
+          <figcaption data-edit="showcase.${i}.name">${shot.name || ""}</figcaption>
         </figure>`
       )
       .join("");
@@ -377,10 +377,10 @@ function applyLanding(data) {
   if (people && (data.masters || []).length) {
     people.innerHTML = data.masters
       .map(
-        (m) => `<article class="person">
-          <img class="avatar-img" src="${m.img}" alt="${m.label || m.id}" />
-          <h3>${m.label || m.id}</h3>
-          <p>${m.bio || ""}</p>
+        (m, i) => `<article class="person">
+          <img class="avatar-img" src="${m.img}" alt="${m.label || m.id}" data-edit-img="masters.${i}.img" />
+          <h3 data-edit="masters.${i}.label">${m.label || m.id}</h3>
+          <p data-edit="masters.${i}.bio">${m.bio || ""}</p>
         </article>`
       )
       .join("");
@@ -412,7 +412,7 @@ function applyLanding(data) {
   if (ig && studio.instagram) ig.href = studio.instagram;
   const chips = document.getElementById("footChips");
   if (chips && (studio.chips || []).length) {
-    chips.innerHTML = studio.chips.map((c) => `<span>${c}</span>`).join("");
+    chips.innerHTML = studio.chips.map((c, i) => `<span data-edit="studio.chips.${i}">${c}</span>`).join("");
   }
   const lat = studio.map_lat;
   const lng = studio.map_lng;
@@ -429,6 +429,7 @@ async function loadSite() {
     const res = await fetch("/api/content", { cache: "no-store" });
     const data = await res.json();
     const pack = data.content || {};
+    window.SITE_CONTENT = pack;
     applyLanding(pack);
     PRICE = {
       title: pack.price && pack.price.title,

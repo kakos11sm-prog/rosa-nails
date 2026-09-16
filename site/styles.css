@@ -1384,3 +1384,55 @@ a.price-card:hover {
   body:has(.top.is-slim) .visit-bar { top: 42px; }
   .visit-bar .btn { width: 100%; }
 }
+
+body.is-edit { padding-bottom: 88px; }
+body.is-edit [data-edit],
+body.is-edit [data-edit-img] {
+  outline: 1.5px dashed rgba(196, 111, 123, 0.55);
+  outline-offset: 3px;
+  cursor: pointer;
+}
+body.is-edit [data-edit]:focus {
+  outline: 2px solid var(--rose-2);
+  cursor: text;
+}
+.edit-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 253, 252, 0.96);
+  border-top: 1px solid var(--line);
+}
+.edit-bar p { margin: 0; flex: 1; font-size: 0.82rem; color: var(--muted); }
+.edit-login {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(63, 51, 54, 0.35);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+.edit-login[hidden] { display: none !important; }
+.edit-login-card {
+  width: min(100%, 360px);
+  background: #fff;
+  border-radius: 24px;
+  padding: 22px;
+  display: grid;
+  gap: 12px;
+}
+.edit-login-card h2 { font-family: var(--serif); margin: 0; }
+.edit-login-card input {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  font: 500 1rem var(--font);
+}
+.edit-login-close { width: 100%; min-height: 44px; }
