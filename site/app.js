@@ -422,12 +422,12 @@ function paintWhy(hero) {
   const tabs = reasons
     .map(
       (r, i) =>
-        `<button type="button" data-why="${i}" aria-label="${esc(r.title)}">${esc(r.icon)}</button>`
+        `<button type="button" class="${i === 0 ? "is-on" : ""}" data-why="${i}" aria-label="${esc(r.title)}">${esc(r.icon)}</button>`
     )
     .join("");
   const slides = reasons
     .map(
-      (r, i) => `<article class="why-card">
+      (r, i) => `<article class="why-card${i === 0 ? " is-on" : ""}">
         <button type="button" class="edit-del" data-del-reason="${i}" aria-label="Прибрати">×</button>
         <span class="why-ico" data-edit="hero.reasons.${i}.icon">${esc(r.icon)}</span>
         <h3 data-edit="hero.reasons.${i}.title">${esc(r.title)}</h3>
@@ -436,7 +436,7 @@ function paintWhy(hero) {
     )
     .join("");
   box.innerHTML = `<div class="why-emoji">${tabs}</div>
-    <div class="why-window"><div class="why-track">${slides}</div></div>
+    <div class="why-window">${slides}</div>
     <button type="button" class="edit-plus" data-add="reason">+ Причина</button>`;
 }
 
@@ -457,11 +457,7 @@ function setupWhy() {
     const list = cards();
     if (!list.length) return;
     index = ((next % list.length) + list.length) % list.length;
-    const track = box.querySelector(".why-track");
-    const card = list[0];
-    if (track && card) {
-      track.style.transform = `translateX(-${index * card.getBoundingClientRect().width}px)`;
-    }
+    list.forEach((card, i) => card.classList.toggle("is-on", i === index));
     emojis().forEach((btn, i) => btn.classList.toggle("is-on", i === index));
   }
 
