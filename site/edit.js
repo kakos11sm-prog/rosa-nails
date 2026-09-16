@@ -88,9 +88,28 @@ function stopTextEdit(el) {
   el.contentEditable = "false";
   const path = el.getAttribute("data-edit");
   if (!path || !window.SITE_CONTENT) return;
-  setPath(window.SITE_CONTENT, path, parseValue(path, el.textContent));
+  const neu = parseValue(path, el.textContent);
+  let oldFilter = "";
+  if (/^looks\.filters\.\d+$/.test(path)) {
+    const i = Number(path.split(".")[2]);
+    oldFilter = String(((window.SITE_CONTENT.looks || {}).filters || [])[i] || "");
+  }
+  setPath(window.SITE_CONTENT, path, neu);
+  if (oldFilter && neu && oldFilter !== neu) {
+    (window.SITE_CONTENT.looks.items || []).forEach((item) => {
+      if (item.tag === oldFilter) item.tag = neu;
+    });
+    if (typeof fillLooks === "function" && fillLooks.active === oldFilter) fillLooks.active = neu;
+  }
+  if (/^looks\.items\.\d+\.tag$/.test(path) && neu) {
+    const list = window.SITE_CONTENT.looks.filters || (window.SITE_CONTENT.looks.filters = []);
+    if (!list.includes(neu)) list.push(neu);
+  }
   markDirty();
-  if (/^masters\.\d+\.label$/.test(path) && typeof window.refreshSiteFromContent === "function") {
+  if (
+    (/^masters\.\d+\.label$/.test(path) || /^looks\.filters\.\d+$/.test(path) || /^looks\.items\.\d+\.tag$/.test(path)) &&
+    typeof window.refreshSiteFromContent === "function"
+  ) {
     window.refreshSiteFromContent();
   }
 }
@@ -192,7 +211,7 @@ function enableEditing() {
 
 function handleStructure(e) {
   const add = e.target.closest("[data-add], [data-add-item]");
-  const del = e.target.closest("[data-del-master], [data-del-section], [data-del-item], [data-del-look], [data-del-shot]");
+  const del = e.target.closest("[data-del-master], [data-del-section], [data-del-item], [data-del-look], [data-del-shot], [data-del-filter]");
   if (!add && !del) return false;
   e.preventDefault();
   e.stopPropagation();
@@ -225,8 +244,17 @@ function handleStructure(e) {
       pack.price.sections.push({ title: "Новий розділ", items: [] });
     }
     if (add.dataset.add === "look") {
-      pack.looks.items.push({ name: "Нова робота", img: "/static/img/hero.png", tag: "Нюд" });
-      if (typeof window.fillLooks === "function") window.fillLooks.active = "Усі";
+      const current = typeof fillLooks === "function" ? fillLooks.active : "";
+      const tag =
+        current && current !== "Усі"
+          ? current
+          : ((pack.looks.filters || [])[0] || "Нюд");
+      pack.looks.items.push({ name: "Нова робота", img: "/static/img/hero.png", tag });
+    }
+    if (add.dataset.add === "filter") {
+      if (typeof ensureLookFilters === "function") ensureLookFilters(pack);
+      pack.looks.filters.push("Нова");
+      if (typeof fillLooks === "function") fillLooks.active = "Нова";
     }
     if (add.dataset.add === "shot") {
       pack.showcase.push({ name: "Нова робота", img: "/static/img/hero.png" });
@@ -279,6 +307,13 @@ function handleStructure(e) {
     if (del.dataset.delLook != null) {
       pack.looks.items.splice(Number(del.dataset.delLook), 1);
     }
+    if (del.dataset.delFilter != null) {
+      pack.looks.filters = pack.looks.filters || [];
+      const i = Number(del.dataset.delFilter);
+      const gone = pack.looks.filters[i];
+      pack.looks.filters.splice(i, 1);
+      if (typeof fillLooks === "function" && fillLooks.active === gone) fillLooks.active = "Усі";
+    }
     if (del.dataset.delShot != null) {
       if (pack.showcase.length < 2) {
         const note = document.getElementById("editNote");
@@ -298,7 +333,7 @@ function onEditPointer(e) {
   const text = e.target.closest("[data-edit]");
   const img = e.target.closest("[data-edit-img]");
   if (!img && !text) return;
-  if (e.target.closest(".edit-bar, .edit-login, .price-switch, .showcase-bar, .look-filters")) return;
+  if (e.target.closest(".edit-bar, .edit-login, .price-switch, .showcase-bar")) return;
   e.preventDefault();
   e.stopPropagation();
   if (text) startTextEdit(text);
@@ -319,7 +354,13 @@ function bootEdit() {
       if (!editing) return;
       if (e.target.closest(".edit-bar, .edit-login")) return;
       if (handleStructure(e)) return;
-      if (e.target.closest(".price-switch, .showcase-bar, .look-filters")) return;
+      if (e.target.closest(".price-switch, .showcase-bar")) return;
+      const filterLabel = e.target.closest(".look-filters [data-edit]");
+      if (filterLabel) {
+        const btn = filterLabel.closest("[data-tag]");
+        const on = typeof fillLooks === "function" ? fillLooks.active : "Усі";
+        if (!btn || btn.dataset.tag !== on) return;
+      }
       const hit = e.target.closest("[data-edit], [data-edit-img]");
       if (hit) {
         e.preventDefault();

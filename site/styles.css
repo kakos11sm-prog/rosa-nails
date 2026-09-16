@@ -723,6 +723,7 @@ a.price-card:hover {
 .looks-block .block-h .eyebrow { margin-bottom: 8px; }
 .look-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
 .chip-btn {
+  position: relative;
   border: 1px solid #edd8db;
   background: #fff;
   color: var(--ink);
@@ -759,7 +760,7 @@ a.price-card:hover {
   object-fit: cover;
   transition: transform 0.7s ease;
 }
-.look span {
+.look .look-name {
   position: absolute;
   left: 10px;
   bottom: 10px;
@@ -770,6 +771,20 @@ a.price-card:hover {
   font-size: 0.76rem;
   font-weight: 600;
   box-shadow: 0 6px 18px rgba(26, 26, 26, 0.08);
+}
+.look .look-tag {
+  display: none;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  background: #fff;
+  color: var(--ink);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(26, 26, 26, 0.08);
+  z-index: 3;
 }
 .looks-block.is-in .look {
   animation: rise 0.65s ease both;
@@ -1472,6 +1487,16 @@ body.is-edit .edit-plus {
   user-select: none;
 }
 body.is-edit .looks .edit-plus { grid-column: 1 / -1; justify-self: start; }
+body.is-edit .look-tag { display: inline-block; }
+body.is-edit .look-filters .edit-plus { margin: 0; min-height: 36px; }
+body.is-edit .chip-btn:not([data-tag="Усі"]) { padding-right: 28px; }
+body.is-edit .chip-btn .edit-del {
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  font-size: 0.95rem;
+}
 body.is-edit .price-group .edit-plus { margin: 16px 0 0; }
 body.is-edit .price-board > .edit-plus { margin: 8px 0 12px; }
 body.is-edit .showcase .edit-plus { margin: 10px 0 0; }

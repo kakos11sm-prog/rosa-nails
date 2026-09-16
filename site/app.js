@@ -199,20 +199,38 @@ function fillPrice() {
   }
 }
 
+function ensureLookFilters(pack) {
+  pack.looks = pack.looks || { items: [] };
+  pack.looks.items = pack.looks.items || [];
+  if (!Array.isArray(pack.looks.filters) || !pack.looks.filters.length) {
+    pack.looks.filters = [...new Set(pack.looks.items.map((item) => item.tag).filter(Boolean))];
+  }
+  return pack.looks.filters;
+}
+
 function fillLooks() {
   const grid = document.getElementById("looksGrid");
   const filters = document.getElementById("lookFilters");
   if (!grid || !filters) return;
 
   function paint() {
-    const tags = ["Усі", ...new Set(LOOKS.map((l) => l.tag))];
+    const pack = window.SITE_CONTENT || {};
+    const names = ensureLookFilters(pack);
+    const tags = ["Усі", ...names];
     const active = fillLooks.active || "Усі";
-    filters.innerHTML = tags
-      .map(
-        (t) =>
-          `<button type="button" class="chip-btn${t === active ? " is-on" : ""}" data-tag="${t}">${t}</button>`
-      )
-      .join("");
+    filters.innerHTML =
+      tags
+        .map((t, i) => {
+          if (t === "Усі") {
+            return `<button type="button" class="chip-btn${t === active ? " is-on" : ""}" data-tag="${t}">${t}</button>`;
+          }
+          const fi = i - 1;
+          return `<button type="button" class="chip-btn${t === active ? " is-on" : ""}" data-tag="${t}">
+            <span data-edit="looks.filters.${fi}">${t}</span>
+            <span class="edit-del" data-del-filter="${fi}" role="button" aria-label="Прибрати категорію">×</span>
+          </button>`;
+        })
+        .join("") + `<button type="button" class="edit-plus" data-add="filter">+ Категорія</button>`;
     const rows = LOOKS.map((l, i) => ({ l, i })).filter((row) => active === "Усі" || row.l.tag === active);
     grid.innerHTML =
       rows
@@ -221,7 +239,8 @@ function fillLooks() {
           return `<article class="look${extra}" style="--d:${0.04 + i * 0.05}s" data-edit-img="looks.items.${i}.img">
           <button type="button" class="edit-del" data-del-look="${i}" aria-label="Прибрати роботу">×</button>
           <img src="${l.img}" alt="${l.name}" />
-          <span data-edit="looks.items.${i}.name">${l.name}</span>
+          <span class="look-tag" data-edit="looks.items.${i}.tag">${l.tag || ""}</span>
+          <span class="look-name" data-edit="looks.items.${i}.name">${l.name}</span>
         </article>`;
         })
         .join("") + `<button type="button" class="edit-plus" data-add="look">+ Робота</button>`;
@@ -232,6 +251,7 @@ function fillLooks() {
   if (!fillLooks.bound) {
     fillLooks.bound = true;
     filters.addEventListener("click", (e) => {
+      if (e.target.closest("[data-add], .edit-del")) return;
       const btn = e.target.closest("[data-tag]");
       if (!btn) return;
       fillLooks.active = btn.dataset.tag;
@@ -478,6 +498,7 @@ async function loadSite() {
     const data = await res.json();
     const pack = data.content || {};
     window.SITE_CONTENT = pack;
+    ensureLookFilters(pack);
     applyLanding(pack);
     PRICE = {
       title: pack.price && pack.price.title,
@@ -497,6 +518,7 @@ async function loadSite() {
 
 window.refreshSiteFromContent = function () {
   const pack = window.SITE_CONTENT || {};
+  ensureLookFilters(pack);
   applyLanding(pack);
   PRICE = {
     title: pack.price && pack.price.title,
