@@ -408,6 +408,33 @@ function setText(id, value) {
   if (el && value != null && value !== "") el.textContent = value;
 }
 
+function esc(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function paintWhy(hero) {
+  const box = document.getElementById("heroWhy");
+  if (!box) return;
+  const reasons = hero.reasons || [];
+  box.innerHTML = reasons
+    .map(
+      (r, i) => `<article class="why-card">
+        <button type="button" class="edit-del" data-del-reason="${i}" aria-label="Прибрати">×</button>
+        <span class="why-ico" data-edit="hero.reasons.${i}.icon">${esc(r.icon)}</span>
+        <h3 data-edit="hero.reasons.${i}.title">${esc(r.title)}</h3>
+        <p data-edit="hero.reasons.${i}.text">${esc(r.text)}</p>
+      </article>`
+    )
+    .join("");
+  box.insertAdjacentHTML(
+    "beforeend",
+    `<button type="button" class="edit-plus" data-add="reason">+ Причина</button>`
+  );
+}
+
 function applyLanding(data) {
   const studio = data.studio || {};
   const hero = data.hero || {};
@@ -421,6 +448,7 @@ function applyLanding(data) {
   setText("heroEyebrow", hero.eyebrow);
   setText("heroTitle", hero.title);
   setText("heroLede", hero.lede);
+  paintWhy(hero);
   setText("showcaseKicker", hero.showcase_kicker || "Роботи студії");
   (hero.facts || []).forEach((fact, i) => {
     setText("fact" + i + "Label", fact.label);

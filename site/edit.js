@@ -211,7 +211,7 @@ function enableEditing() {
 
 function handleStructure(e) {
   const add = e.target.closest("[data-add], [data-add-item]");
-  const del = e.target.closest("[data-del-master], [data-del-section], [data-del-item], [data-del-look], [data-del-shot], [data-del-filter]");
+  const del = e.target.closest("[data-del-master], [data-del-section], [data-del-item], [data-del-look], [data-del-shot], [data-del-filter], [data-del-reason]");
   if (!add && !del) return false;
   e.preventDefault();
   e.stopPropagation();
@@ -258,6 +258,11 @@ function handleStructure(e) {
     }
     if (add.dataset.add === "shot") {
       pack.showcase.push({ name: "Нова робота", img: "/static/img/hero.png" });
+    }
+    if (add.dataset.add === "reason") {
+      pack.hero = pack.hero || {};
+      pack.hero.reasons = pack.hero.reasons || [];
+      pack.hero.reasons.push({ icon: "🤍", title: "Нова причина", text: "Натисни і напиши текст." });
     }
     if (add.dataset.addItem != null) {
       const si = Number(add.dataset.addItem);
@@ -321,6 +326,11 @@ function handleStructure(e) {
         return true;
       }
       pack.showcase.splice(Number(del.dataset.delShot), 1);
+    }
+    if (del.dataset.delReason != null) {
+      pack.hero = pack.hero || {};
+      pack.hero.reasons = pack.hero.reasons || [];
+      pack.hero.reasons.splice(Number(del.dataset.delReason), 1);
     }
   }
   markDirty();
