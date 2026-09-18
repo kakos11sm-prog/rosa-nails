@@ -38,7 +38,8 @@ img { max-width: 100%; display: block; }
   background: rgba(255, 253, 252, 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
-  transition: padding 0.35s ease, gap 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+  overflow-anchor: none;
+  transition: padding 0.28s ease, gap 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
 }
 .top.is-slim {
   padding: 6px 22px;

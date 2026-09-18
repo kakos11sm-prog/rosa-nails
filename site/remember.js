@@ -88,9 +88,21 @@ async function rosaShowVisitBar() {
 function rosaSlimHeader() {
   const top = document.querySelector("header.top");
   if (!top) return;
-  const paint = () => top.classList.toggle("is-slim", window.scrollY > 16);
+  let slim = false;
+  let raf = 0;
+  const paint = () => {
+    raf = 0;
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    if (!slim && y > 56) slim = true;
+    else if (slim && y < 8) slim = false;
+    top.classList.toggle("is-slim", slim);
+  };
+  const onScroll = () => {
+    if (raf) return;
+    raf = window.requestAnimationFrame(paint);
+  };
   paint();
-  window.addEventListener("scroll", paint, { passive: true });
+  window.addEventListener("scroll", onScroll, { passive: true });
 }
 
 rosaShowVisitBar();
