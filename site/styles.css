@@ -1887,7 +1887,14 @@ body.is-edit .team-note-url:empty::before {
 .form-note { grid-column: 1 / -1; margin: 0; font-size: 0.9rem; }
 .form-note.is-ok { color: var(--ok); }
 .form-note.is-bad { color: var(--bad); }
-.form .btn-wide { grid-column: 1 / -1; margin-top: 4px; }
+.book-finish {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+.book-finish .form-hint { margin: 0; }
+.btn-ghost[hidden] { display: none !important; }
+.status-box .btn-ghost { margin-bottom: 10px; }
 
 .foot {
   border-top: 1px solid rgba(196, 111, 123, 0.16);

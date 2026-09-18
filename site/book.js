@@ -320,6 +320,17 @@ async function bootBook() {
   } catch (_) {
     /* keep fallbacks */
   }
+  try {
+    const cfg = await fetch("/api/config", { cache: "no-store" }).then((res) => res.json());
+    if (cfg && cfg.bot_url) {
+      const tg = document.getElementById("telegramBtn");
+      const hint = document.getElementById("telegramHint");
+      if (tg) tg.hidden = false;
+      if (hint) hint.hidden = false;
+    }
+  } catch (_) {
+    /* no bot */
+  }
   fillServicePicks();
   fillDesignPicks();
   paintPicker();
@@ -411,13 +422,24 @@ document.getElementById("bookForm").addEventListener("click", (e) => {
 
 document.getElementById("bookForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  await submitBooking(false);
+});
+
+document.getElementById("telegramBtn")?.addEventListener("click", () => {
+  submitBooking(true);
+});
+
+async function submitBooking(viaTelegram) {
   const btn = document.getElementById("submitBtn");
-  const payload = Object.fromEntries(new FormData(e.target).entries());
+  const tg = document.getElementById("telegramBtn");
+  const form = document.getElementById("bookForm");
+  const payload = Object.fromEntries(new FormData(form).entries());
   if (!payload.master || !payload.service || !payload.date || !payload.time) {
     showNote("Оберіть майстра, послугу, дату і час.", false);
     return;
   }
   btn.disabled = true;
+  if (tg) tg.disabled = true;
   try {
     const res = await fetch("/api/book", {
       method: "POST",
@@ -427,9 +449,14 @@ document.getElementById("bookForm").addEventListener("submit", async (e) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "не вдалося записати");
     if (data.booking && data.booking.id) rosaSaveBooking(data.booking.id);
+    if (viaTelegram && data.bot_url) {
+      location.href = data.bot_url;
+      return;
+    }
     location.href = `/status/${data.booking.id}`;
   } catch (err) {
     showNote(String(err.message || err), false);
     btn.disabled = false;
+    if (tg) tg.disabled = false;
   }
-});
+}

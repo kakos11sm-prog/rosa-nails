@@ -668,6 +668,67 @@ def notify_client(row: dict, text: str) -> bool:
         return False
 
 
+def client_bot_url(booking_id: str = "") -> str:
+    user = bot_username()
+    if not user:
+        return ""
+    if booking_id:
+        return f"https://t.me/{user}?start=rosa_{booking_id}"
+    return f"https://t.me/{user}"
+
+
+def client_remind_text(row: dict) -> str:
+    slot = pretty_slot(str(row.get("date") or ""), str(row.get("time") or ""))
+    addr = str((load_content().get("studio") or {}).get("address") or "вул. Дмитра Донцова, 6")
+    return (
+        f"ROSA · нагадування про запис.\n\n"
+        f"{slot}\n"
+        f"Майстер: {row.get('master')}\n"
+        f"{row.get('service') or ''}\n\n"
+        f"Чекаємо вас у студії, {addr}."
+    )
+
+
+_remind_checked = None
+
+
+def send_due_reminders() -> int:
+    today = datetime.now(TZ).date()
+    tomorrow = today + timedelta(days=1)
+    rows = _load()
+    sent = 0
+    changed = False
+    for row in rows:
+        if row.get("status") != "confirmed":
+            continue
+        if not str(row.get("telegram_id") or "").strip():
+            continue
+        if row.get("reminded_at"):
+            continue
+        try:
+            day = datetime.strptime(str(row.get("date") or ""), "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        if day != tomorrow:
+            continue
+        if notify_client(row, client_remind_text(row)):
+            row["reminded_at"] = datetime.now(TZ).isoformat(timespec="seconds")
+            sent += 1
+            changed = True
+    if changed:
+        _save(rows)
+    return sent
+
+
+def maybe_send_reminders() -> int:
+    global _remind_checked
+    now = datetime.now(TZ)
+    if _remind_checked and now - _remind_checked < timedelta(minutes=10):
+        return 0
+    _remind_checked = now
+    return send_due_reminders()
+
+
 def client_decision_text(row: dict, accepted: bool) -> str:
     slot = pretty_slot(str(row.get("date") or ""), str(row.get("time") or ""))
     services = booking_service_lines(row)
@@ -678,7 +739,7 @@ def client_decision_text(row: dict, accepted: bool) -> str:
             f"{slot}\n"
             f"Майстер: {row.get('master')}\n\n"
             f"Послуги:\n{body}\n\n"
-            f"Чекаємо вас у студії."
+            f"Чекаємо вас у студії. Напередодні нагадаємо в цей чат."
         )
     return (
         f"ROSA · цей час не підтвердили.\n{slot}\n"
@@ -1020,6 +1081,7 @@ def apply_admin_callback(action: str, booking_id: str, extra: str, chat_id: str)
 
 
 def handle_telegram_update(update: dict) -> None:
+    maybe_send_reminders()
     query = update.get("callback_query") or {}
     if query:
         data = str(query.get("data") or "")
@@ -1088,7 +1150,8 @@ def handle_telegram_update(update: dict) -> None:
             "text": (
                 f"Заявку #{row.get('id')} прив’язала до цього чату.\n"
                 f"{row.get('date')} {row.get('time')}, {row.get('master')}.\n"
-                f"Сюди напишемо, щойно студія підтвердить або відмовить."
+                f"Сюди напишемо, щойно студія підтвердить або відмовить.\n"
+                f"Напередодні візиту нагадаємо."
             ),
         },
     )
@@ -1256,6 +1319,7 @@ def status_page(booking_id):
 
 @app.get("/api/status/<booking_id>")
 def booking_status(booking_id):
+    maybe_send_reminders()
     row = _find_booking(str(booking_id or "").strip())
     if not row:
         return jsonify({"ok": False, "error": "заявку не знайдено"}), 404
@@ -1272,6 +1336,8 @@ def booking_status(booking_id):
         "design_price": str(row.get("design_price") or "").strip() or _design_price_text(row.get("design") or ""),
         "offers": row.get("offers") or [],
         "slots": day_slot_view(row) if row.get("status") == "offered" else [],
+        "telegram": bool(str(row.get("telegram_id") or "").strip()),
+        "bot_start": client_bot_url(str(row.get("id") or "")),
     })
 
 
@@ -1349,6 +1415,16 @@ def telegram_webhook():
     return "ok"
 
 
+@app.get("/api/cron/remind")
+def cron_remind():
+    want = (os.environ.get("CRON_SECRET") or "").strip()
+    got = str(request.args.get("secret") or request.headers.get("X-Cron-Secret") or "").strip()
+    if want and got != want:
+        return jsonify({"ok": False}), 403
+    sent = send_due_reminders()
+    return jsonify({"ok": True, "sent": sent})
+
+
 @app.post("/api/book")
 def create_booking():
     payload = request.get_json(silent=True) or {}
@@ -1361,12 +1437,11 @@ def create_booking():
             row = confirm_booking(row["id"])
         except ValueError:
             pass
-    user = bot_username()
     return jsonify({
         "ok": True,
         "booking": row,
         "pending": row.get("status") == "pending",
-        "bot_url": f"https://t.me/{user}" if user else "",
+        "bot_url": client_bot_url(str(row.get("id") or "")),
     })
 
 

@@ -99,6 +99,18 @@ function paint(status, data) {
     `;
   }
   paintOffers({ ...(data || {}), status });
+  const tg = document.getElementById("statusTg");
+  if (tg) {
+    if (data && data.bot_start && status !== "cancelled") {
+      tg.hidden = false;
+      tg.href = data.bot_start;
+      tg.textContent = data.telegram
+        ? "Відкрити чат у Telegram"
+        : "Отримувати відповідь в Telegram";
+    } else {
+      tg.hidden = true;
+    }
+  }
   if (cta) {
     cta.hidden = status === "offered";
     if (status === "confirmed") {
