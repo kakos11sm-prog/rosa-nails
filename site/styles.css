@@ -991,26 +991,41 @@ a.price-card:hover {
   box-shadow: 0 16px 32px rgba(196, 111, 123, 0.1);
 }
 .price-card-pic { position: relative; }
+.price-tags {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
+}
+body.is-edit .price-tags { pointer-events: auto; }
 .price-card img {
   width: 100%;
   height: 140px;
   object-fit: cover;
 }
-.price-card .price {
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
+.price-card .price,
+.price-card .price-mins {
   margin: 0;
   padding: 5px 10px;
   border-radius: 999px;
-  background: rgba(255, 253, 252, 0.95);
-  color: var(--rose-2);
   font-family: var(--font);
   font-style: normal;
   font-weight: 600;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   letter-spacing: 0.01em;
   box-shadow: 0 4px 12px rgba(63, 51, 54, 0.1);
+}
+.price-card .price {
+  background: rgba(255, 253, 252, 0.95);
+  color: var(--rose-2);
+}
+.price-card .price-mins {
+  background: rgba(63, 51, 54, 0.78);
+  color: #fff;
 }
 .price-card div:last-child {
   display: grid;

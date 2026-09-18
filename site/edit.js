@@ -21,7 +21,7 @@ function markDirty() {
 }
 
 function parseValue(path, text) {
-  const raw = String(text || "").replace(/\s+грн$/i, "").trim();
+  const raw = String(text || "").replace(/\s+грн$/i, "").replace(/\s+хв$/i, "").trim();
   if (path.includes(".prices.") || path.endsWith(".mins")) {
     return /^\d+(\.\d+)?$/.test(raw) ? Number(raw) : raw;
   }

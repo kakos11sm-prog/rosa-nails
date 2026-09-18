@@ -14,6 +14,12 @@ function money(value) {
   return typeof value === "number" ? `${value} грн` : `${value} грн`;
 }
 
+function minsLabel(value) {
+  const n = Number(value);
+  if (!n) return "90 хв";
+  return `${n} хв`;
+}
+
 function fillPrice() {
   const pick = document.getElementById("priceMasters");
   const board = document.getElementById("priceBoard");
@@ -56,7 +62,10 @@ function fillPrice() {
                   <span class="edit-del" data-del-item="${si}:${ii}" role="button" aria-label="Прибрати послугу">×</span>
                   <div class="price-card-pic">
                     <img src="${item.img}" alt="" data-edit-img="price.sections.${si}.items.${ii}.img" />
-                    <strong class="price" data-edit="price.sections.${si}.items.${ii}.prices.${active}">${money(prices[active])}</strong>
+                    <span class="price-tags">
+                      <strong class="price" data-edit="price.sections.${si}.items.${ii}.prices.${active}">${money(prices[active])}</strong>
+                      <em class="price-mins" data-edit="price.sections.${si}.items.${ii}.mins">${minsLabel(item.mins)}</em>
+                    </span>
                   </div>
                   <div>
                     <h4 data-edit="price.sections.${si}.items.${ii}.name">${item.name}</h4>
