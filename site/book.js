@@ -15,13 +15,12 @@ let SERVICES = [
 ];
 
 let LOOKS = [
-  { name: "Молочний френч", img: "/static/img/look-french.png", tag: "Френч" },
-  { name: "Омбре", img: "/static/img/look-ombre.png", tag: "Нюд" },
-  { name: "Нюд + блиск", img: "/static/img/look-nude.png", tag: "Нюд" },
-  { name: "Хром", img: "/static/img/look-chrome.png", tag: "Дизайн" },
-  { name: "Квіти", img: "/static/img/look-floral.png", tag: "Дизайн" },
+  { name: "Молочний френч", tag: "Френч" },
+  { name: "Омбре", tag: "Нюд" },
+  { name: "Нюд + блиск", tag: "Нюд" },
+  { name: "Хром", tag: "Дизайн" },
+  { name: "Квіти", tag: "Дизайн" },
 ];
-let designTag = "Усі";
 
 const pickerState = { year: 0, month: 0, open: new Set() };
 
@@ -69,23 +68,20 @@ function fillServicePicks() {
 
 function fillDesignPicks() {
   const box = document.getElementById("designPicks");
-  const tags = document.getElementById("designTags");
   if (!box) return;
   const chosen = document.getElementById("designSelect").value;
-  const names = ["Усі", ...new Set(LOOKS.map((l) => l.tag).filter(Boolean))];
-  if (tags) {
-    tags.innerHTML = names
-      .map((t) => `<button type="button" class="chip-btn${t === designTag ? " is-on" : ""}" data-design-tag="${t}">${t}</button>`)
-      .join("");
-  }
-  const list = designTag === "Усі" ? LOOKS : LOOKS.filter((l) => l.tag === designTag);
-  box.innerHTML = list
-    .map((l) => {
-      const on = l.name === chosen ? " is-on" : "";
-      return `<button type="button" class="pick-design${on}" data-design="${l.name}">
-        <img src="${l.img}" alt="" />
-        <span>${l.name}</span>
-      </button>`;
+  const groups = [...new Set(LOOKS.map((l) => l.tag || "Інше"))];
+  box.innerHTML = groups
+    .map((group) => {
+      const rows = LOOKS.filter((l) => (l.tag || "Інше") === group)
+        .map((l) => {
+          const on = l.name === chosen ? " is-on" : "";
+          return `<button type="button" class="pick-service${on}" data-design="${l.name}">
+            <span><strong>${l.name}</strong></span>
+          </button>`;
+        })
+        .join("");
+      return `<p class="slot-label">${group}</p>${rows}`;
     })
     .join("");
 }
@@ -287,7 +283,7 @@ async function bootBook() {
       }
     }
     if (rows.length) SERVICES = rows;
-    const looks = ((pack.looks && pack.looks.items) || []).filter((item) => item && item.name && item.img);
+    const looks = ((pack.looks && pack.looks.items) || []).filter((item) => item && item.name);
     if (looks.length) LOOKS = looks;
     const box = document.querySelector(".pick-people");
     if (box && (pack.masters || []).length) {
@@ -346,12 +342,6 @@ document.getElementById("bookForm").addEventListener("click", (e) => {
     document.querySelectorAll("[data-service]").forEach((el) => el.classList.toggle("is-on", el === service));
     if (document.getElementById("masterSelect").value) refreshDays();
     openStep("design");
-    return;
-  }
-  const tag = e.target.closest("[data-design-tag]");
-  if (tag) {
-    designTag = tag.dataset.designTag;
-    fillDesignPicks();
     return;
   }
   const skip = e.target.closest("[data-design-skip]");
