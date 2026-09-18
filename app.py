@@ -89,15 +89,48 @@ def catalog_services() -> dict[str, int]:
     return names or dict(SERVICE_MINUTES)
 
 
-def catalog_look_names() -> set[str]:
-    names: set[str] = set()
-    for item in (load_content().get("looks") or {}).get("items") or []:
+DEFAULT_DESIGNS = [
+    {"name": "Френч (ручки)", "price": 100},
+    {"name": "Френч (ніжки)", "price": 50},
+    {"name": "Наліпки, поталь (1 ніготь)", "price": 10},
+    {"name": "Стемпінг, втирка (1 ніготь)", "price": 10},
+    {"name": "Сухоцвіти (1 ніготь)", "price": 15},
+    {"name": "Градієнт (1 ніготь)", "price": 15},
+    {"name": "Малюнок від руки", "price": "від 20"},
+    {"name": "Об'ємні фігурки (1 шт)", "price": 30},
+    {"name": "Кошаче око", "price": 50},
+    {"name": "Світловідбиваючий", "price": 50},
+]
+
+
+def catalog_designs() -> list[dict]:
+    rows: list[dict] = []
+    for item in load_content().get("designs") or []:
         if not isinstance(item, dict):
             continue
         name = str(item.get("name") or "").strip()
-        if name:
-            names.add(name)
-    return names
+        if not name:
+            continue
+        rows.append({"name": name, "price": item.get("price")})
+    return rows or list(DEFAULT_DESIGNS)
+
+
+def catalog_design_names() -> set[str]:
+    return {str(item.get("name") or "").strip() for item in catalog_designs() if item.get("name")}
+
+
+def _design_price_text(name: str) -> str:
+    for item in catalog_designs():
+        if str(item.get("name") or "").strip() != name:
+            continue
+        price = item.get("price")
+        if isinstance(price, (int, float)):
+            return f"{int(price)} грн"
+        text = str(price or "").strip()
+        if text and "грн" not in text:
+            return f"{text} грн"
+        return text
+    return ""
 
 
 def catalog_masters() -> set[str]:
@@ -235,13 +268,13 @@ def add_booking(payload: dict) -> dict:
     date = str(payload.get("date") or "").strip()
     time = str(payload.get("time") or "").strip()
     source = str(payload.get("source") or "site").strip() or "site"
-    looks = catalog_look_names()
+    extras = catalog_design_names()
 
     if not name or not phone:
         raise ValueError("вкажіть ім’я і телефон")
     if service not in catalog_services():
         raise ValueError("оберіть послугу зі списку")
-    if design and looks and design not in looks:
+    if design and extras and design not in extras:
         raise ValueError("оберіть дизайн зі списку")
     if master not in catalog_masters():
         raise ValueError("оберіть майстра")
@@ -264,6 +297,7 @@ def add_booking(payload: dict) -> dict:
         "phone": phone,
         "service": service,
         "design": design,
+        "design_price": _design_price_text(design) if design else "",
         "master": master,
         "date": date,
         "time": time,
@@ -788,7 +822,10 @@ def telegram_ready() -> bool:
 
 def booking_text(row: dict) -> str:
     design = str(row.get("design") or "").strip()
-    extra = f"Дизайн: {design}\n" if design else ""
+    price = str(row.get("design_price") or "").strip()
+    extra = ""
+    if design:
+        extra = f"Дизайн: {design}" + (f" · {price}" if price else "") + "\n"
     return (
         f"ROSA · нова заявка · {row.get('source')}\n"
         f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
@@ -958,6 +995,7 @@ def booking_status(booking_id):
         "master": row.get("master"),
         "service": row.get("service"),
         "design": row.get("design") or "",
+        "design_price": row.get("design_price") or "",
         "offers": row.get("offers") or [],
         "slots": day_slot_view(row) if row.get("status") == "offered" else [],
     })

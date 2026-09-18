@@ -14,12 +14,17 @@ let SERVICES = [
   { name: "Педикюр: зняття покриття", mins: 30, price: 100, img: "/static/img/look-pedi.png", group: "Педикюр" },
 ];
 
-let LOOKS = [
-  { name: "Молочний френч", tag: "Френч" },
-  { name: "Омбре", tag: "Нюд" },
-  { name: "Нюд + блиск", tag: "Нюд" },
-  { name: "Хром", tag: "Дизайн" },
-  { name: "Квіти", tag: "Дизайн" },
+let DESIGNS = [
+  { name: "Френч (ручки)", price: 100 },
+  { name: "Френч (ніжки)", price: 50 },
+  { name: "Наліпки, поталь (1 ніготь)", price: 10 },
+  { name: "Стемпінг, втирка (1 ніготь)", price: 10 },
+  { name: "Сухоцвіти (1 ніготь)", price: 15 },
+  { name: "Градієнт (1 ніготь)", price: 15 },
+  { name: "Малюнок від руки", price: "від 20" },
+  { name: "Об'ємні фігурки (1 шт)", price: 30 },
+  { name: "Кошаче око", price: 50 },
+  { name: "Світловідбиваючий", price: 50 },
 ];
 
 const pickerState = { year: 0, month: 0, open: new Set() };
@@ -66,30 +71,29 @@ function fillServicePicks() {
     .join("");
 }
 
+function designMoney(item) {
+  if (!item) return "";
+  return typeof item.price === "number" ? `${item.price} грн` : `${item.price} грн`;
+}
+
 function fillDesignPicks() {
   const box = document.getElementById("designPicks");
   if (!box) return;
   const chosen = document.getElementById("designSelect").value;
-  const groups = [...new Set(LOOKS.map((l) => l.tag || "Інше"))];
-  box.innerHTML = groups
-    .map((group) => {
-      const rows = LOOKS.filter((l) => (l.tag || "Інше") === group)
-        .map((l) => {
-          const on = l.name === chosen ? " is-on" : "";
-          return `<button type="button" class="pick-service${on}" data-design="${l.name}">
-            <span><strong>${l.name}</strong></span>
-          </button>`;
-        })
-        .join("");
-      return `<p class="slot-label">${group}</p>${rows}`;
-    })
-    .join("");
+  box.innerHTML = DESIGNS.map((item) => {
+    const on = item.name === chosen ? " is-on" : "";
+    return `<button type="button" class="pick-service${on}" data-design="${item.name}">
+      <span><strong>${item.name}</strong><em>${designMoney(item)}</em></span>
+    </button>`;
+  }).join("");
 }
 
 function setDesign(name) {
-  const value = name || "";
-  document.getElementById("designSelect").value = value;
-  document.getElementById("designSummary").textContent = value || "Без додаткового дизайну";
+  const item = DESIGNS.find((d) => d.name === name);
+  document.getElementById("designSelect").value = name || "";
+  document.getElementById("designSummary").textContent = item
+    ? `${item.name} · ${designMoney(item)}`
+    : "Без додаткового дизайну";
   fillDesignPicks();
 }
 
@@ -283,8 +287,8 @@ async function bootBook() {
       }
     }
     if (rows.length) SERVICES = rows;
-    const looks = ((pack.looks && pack.looks.items) || []).filter((item) => item && item.name);
-    if (looks.length) LOOKS = looks;
+    const extras = (pack.designs || []).filter((item) => item && item.name);
+    if (extras.length) DESIGNS = extras.map((item) => ({ name: item.name, price: item.price }));
     const box = document.querySelector(".pick-people");
     if (box && (pack.masters || []).length) {
       box.innerHTML = pack.masters
