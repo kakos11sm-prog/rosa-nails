@@ -244,16 +244,92 @@ body:has(.top.is-slim) .visit-bar { top: 42px; }
 .visit-bar.is-no .visit-bar-kicker { color: var(--bad); }
 .visit-bar.is-offer .visit-bar-kicker { color: var(--rose-2); }
 .visit-bar.is-wait .visit-bar-kicker { color: #c4893a; }
-.visit-bar.is-wait .visit-bar-kicker::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: #e0a14a;
-  animation: visitDot 1.2s ease-in-out infinite;
+.visit-bar-when {
+  margin: 2px 0 0;
+  font-weight: 600;
+  color: var(--ink);
 }
+.visit-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+.visit-copy { min-width: 0; }
+.visit-seal {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+}
+.visit-seal svg {
+  width: 46px;
+  height: 46px;
+  overflow: visible;
+  display: block;
+}
+.visit-seal .status-dots { gap: 4px; }
+.visit-seal .status-dots i { width: 5px; height: 5px; }
+.visit-seal.is-wait .seal-ring {
+  stroke-dasharray: 48 28;
+  stroke-dashoffset: 0;
+  animation: status-spin 7s linear infinite;
+}
+.visit-seal.is-wait .seal-halo { animation: status-breathe 2.4s ease-in-out infinite; }
+.visit-seal.is-wait .status-dots i { animation: status-dot 1.2s ease-in-out infinite; }
+.visit-seal.is-wait .status-dots i:nth-child(2) { animation-delay: 0.15s; }
+.visit-seal.is-wait .status-dots i:nth-child(3) { animation-delay: 0.3s; }
+.visit-seal.is-wait .seal-check,
+.visit-seal.is-wait .seal-x { opacity: 0; }
+.visit-seal.is-ok .status-dots,
+.visit-seal.is-no .status-dots { display: none; }
+.visit-seal.is-ok .seal-halo { stroke: rgba(47, 122, 82, 0.22); }
+.visit-seal.is-no .seal-halo { stroke: rgba(180, 59, 59, 0.18); }
+.visit-seal.is-ok .seal-ring { stroke: #4c9a6e; }
+.visit-seal.is-no .seal-ring { stroke: #c45b5b; }
+.visit-seal.is-no .seal-check { display: none; }
+.visit-seal.is-ok .seal-x { display: none; }
+.visit-seal.is-ok.is-reveal { animation: status-pop 0.7s cubic-bezier(0.22, 1.2, 0.36, 1) both; }
+.visit-seal.is-ok.is-reveal .seal-ring { animation: status-draw 0.55s ease forwards; }
+.visit-seal.is-ok.is-reveal .seal-check { animation: status-draw-check 0.45s ease 0.2s forwards; }
+.visit-seal.is-no.is-reveal { animation: status-no 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.visit-seal.is-no.is-reveal .seal-ring { animation: status-draw 0.5s ease forwards; }
+.visit-seal.is-no.is-reveal .seal-x.a { animation: status-draw-check 0.32s ease 0.2s forwards; }
+.visit-seal.is-no.is-reveal .seal-x.b { animation: status-draw-check 0.32s ease 0.36s forwards; }
+.visit-bar.is-offer .visit-seal {
+  width: auto;
+  height: auto;
+  min-height: 42px;
+  padding: 6px;
+  background: #fff;
+  border: 2px solid var(--rose);
+  border-radius: 999px;
+  box-shadow: 0 8px 16px rgba(196, 111, 123, 0.12);
+}
+.visit-bar.is-offer .visit-seal.is-reveal {
+  animation: status-stretch 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.visit-bar.is-offer .visit-seal svg,
+.visit-bar.is-offer .visit-seal .status-dots { display: none; }
+.visit-hours {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.visit-hour {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rose);
+  color: #fff;
+  font: 700 0.82rem/1 var(--font);
+  cursor: pointer;
+}
+.visit-hour:hover { background: var(--rose-2); }
+.visit-hour:disabled { opacity: 0.55; cursor: default; }
 .visit-bar.is-pulse {
   animation: visitPulse 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -1761,7 +1837,11 @@ a.price-card:hover {
     transition: none;
   }
   .visit-bar.is-wait .visit-bar-kicker::before,
-  .visit-bar.is-pulse { animation: none; }
+  .visit-bar.is-pulse,
+  .visit-seal.is-wait .seal-ring,
+  .visit-seal.is-wait .seal-halo,
+  .visit-seal.is-wait .status-dots i,
+  .visit-bar.is-offer .visit-seal.is-reveal { animation: none; }
   .logo-word, .logo-spark { animation: none !important; }
   .price-card .price { transition: none; }
   .price-switch-glider { animation: none; transition: none; }
@@ -1850,6 +1930,8 @@ a.price-card:hover {
     align-items: stretch;
     gap: 8px;
   }
+  .visit-main { width: 100%; }
+  .visit-bar.is-offer .visit-seal { width: 100%; border-radius: 22px; }
   body:has(.top.is-slim) .visit-bar { top: 42px; }
   .visit-bar .btn { width: 100%; }
 }
