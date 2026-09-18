@@ -5,6 +5,7 @@ from __future__ import annotations
 import hmac
 import json
 import os
+import re
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -195,10 +196,32 @@ def service_minutes(name: str) -> int:
     return catalog_services().get(name, 90)
 
 
+def work_hours() -> tuple[str, str]:
+    pack = load_content()
+    texts = [str((pack.get("studio") or {}).get("hours") or "")]
+    for item in (pack.get("hero") or {}).get("facts") or []:
+        if isinstance(item, dict):
+            texts.append(str(item.get("value") or ""))
+    pattern = re.compile(r"(\d{1,2})[:.](\d{2})\s*(?:[–—−-]|до)\s*(\d{1,2})[:.](\d{2})")
+    for text in texts:
+        match = pattern.search(text)
+        if not match:
+            continue
+        start = f"{int(match.group(1)):02d}:{match.group(2)}"
+        end = f"{int(match.group(3)):02d}:{match.group(4)}"
+        try:
+            if datetime.strptime(start, "%H:%M") < datetime.strptime(end, "%H:%M"):
+                return start, end
+        except ValueError:
+            continue
+    return WORK_START, WORK_END
+
+
 def candidate_starts(service: str = "") -> list[str]:
     mins = max(SLOT_STEP, service_minutes(service) if service else 90)
-    start = datetime.strptime(WORK_START, "%H:%M")
-    limit = datetime.strptime(WORK_END, "%H:%M")
+    open_from, close_at = work_hours()
+    start = datetime.strptime(open_from, "%H:%M")
+    limit = datetime.strptime(close_at, "%H:%M")
     out = []
     cursor = start
     step = timedelta(minutes=SLOT_STEP)

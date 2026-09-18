@@ -20,6 +20,22 @@ function minsLabel(value) {
   return `${n} хв`;
 }
 
+function browProfile(raw) {
+  const text = String(raw || "").trim();
+  if (!text || /^посилання/i.test(text)) return { href: "", label: "" };
+  let href = text;
+  if (text.startsWith("@")) href = "https://instagram.com/" + text.replace(/^@/, "").split(/[/?\s]/)[0];
+  else if (!/^https?:\/\//i.test(text)) href = "https://" + text.replace(/^\/+/, "");
+  let label = "Instagram";
+  try {
+    const name = new URL(href).pathname.split("/").filter(Boolean)[0];
+    if (name) label = "@" + name;
+  } catch (_) {
+    if (text.startsWith("@")) label = text.split(/\s/)[0];
+  }
+  return { href, label };
+}
+
 function fillPrice() {
   const pick = document.getElementById("priceMasters");
   const board = document.getElementById("priceBoard");
@@ -631,6 +647,23 @@ function applyLanding(data) {
         </article>`
       )
       .join("");
+  }
+  const noteText = document.getElementById("teamNoteText");
+  if (noteText) noteText.textContent = team.note || "Також у студії працює майстер-бровист";
+  const noteLink = document.getElementById("teamNoteLink");
+  const noteUrl = document.getElementById("teamNoteUrl");
+  const rawUrl = String(team.note_url || "").trim();
+  if (noteUrl) noteUrl.textContent = rawUrl;
+  if (noteLink) {
+    const packed = browProfile(rawUrl);
+    if (packed.href) {
+      noteLink.hidden = false;
+      noteLink.href = packed.href;
+      noteLink.textContent = packed.label;
+    } else {
+      noteLink.hidden = true;
+      noteLink.removeAttribute("href");
+    }
   }
   setText("priceEyebrow", price.eyebrow);
   setText("priceHeading", price.title);
