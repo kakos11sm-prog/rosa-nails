@@ -82,6 +82,7 @@ function paint(status, data) {
       <div><dt>${status === "offered" ? "Було" : "Коли"}</dt><dd>${data.date} ${data.time}</dd></div>
       <div><dt>Майстер</dt><dd>${data.master}</dd></div>
       <div><dt>Послуга</dt><dd>${data.service}</dd></div>
+      ${data.design ? `<div><dt>Дизайн</dt><dd>${data.design}</dd></div>` : ""}
     `;
   }
   paintOffers(data || {});

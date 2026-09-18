@@ -19,10 +19,11 @@
     <div class="wrap status-box book-page">
       <p class="eyebrow">Онлайн</p>
       <h1>Заплануйте візит</h1>
-      <p class="lede">Оберіть майстра, послугу і час. Студія підтвердить заявку — статус побачите на наступній сторінці.</p>
+      <p class="lede">Оберіть майстра, послугу, дизайн і час. Студія підтвердить заявку — статус побачите на наступній сторінці.</p>
       <form class="book-flow" id="bookForm">
         <input type="hidden" name="master" id="masterSelect" required />
         <input type="hidden" name="service" id="serviceSelect" required />
+        <input type="hidden" name="design" id="designSelect" />
         <input type="hidden" name="date" id="dateInput" required />
         <input type="hidden" name="time" id="timeSelect" />
 
@@ -58,6 +59,22 @@
           </button>
           <div class="step-panel">
             <div class="pick-services" id="servicePicks"></div>
+          </div>
+        </article>
+
+        <article class="step" data-step="design">
+          <button type="button" class="step-tab" data-open="design">
+            <span>
+              <small>Дизайн</small>
+              <strong id="designSummary">Можна обрати додатково</strong>
+            </span>
+            <i>›</i>
+          </button>
+          <div class="step-panel">
+            <p class="form-hint">Оберіть роботу з портфоліо — або продовжіть без додаткового дизайну.</p>
+            <div class="pick-design-tags" id="designTags"></div>
+            <div class="pick-designs" id="designPicks"></div>
+            <button type="button" class="pick-design-skip" data-design-skip>Без додаткового дизайну</button>
           </div>
         </article>
 

@@ -89,6 +89,17 @@ def catalog_services() -> dict[str, int]:
     return names or dict(SERVICE_MINUTES)
 
 
+def catalog_look_names() -> set[str]:
+    names: set[str] = set()
+    for item in (load_content().get("looks") or {}).get("items") or []:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name") or "").strip()
+        if name:
+            names.add(name)
+    return names
+
+
 def catalog_masters() -> set[str]:
     ids = []
     for master in load_content().get("masters") or []:
@@ -219,15 +230,19 @@ def add_booking(payload: dict) -> dict:
     name = str(payload.get("name") or "").strip()
     phone = str(payload.get("phone") or "").strip()
     service = str(payload.get("service") or "").strip()
+    design = str(payload.get("design") or "").strip()
     master = str(payload.get("master") or payload.get("barber") or "").strip()
     date = str(payload.get("date") or "").strip()
     time = str(payload.get("time") or "").strip()
     source = str(payload.get("source") or "site").strip() or "site"
+    looks = catalog_look_names()
 
     if not name or not phone:
         raise ValueError("вкажіть ім’я і телефон")
     if service not in catalog_services():
         raise ValueError("оберіть послугу зі списку")
+    if design and looks and design not in looks:
+        raise ValueError("оберіть дизайн зі списку")
     if master not in catalog_masters():
         raise ValueError("оберіть майстра")
     if time not in TIMES:
@@ -248,6 +263,7 @@ def add_booking(payload: dict) -> dict:
         "name": name,
         "phone": phone,
         "service": service,
+        "design": design,
         "master": master,
         "date": date,
         "time": time,
@@ -365,8 +381,9 @@ def client_decision_text(row: dict, accepted: bool) -> str:
     slot = f"{row.get('date')} {row.get('time')}, майстер {row.get('master')}"
     if accepted:
         return (
-            f"ROSA · запис підтверджено.\n{slot}\n{row.get('service')}.\n"
-            f"Чекаємо вас у студії."
+            f"ROSA · запис підтверджено.\n{slot}\n{row.get('service')}"
+            + (f" · {row.get('design')}" if row.get("design") else "")
+            + ".\nЧекаємо вас у студії."
         )
     return (
         f"ROSA · цей час не підтвердили.\n{slot}\n"
@@ -601,7 +618,8 @@ def notify_admin_rescheduled(row: dict) -> bool:
                 f"ROSA · клієнт перезаписався\n"
                 f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
                 f"{row.get('service')}\n"
-                f"{row.get('name')} · {row.get('phone')}\n"
+                + (f"Дизайн: {row.get('design')}\n" if row.get("design") else "")
+                + f"{row.get('name')} · {row.get('phone')}\n"
                 f"#{row.get('id')}\n\n"
                 f"Додати цей час у календар?"
             ),
@@ -769,10 +787,13 @@ def telegram_ready() -> bool:
 
 
 def booking_text(row: dict) -> str:
+    design = str(row.get("design") or "").strip()
+    extra = f"Дизайн: {design}\n" if design else ""
     return (
         f"ROSA · нова заявка · {row.get('source')}\n"
         f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
         f"{row.get('service')}\n"
+        f"{extra}"
         f"{row.get('name')} · {row.get('phone')}\n"
         f"#{row.get('id')}\n\n"
         f"Додати запис у календар?"
@@ -936,6 +957,7 @@ def booking_status(booking_id):
         "time": row.get("time"),
         "master": row.get("master"),
         "service": row.get("service"),
+        "design": row.get("design") or "",
         "offers": row.get("offers") or [],
         "slots": day_slot_view(row) if row.get("status") == "offered" else [],
     })

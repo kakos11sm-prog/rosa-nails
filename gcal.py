@@ -212,7 +212,8 @@ def create_event(row: dict, minutes: int) -> str:
         "description": (
             f"Майстер: {master}\n"
             f"Телефон: {row.get('phone')}\n"
-            f"Джерело: {row.get('source')}\n"
+            + (f"Дизайн: {row.get('design')}\n" if row.get("design") else "")
+            + f"Джерело: {row.get('source')}\n"
             f"#{row.get('id')}"
         ),
         "colorId": EVENT_COLOR.get(master, "11"),

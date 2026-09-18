@@ -1031,7 +1031,62 @@ a.price-card:hover {
 }
 .pick-service span { display: flex; flex-direction: column; gap: 3px; }
 .pick-service em { font-style: normal; color: var(--rose); font-size: 0.82rem; }
-.pick-person.is-on, .pick-service.is-on { border-color: var(--rose); background: #f8eef0; }
+.pick-person.is-on, .pick-service.is-on, .pick-design.is-on { border-color: var(--rose); background: #f8eef0; }
+.pick-design-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+}
+.pick-designs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.pick-design {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f7f3f2;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+}
+.pick-design img {
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  display: block;
+}
+.pick-design span {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-align: center;
+}
+.pick-design.is-on {
+  box-shadow: 0 0 0 2px #e2b4ba;
+}
+.pick-design-skip {
+  width: 100%;
+  margin-top: 12px;
+  min-height: 44px;
+  border: 1px dashed var(--line);
+  background: #fff;
+  border-radius: 14px;
+  color: var(--muted);
+  font: 600 0.9rem var(--font);
+  cursor: pointer;
+}
 .slot-label {
   margin: 14px 0 8px;
   color: var(--muted);
