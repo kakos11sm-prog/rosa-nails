@@ -212,7 +212,10 @@ def create_event(row: dict, minutes: int) -> str:
         "description": (
             f"Майстер: {master}\n"
             f"Телефон: {row.get('phone')}\n"
-            + (f"Дизайн: {row.get('design')}\n" if row.get("design") else "")
+            f"Послуга: {row.get('service')}"
+            + (f" · {row.get('service_price')}" if row.get("service_price") else "")
+            + "\n"
+            + (f"Дизайн: {row.get('design')}" + (f" · {row.get('design_price')}" if row.get("design_price") else "") + "\n" if row.get("design") else "")
             + f"Джерело: {row.get('source')}\n"
             f"#{row.get('id')}"
         ),

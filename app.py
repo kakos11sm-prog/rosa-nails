@@ -123,14 +123,59 @@ def _design_price_text(name: str) -> str:
     for item in catalog_designs():
         if str(item.get("name") or "").strip() != name:
             continue
-        price = item.get("price")
-        if isinstance(price, (int, float)):
-            return f"{int(price)} грн"
-        text = str(price or "").strip()
-        if text and "грн" not in text:
-            return f"{text} грн"
-        return text
+        return _money_text(item.get("price"))
     return ""
+
+
+def _money_text(value) -> str:
+    if isinstance(value, (int, float)):
+        return f"{int(value)} грн"
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    if "грн" not in text.lower():
+        return f"{text} грн"
+    return text
+
+
+def catalog_service_price(name: str, master: str):
+    want = str(name or "").strip()
+    who = str(master or "").strip()
+    for section in (load_content().get("price") or {}).get("sections") or []:
+        if not isinstance(section, dict):
+            continue
+        for item in section.get("items") or []:
+            if not isinstance(item, dict):
+                continue
+            label = str(item.get("book") or item.get("name") or "").strip()
+            if label != want:
+                continue
+            prices = item.get("prices") or {}
+            if who in prices:
+                return prices[who]
+            if isinstance(prices, dict) and prices:
+                return next(iter(prices.values()))
+    return None
+
+
+def service_price_text(row: dict) -> str:
+    stored = str(row.get("service_price") or "").strip()
+    if stored:
+        return stored if "грн" in stored.lower() else f"{stored} грн"
+    return _money_text(catalog_service_price(row.get("service"), row.get("master")))
+
+
+def booking_service_lines(row: dict) -> list[str]:
+    lines = []
+    service = str(row.get("service") or "").strip()
+    if service:
+        price = service_price_text(row)
+        lines.append(f"{service}" + (f" — {price}" if price else ""))
+    design = str(row.get("design") or "").strip()
+    if design:
+        price = str(row.get("design_price") or "").strip() or _design_price_text(design)
+        lines.append(f"{design}" + (f" — {price}" if price else ""))
+    return lines
 
 
 def catalog_masters() -> set[str]:
@@ -298,6 +343,7 @@ def add_booking(payload: dict) -> dict:
         "service": service,
         "design": design,
         "design_price": _design_price_text(design) if design else "",
+        "service_price": _money_text(catalog_service_price(service, master)),
         "master": master,
         "date": date,
         "time": time,
@@ -439,11 +485,14 @@ def admin_card_text(row: dict, note: str = "") -> str:
         "",
         f"🗓 {html_esc(pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}",
         f"💅 {html_esc(row.get('master'))}",
-        f"✂️ {html_esc(row.get('service'))}",
     ]
+    service_pay = service_price_text(row)
+    lines.append(
+        f"✂️ {html_esc(row.get('service'))}" + (f" · {html_esc(service_pay)}" if service_pay else "")
+    )
     design = str(row.get("design") or "").strip()
     if design:
-        price = str(row.get("design_price") or "").strip()
+        price = str(row.get("design_price") or "").strip() or _design_price_text(design)
         lines.append(f"✨ {html_esc(design)}" + (f" · {html_esc(price)}" if price else ""))
     source = str(row.get("source") or "").strip()
     if source:
@@ -523,12 +572,16 @@ def notify_client(row: dict, text: str) -> bool:
 
 
 def client_decision_text(row: dict, accepted: bool) -> str:
-    slot = f"{row.get('date')} {row.get('time')}, майстер {row.get('master')}"
+    slot = pretty_slot(str(row.get("date") or ""), str(row.get("time") or ""))
+    services = booking_service_lines(row)
     if accepted:
+        body = "\n".join(f"• {line}" for line in services) or str(row.get("service") or "")
         return (
-            f"ROSA · запис підтверджено.\n{slot}\n{row.get('service')}"
-            + (f" · {row.get('design')}" if row.get("design") else "")
-            + ".\nЧекаємо вас у студії."
+            f"ROSA · вас записано.\n\n"
+            f"{slot}\n"
+            f"Майстер: {row.get('master')}\n\n"
+            f"Послуги:\n{body}\n\n"
+            f"Чекаємо вас у студії."
         )
     return (
         f"ROSA · цей час не підтвердили.\n{slot}\n"
@@ -1116,6 +1169,7 @@ def booking_status(booking_id):
         "time": row.get("time"),
         "master": row.get("master"),
         "service": row.get("service"),
+        "service_price": service_price_text(row),
         "design": row.get("design") or "",
         "design_price": row.get("design_price") or "",
         "offers": row.get("offers") or [],
