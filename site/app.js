@@ -435,7 +435,8 @@ function paintWhy(hero) {
       </article>`
     )
     .join("");
-  box.innerHTML = `<div class="why-emoji">${tabs}</div>
+  box.innerHTML = `<p class="why-kicker">Деталі</p>
+    <div class="why-emoji">${tabs}</div>
     <div class="why-window"><div class="why-track">${slides}</div></div>
     <button type="button" class="edit-plus" data-add="reason">+ Причина</button>`;
 }
