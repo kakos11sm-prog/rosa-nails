@@ -90,18 +90,38 @@ function rosaSlimHeader() {
   if (!top) return;
   let slim = false;
   let raf = 0;
-  const paint = () => {
-    raf = 0;
-    const y = window.scrollY || document.documentElement.scrollTop || 0;
-    if (!slim && y > 56) slim = true;
-    else if (slim && y < 8) slim = false;
+  let busy = false;
+  const quiet = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const lockMs = quiet ? 0 : 320;
+
+  const apply = (next) => {
+    if (next === slim) return;
+    slim = next;
     top.classList.toggle("is-slim", slim);
+    if (!lockMs) return;
+    busy = true;
+    window.setTimeout(() => {
+      busy = false;
+      decide();
+    }, lockMs);
   };
+
+  const decide = () => {
+    if (busy) return;
+    const y = window.scrollY || document.documentElement.scrollTop || 0;
+    if (!slim && y > 64) apply(true);
+    else if (slim && y < 12) apply(false);
+  };
+
   const onScroll = () => {
     if (raf) return;
-    raf = window.requestAnimationFrame(paint);
+    raf = window.requestAnimationFrame(() => {
+      raf = 0;
+      decide();
+    });
   };
-  paint();
+
+  decide();
   window.addEventListener("scroll", onScroll, { passive: true });
 }
 

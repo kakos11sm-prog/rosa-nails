@@ -34,15 +34,18 @@ img { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 14px 22px;
+  height: 66px;
+  padding: 0 22px;
+  box-sizing: border-box;
   background: rgba(255, 253, 252, 0.92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
+  overflow: hidden;
   overflow-anchor: none;
-  transition: padding 0.28s ease, gap 0.28s ease, box-shadow 0.28s ease, background 0.28s ease;
+  transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), gap 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, background 0.28s ease;
 }
 .top.is-slim {
-  padding: 6px 22px;
+  height: 42px;
   gap: 12px;
   background: rgba(255, 253, 252, 0.97);
   box-shadow: 0 8px 22px rgba(196, 111, 123, 0.08);
@@ -53,7 +56,6 @@ img { max-width: 100%; display: block; }
   letter-spacing: 0.18em;
   text-decoration: none;
   font-weight: 600;
-  transition: font-size 0.35s ease, letter-spacing 0.35s ease;
 }
 .top .logo {
   display: inline-flex;
@@ -65,8 +67,10 @@ img { max-width: 100%; display: block; }
   letter-spacing: 0.02em;
   white-space: nowrap;
   color: var(--rose-2);
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
+  transform-origin: left center;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .logo-word {
   position: relative;
@@ -107,8 +111,7 @@ img { max-width: 100%; display: block; }
   50% { transform: scale(1.15) rotate(18deg); opacity: 1; }
 }
 .top.is-slim .logo {
-  font-size: clamp(1.18rem, 4.6vw, 1.42rem);
-  letter-spacing: 0.02em;
+  transform: scale(0.84);
 }
 .top.is-slim .logo-spark {
   width: 8px;
@@ -122,7 +125,7 @@ img { max-width: 100%; display: block; }
   color: var(--muted);
   max-width: 40rem;
   overflow: hidden;
-  transition: opacity 0.3s ease, max-width 0.35s ease, margin 0.35s ease, gap 0.35s ease;
+  transition: opacity 0.2s ease;
 }
 .nav a { text-decoration: none; }
 .nav a:hover { color: var(--ink); }
@@ -132,14 +135,15 @@ img { max-width: 100%; display: block; }
   margin-left: 0;
   gap: 0;
   pointer-events: none;
+  visibility: hidden;
 }
-.top-acts { display: flex; align-items: center; gap: 8px; flex-shrink: 0; transition: gap 0.35s ease; }
+.top-acts { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; transition: gap 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
 .btn-short { display: none; }
 .top-acts .btn-sm {
   height: 38px;
   padding: 0 16px;
   box-sizing: border-box;
-  transition: height 0.35s ease, padding 0.35s ease, font-size 0.35s ease, box-shadow 0.35s ease;
+  transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), padding 0.28s cubic-bezier(0.22, 1, 0.36, 1), font-size 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
 }
 .icon-btn {
   width: 38px;
@@ -155,13 +159,13 @@ img { max-width: 100%; display: block; }
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 8px 18px rgba(196, 111, 123, 0.16);
-  transition: width 0.35s ease, height 0.35s ease, box-shadow 0.35s ease;
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), height 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
 }
 .icon-btn svg {
   width: 38px;
   height: 38px;
   display: block;
-  transition: width 0.35s ease, height 0.35s ease;
+  transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1), height 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .icon-btn:hover { opacity: 0.88; }
 .top.is-slim .top-acts { gap: 6px; }
@@ -181,7 +185,7 @@ img { max-width: 100%; display: block; }
   padding: 0 16px;
   box-sizing: border-box;
   margin-left: auto;
-  transition: height 0.35s ease, padding 0.35s ease, font-size 0.35s ease;
+  transition: height 0.28s cubic-bezier(0.22, 1, 0.36, 1), padding 0.28s cubic-bezier(0.22, 1, 0.36, 1), font-size 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .top.is-slim > .btn-sm {
   height: 28px;
@@ -218,7 +222,7 @@ img { max-width: 100%; display: block; }
 
 .visit-bar {
   position: sticky;
-  top: 62px;
+  top: 66px;
   z-index: 7;
   display: flex;
   align-items: center;
@@ -228,9 +232,9 @@ img { max-width: 100%; display: block; }
   background: #fff;
   border-bottom: 1px solid var(--line);
   box-shadow: 0 8px 20px rgba(196, 111, 123, 0.06);
-  transition: top 0.35s ease, transform 0.5s cubic-bezier(0.22, 0.8, 0.28, 1), opacity 0.4s ease;
+  transition: top 0.28s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 0.8, 0.28, 1), opacity 0.4s ease;
 }
-body:has(.top.is-slim) .visit-bar { top: 46px; }
+body:has(.top.is-slim) .visit-bar { top: 42px; }
 .visit-bar[hidden] { display: none !important; }
 .visit-bar.is-ok { background: #f4f8f5; }
 .visit-bar.is-no { background: #fbf4f4; }
@@ -1637,8 +1641,8 @@ a.price-card:hover {
   .hero-place { font-size: 0.92rem; padding-bottom: 12px; padding-left: 0; }
   .lede { font-size: 0.95rem; }
   .hero-copy .lede { font-size: 0.98rem; line-height: 1.65; max-width: none; }
-  .top { padding: 12px 16px; gap: 14px; }
-  .top.is-slim { padding: 6px 14px; gap: 12px; }
+  .top { height: 56px; padding: 0 16px; gap: 14px; }
+  .top.is-slim { height: 42px; padding: 0 14px; gap: 12px; }
   .top-acts { margin-left: auto; gap: 6px; }
   .top-acts .btn-sm,
   .top > .btn-sm {
@@ -1655,7 +1659,7 @@ a.price-card:hover {
   .btn-short { display: inline; }
   .logo { font-size: 1.28rem; letter-spacing: 0.14em; }
   .top .logo { font-size: 1.62rem; letter-spacing: 0.01em; }
-  .top.is-slim .logo { font-size: 1.28rem; letter-spacing: 0.01em; }
+  .top.is-slim .logo { font-size: 1.62rem; transform: scale(0.82); }
   .price-head { padding: 8px 4px; }
   .price-title {
     flex-direction: row;
