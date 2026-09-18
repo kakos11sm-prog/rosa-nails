@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -152,24 +152,54 @@ def _admin_chat() -> str:
     return str(os.environ.get("TELEGRAM_ADMIN_CHAT_ID") or "").strip()
 
 
+def _markup(keyboard):
+    if not keyboard:
+        return None
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton(btn.get("text") or "", callback_data=btn.get("callback_data") or "") for btn in row]
+            for row in keyboard
+        ]
+    )
+
+
 async def decide_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     if not query or not query.data:
         return
-    try:
-        await query.answer()
-    except Exception:
-        pass
     chat_id = str(query.message.chat_id if query.message else "")
-    action, _, booking_id = query.data.partition(":")
+    parts = str(query.data).split(":")
+    action = parts[0] if parts else ""
+    booking_id = parts[1] if len(parts) > 1 else ""
+    extra = parts[2] if len(parts) > 2 else ""
+    text = None
+    keyboard = None
+    toast = ""
     try:
-        text = store.apply_admin_decision(action, booking_id, chat_id)
+        text, keyboard, toast = store.apply_admin_callback(action, booking_id, extra, chat_id)
     except ValueError as exc:
         text = f"Не вийшло: {exc}"
+        keyboard = []
+        toast = str(exc)
     except Exception as exc:
         text = f"Не вийшло: {exc}"
+        keyboard = []
+        toast = str(exc)
     try:
-        await query.edit_message_text(text)
+        if toast:
+            await query.answer(toast[:180])
+        else:
+            await query.answer()
+    except Exception:
+        pass
+    if text is None:
+        return
+    try:
+        await query.edit_message_text(
+            text,
+            parse_mode="HTML",
+            reply_markup=_markup(keyboard),
+        )
     except Exception:
         print(f"кнопка запису не спрацювала: {text}")
 
@@ -208,7 +238,7 @@ def main() -> None:
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
-    app.add_handler(CallbackQueryHandler(decide_booking, pattern=r"^(ok|no):"))
+    app.add_handler(CallbackQueryHandler(decide_booking, pattern=r"^(ok|no|mv|dt|tm|go|xx|bk|ds):"))
     app.add_handler(conv)
     print("бот ROSA запущено", flush=True)
     app.run_polling(drop_pending_updates=True)

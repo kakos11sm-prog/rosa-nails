@@ -61,7 +61,15 @@ function paintOffers(data) {
     morph.innerHTML = `
       <p>Пропонуємо інший час</p>
       <div class="status-offer-hours">${hours
-        .map((slot) => `<button type="button" class="status-hour" data-choose="${slot.date}|${slot.time}">${slot.time}</button>`)
+        .map((slot) => {
+          const many = new Set(hours.map((item) => item.date)).size > 1;
+          const when = new Date(`${slot.date}T12:00:00`);
+          const day = Number.isNaN(when.getTime())
+            ? slot.date
+            : when.toLocaleDateString("uk-UA", { day: "numeric", month: "short" });
+          const label = many ? `${day} · ${slot.time}` : slot.time;
+          return `<button type="button" class="status-hour" data-choose="${slot.date}|${slot.time}">${label}</button>`;
+        })
         .join("")}</div>
     `;
   }

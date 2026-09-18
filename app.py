@@ -351,6 +351,117 @@ def expand_time(raw: str) -> str:
     return raw
 
 
+def html_esc(value) -> str:
+    return (
+        str(value or "")
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
+def pretty_slot(date: str, time: str) -> str:
+    try:
+        return f"{pretty_date(str(date or ''))} · {time}"
+    except ValueError:
+        return f"{date} {time}".strip()
+
+
+def _offer_picked(state: dict) -> list[dict]:
+    raw = list(state.get("picked") or [])
+    date = str(state.get("date") or "")
+    out: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+    for item in raw:
+        if isinstance(item, dict):
+            day = str(item.get("date") or date)
+            time = str(item.get("time") or "")
+        else:
+            text = str(item or "")
+            if " " in text and text[4:5] == "-":
+                day, time = text.split(" ", 1)
+            else:
+                day, time = date, text
+        key = (day, time)
+        if not day or not time or key in seen:
+            continue
+        seen.add(key)
+        out.append({"date": day, "time": time})
+    return out
+
+
+def _picked_lines(picked: list[dict]) -> str:
+    if not picked:
+        return "<i>ще нічого не обрано</i>"
+    by_date: dict[str, list[str]] = {}
+    for item in picked:
+        by_date.setdefault(item["date"], []).append(item["time"])
+    lines = []
+    for day in sorted(by_date):
+        times = ", ".join(sorted(by_date[day]))
+        try:
+            label = pretty_date(day)
+        except ValueError:
+            label = day
+        lines.append(f"• {html_esc(label)} — <b>{html_esc(times)}</b>")
+    return "\n".join(lines)
+
+
+def pending_keyboard(booking_id: str) -> list[list[dict]]:
+    return [
+        [{"text": "✅ Підтвердити", "callback_data": f"ok:{booking_id}"}],
+        [{"text": "🕒 Інший час", "callback_data": f"mv:{booking_id}"}],
+        [{"text": "✕ Відмовити", "callback_data": f"no:{booking_id}"}],
+    ]
+
+
+def admin_card_text(row: dict, note: str = "") -> str:
+    status = str(row.get("status") or "pending")
+    if status in {"pending", "new"}:
+        head, badge = "Нова заявка", "очікує рішення"
+    elif status == "confirmed":
+        head = "Запис підтверджено"
+        badge = "в календарі" if row.get("google_event_id") else "підтверджено"
+    elif status == "cancelled":
+        head, badge = "Заявку відхилено", "слот вільний"
+    elif status == "offered":
+        head, badge = "Запропоновано інший час", "чекаємо клієнта"
+    else:
+        head, badge = "Заявка", status
+
+    lines = [
+        f"<b>{html_esc(head)}</b>",
+        f"<i>{html_esc(badge)}</i>",
+        f"<code>#{html_esc(row.get('id'))}</code>",
+        "",
+        f"👤 <b>{html_esc(row.get('name'))}</b>",
+        f"📞 {html_esc(row.get('phone'))}",
+        "",
+        f"🗓 {html_esc(pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}",
+        f"💅 {html_esc(row.get('master'))}",
+        f"✂️ {html_esc(row.get('service'))}",
+    ]
+    design = str(row.get("design") or "").strip()
+    if design:
+        price = str(row.get("design_price") or "").strip()
+        lines.append(f"✨ {html_esc(design)}" + (f" · {html_esc(price)}" if price else ""))
+    source = str(row.get("source") or "").strip()
+    if source:
+        where = "сайт" if source in {"site", "web"} else source
+        lines.append(f"\n<i>звідки: {html_esc(where)}</i>")
+    if status == "offered":
+        offers = row.get("offers") or []
+        lines.append("\n<b>Варіанти клієнту</b>")
+        lines.append(_picked_lines([
+            {"date": str(item.get("date") or ""), "time": str(item.get("time") or "")}
+            for item in offers if isinstance(item, dict)
+        ]))
+    if note:
+        lines.append("")
+        lines.append(html_esc(note))
+    return "\n".join(lines)
+
+
 def _patch_booking(booking_id: str, **fields) -> dict:
     rows = _load()
     row = _find_booking(booking_id, rows)
@@ -441,23 +552,29 @@ def _admin_chat() -> str:
     return str(os.environ.get("TELEGRAM_ADMIN_CHAT_ID") or "").strip()
 
 
-def date_keyboard(booking_id: str, dates: list[str]) -> list[list[dict]]:
+def date_keyboard(booking_id: str, dates: list[str], picked: list[dict]) -> list[list[dict]]:
+    picked_days = {item["date"] for item in picked}
     rows: list[list[dict]] = []
     line: list[dict] = []
     for date in dates:
         day = datetime.strptime(date, "%Y-%m-%d")
-        label = f"{UA_WEEKDAYS_SHORT[day.weekday()]} {day.strftime('%d.%m')}"
+        mark = "✓ " if date in picked_days else ""
+        label = f"{mark}{UA_WEEKDAYS_SHORT[day.weekday()]} {day.strftime('%d.%m')}"
         line.append({"text": label, "callback_data": f"dt:{booking_id}:{date.replace('-', '')}"})
         if len(line) == 3:
             rows.append(line)
             line = []
     if line:
         rows.append(line)
-    rows.append([{"text": "Ні, скасувати запис", "callback_data": f"no:{booking_id}"}])
+    if picked:
+        rows.append([{"text": "Надіслати клієнту", "callback_data": f"go:{booking_id}"}])
+    rows.append([{"text": "← До заявки", "callback_data": f"bk:{booking_id}"}])
+    rows.append([{"text": "✕ Відмовити", "callback_data": f"no:{booking_id}"}])
     return rows
 
 
-def time_keyboard(booking_id: str, date: str, master: str, service: str, picked: list[str]) -> list[list[dict]]:
+def time_keyboard(booking_id: str, date: str, master: str, service: str, picked: list[dict]) -> list[list[dict]]:
+    chosen = {item["time"] for item in picked if item["date"] == date}
     line: list[dict] = []
     rows: list[list[dict]] = []
     for time in TIMES:
@@ -466,7 +583,7 @@ def time_keyboard(booking_id: str, date: str, master: str, service: str, picked:
         if taken:
             btn = {"text": f"{time} · зайнято", "callback_data": f"xx:{booking_id}"}
         else:
-            mark = "✓ " if time in picked else ""
+            mark = "✓ " if time in chosen else ""
             btn = {"text": f"{mark}{time}", "callback_data": f"tm:{booking_id}:{compact}"}
         line.append(btn)
         if len(line) == 2:
@@ -474,23 +591,40 @@ def time_keyboard(booking_id: str, date: str, master: str, service: str, picked:
             line = []
     if line:
         rows.append(line)
-    rows.append([{"text": "Надіслати клієнту", "callback_data": f"go:{booking_id}"}])
-    rows.append([{"text": "Інша дата", "callback_data": f"mv:{booking_id}"}])
+    if picked:
+        rows.append([{"text": "Надіслати клієнту", "callback_data": f"go:{booking_id}"}])
+    rows.append([{"text": "← Ще дата", "callback_data": f"ds:{booking_id}"}])
+    rows.append([{"text": "✕ Відмовити", "callback_data": f"no:{booking_id}"}])
     return rows
 
 
-def times_text(row: dict, date: str, picked: list[str]) -> str:
-    chosen = ", ".join(picked) if picked else "поки нічого"
+def reschedule_text(row: dict, hint: str) -> str:
+    picked = _offer_picked(dict(row.get("reschedule") or {}))
     return (
-        f"Інший час для #{row.get('id')}\n"
-        f"{row.get('name')} · було {row.get('date')} {row.get('time')}\n"
-        f"{pretty_date(date)}\n"
-        f"Вільні години можна тиснути кілька разів. Зайняті — сірі.\n"
-        f"Обрано: {chosen}"
+        f"<b>Інший час</b>\n"
+        f"<i>можна кілька дат і годин</i>\n"
+        f"<code>#{html_esc(row.get('id'))}</code>\n\n"
+        f"Клієнт: <b>{html_esc(row.get('name'))}</b>\n"
+        f"Було: {html_esc(pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}\n"
+        f"💅 {html_esc(row.get('master'))}\n"
+        f"✂️ {html_esc(row.get('service'))}\n\n"
+        f"<b>Обрано</b>\n{_picked_lines(picked)}\n\n"
+        f"{hint}"
     )
 
 
-def start_reschedule(booking_id: str) -> tuple[str | None, list | None, str]:
+def times_text(row: dict, date: str) -> str:
+    try:
+        label = pretty_date(date)
+    except ValueError:
+        label = date
+    return reschedule_text(
+        row,
+        f"Дата: <b>{html_esc(label)}</b>\nНатисніть години — можна кілька, потім ще дату.",
+    )
+
+
+def start_reschedule(booking_id: str, reset: bool = False) -> tuple[str | None, list | None, str]:
     row = _find_booking(booking_id)
     if not row:
         raise ValueError("заявку не знайдено")
@@ -499,23 +633,25 @@ def start_reschedule(booking_id: str) -> tuple[str | None, list | None, str]:
     days = open_dates(str(row.get("master") or ""), str(row.get("service") or ""), skip_id=booking_id)[:15]
     if not days:
         return "Немає вільних днів у розкладі.", [], ""
-    _patch_booking(booking_id, reschedule={"date": "", "picked": []})
-    text = (
-        f"Інший час для #{row.get('id')}\n"
-        f"{row.get('name')} · зараз {row.get('date')} {row.get('time')}\n"
-        f"Оберіть дату:"
+    state = dict(row.get("reschedule") or {})
+    picked = [] if reset else _offer_picked(state)
+    row = _patch_booking(booking_id, reschedule={"date": "", "picked": picked})
+    return (
+        reschedule_text(row, "Оберіть дату, потім години. Можна кілька днів підряд."),
+        date_keyboard(booking_id, days, picked),
+        "",
     )
-    return text, date_keyboard(booking_id, days), ""
 
 
 def show_offer_times(booking_id: str, date: str) -> tuple[str | None, list | None, str]:
     row = _find_booking(booking_id)
     if not row:
         raise ValueError("заявку не знайдено")
-    _patch_booking(booking_id, reschedule={"date": date, "picked": []})
+    picked = _offer_picked(dict(row.get("reschedule") or {}))
+    row = _patch_booking(booking_id, reschedule={"date": date, "picked": picked})
     master = str(row.get("master") or "")
     service = str(row.get("service") or "")
-    return times_text(row, date, []), time_keyboard(booking_id, date, master, service, []), ""
+    return times_text(row, date), time_keyboard(booking_id, date, master, service, picked), ""
 
 
 def toggle_offer_time(booking_id: str, time: str) -> tuple[str | None, list | None, str]:
@@ -524,74 +660,64 @@ def toggle_offer_time(booking_id: str, time: str) -> tuple[str | None, list | No
         raise ValueError("заявку не знайдено")
     state = dict(row.get("reschedule") or {})
     date = str(state.get("date") or "")
-    picked = [str(item) for item in (state.get("picked") or [])]
+    picked = _offer_picked(state)
     if not date:
         raise ValueError("спочатку оберіть дату")
     master = str(row.get("master") or "")
     service = str(row.get("service") or "")
-    if time in picked:
-        picked.remove(time)
+    if any(item["date"] == date and item["time"] == time for item in picked):
+        picked = [item for item in picked if not (item["date"] == date and item["time"] == time)]
     else:
         if slot_taken(master, date, time, service, skip_id=booking_id):
             return None, None, "Цей час уже зайнятий"
-        picked.append(time)
-        picked.sort()
-    _patch_booking(booking_id, reschedule={"date": date, "picked": picked})
-    return times_text(row, date, picked), time_keyboard(booking_id, date, master, service, picked), ""
+        picked.append({"date": date, "time": time})
+        picked.sort(key=lambda item: (item["date"], item["time"]))
+    row = _patch_booking(booking_id, reschedule={"date": date, "picked": picked})
+    return times_text(row, date), time_keyboard(booking_id, date, master, service, picked), ""
 
 
 def send_offers(booking_id: str) -> tuple[str | None, list | None, str]:
     row = _find_booking(booking_id)
     if not row:
         raise ValueError("заявку не знайдено")
-    state = dict(row.get("reschedule") or {})
-    date = str(state.get("date") or "")
-    picked = [str(item) for item in (state.get("picked") or [])]
-    if not date or not picked:
+    picked = _offer_picked(dict(row.get("reschedule") or {}))
+    if not picked:
         return None, None, "Оберіть хоча б один вільний час"
-    offers = [{"date": date, "time": item} for item in picked]
-    row = _patch_booking(booking_id, status="offered", offers=offers)
+    row = _patch_booking(booking_id, status="offered", offers=picked, reschedule={"date": "", "picked": picked})
     notify_client(row, client_offer_text(row))
-    return (
-        f"Надіслала клієнту інші години.\n"
-        f"#{row.get('id')} · {pretty_date(date)}\n"
-        f"{', '.join(picked)}\n"
-        f"Чекаємо, поки обере на сайті.",
-        [],
-        "",
-    )
+    note = "Надіслала клієнту варіанти нижче. Чекаємо, поки обере на сайті."
+    return admin_card_text(row, note), [], ""
 
 
 def client_offer_text(row: dict) -> str:
-    offers = row.get("offers") or []
-    date = str((offers[0] or {}).get("date") or row.get("date") or "") if offers else str(row.get("date") or "")
-    times = ", ".join(str(item.get("time") or "") for item in offers)
+    offers = [item for item in (row.get("offers") or []) if isinstance(item, dict)]
+    blocks = _picked_lines([
+        {"date": str(item.get("date") or ""), "time": str(item.get("time") or "")}
+        for item in offers
+    ]).replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", "")
     return (
         f"ROSA · цей час не підходить, пропонуємо інший.\n"
         f"Було: {row.get('date')} {row.get('time')}, {row.get('master')}.\n"
-        f"Нові варіанти {pretty_date(date) if date else ''}: {times}.\n"
+        f"Нові варіанти:\n{blocks}\n"
         f"Оберіть зручний на сторінці запису:\n{status_url(str(row.get('id') or ''))}"
     )
 
 
 def day_slot_view(row: dict) -> list[dict]:
     offers = row.get("offers") or []
-    if not offers:
-        return []
-    date = str(offers[0].get("date") or "")
-    wanted = {str(item.get("time") or "") for item in offers}
     master = str(row.get("master") or "")
     service = str(row.get("service") or "")
-    free = set(free_times(master, date, service, skip_id=str(row.get("id") or "")))
+    skip = str(row.get("id") or "")
     out = []
-    for time in TIMES:
-        if time in wanted:
-            kind = "offer" if time in free else "busy"
-        elif time not in free:
-            kind = "busy"
-        else:
+    for item in offers:
+        if not isinstance(item, dict):
             continue
-        out.append({"date": date, "time": time, "kind": kind})
+        date = str(item.get("date") or "")
+        time = str(item.get("time") or "")
+        if not date or not time:
+            continue
+        taken = slot_taken(master, date, time, service, skip_id=skip)
+        out.append({"date": date, "time": time, "kind": "busy" if taken else "offer"})
     return out
 
 
@@ -625,53 +751,55 @@ def client_cancel_booking(booking_id: str) -> dict:
         raise ValueError("цю заявку вже закрито")
     row = reject_booking(booking_id)
     chat = _admin_chat()
-    if chat:
+    mid = row.get("admin_tg_mid")
+    if chat and mid:
+        _telegram_call(
+            "editMessageText",
+            {
+                "chat_id": chat,
+                "message_id": mid,
+                "text": admin_card_text(row, "Клієнт скасував заявку сам."),
+                "parse_mode": "HTML",
+                "reply_markup": {"inline_keyboard": []},
+            },
+        )
+    elif chat:
         _telegram_call(
             "sendMessage",
             {
                 "chat_id": chat,
-                "text": (
-                    f"Клієнт скасував заявку #{row.get('id')}.\n"
-                    f"{row.get('name')} · {row.get('date')} {row.get('time')} · {row.get('master')}"
-                ),
+                "text": admin_card_text(row, "Клієнт скасував заявку сам."),
+                "parse_mode": "HTML",
             },
         )
     return row
 
 
 def notify_admin_rescheduled(row: dict) -> bool:
+    note = "Клієнт обрав новий час. Підтвердіть, якщо все ок."
+    keyboard = pending_keyboard(str(row.get("id") or ""))
     chat = _admin_chat()
-    token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
-    if not token or not chat:
-        return False
-    return _telegram_call(
-        "sendMessage",
-        {
-            "chat_id": chat,
-            "text": (
-                f"ROSA · клієнт перезаписався\n"
-                f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
-                f"{row.get('service')}\n"
-                + (f"Дизайн: {row.get('design')}\n" if row.get("design") else "")
-                + f"{row.get('name')} · {row.get('phone')}\n"
-                f"#{row.get('id')}\n\n"
-                f"Додати цей час у календар?"
-            ),
-            "reply_markup": {
-                "inline_keyboard": [[
-                    {"text": "Так, записати", "callback_data": f"ok:{row['id']}"},
-                    {"text": "Ні", "callback_data": f"no:{row['id']}"},
-                ]]
-            },
-        },
-    )
+    mid = row.get("admin_tg_mid")
+    payload = {
+        "text": admin_card_text(row, note),
+        "parse_mode": "HTML",
+        "reply_markup": {"inline_keyboard": keyboard},
+        "disable_web_page_preview": True,
+    }
+    if chat and mid:
+        payload["chat_id"] = chat
+        payload["message_id"] = mid
+        if _telegram_call("editMessageText", payload):
+            return True
+    return bool(notify_admin(row, note=note, keyboard=keyboard))
 
 
-def _telegram_call(method: str, payload: dict) -> bool:
+def _telegram_call(method: str, payload: dict):
     token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
     if not token:
-        return False
+        return None
     try:
+        import urllib.error
         import urllib.request
 
         req = urllib.request.Request(
@@ -680,10 +808,16 @@ def _telegram_call(method: str, payload: dict) -> bool:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        urllib.request.urlopen(req, timeout=12)
-        return True
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        return data if data.get("ok") else None
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "ignore")
+        if "message is not modified" in body:
+            return {"ok": True}
+        return None
     except OSError:
-        return False
+        return None
 
 
 def apply_admin_decision(action: str, booking_id: str, chat_id: str = "") -> str:
@@ -691,37 +825,40 @@ def apply_admin_decision(action: str, booking_id: str, chat_id: str = "") -> str
         return "Підтверджувати може лише адміністратор студії."
     if action == "ok":
         row = confirm_booking(booking_id)
-        extra = " і в Google Календар" if row.get("google_event_id") else ""
+        extra = " Календар оновлено." if row.get("google_event_id") else ""
         sent = notify_client(row, client_decision_text(row, True))
-        return (
-            f"Записала{extra}.\n"
-            f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
-            f"{row.get('name')} · {row.get('phone')}\n#{row.get('id')}\n"
-            f"{'Клієнту написала в Telegram.' if sent else 'Клієнту в Telegram не написала — зателефонуйте.'}"
-        )
+        client = "Клієнту написала в Telegram." if sent else "Клієнту в Telegram не дійшло — зателефонуйте."
+        return (extra + " " + client).strip()
     if action == "no":
         row = reject_booking(booking_id)
         sent = notify_client(row, client_decision_text(row, False))
         phone = str(row.get("phone") or "")
-        return (
-            f"Відхилила. Слот вільний.\n"
-            f"{row.get('date')} {row.get('time')} · {row.get('master')}\n#{row.get('id')}\n"
-            f"{'Клієнту написала, що запис не підтверджено.' if sent else 'Клієнту в Telegram не написала — зателефонуйте: ' + phone}"
-        )
+        if sent:
+            return "Клієнту написала, що запис не підтверджено."
+        return f"Клієнту в Telegram не дійшло — зателефонуйте: {phone}"
     raise ValueError("незрозуміла дія")
 
 
 def apply_admin_callback(action: str, booking_id: str, extra: str, chat_id: str) -> tuple[str | None, list | None, str]:
     if _admin_chat() and chat_id and chat_id != _admin_chat():
         return "Підтверджувати може лише адміністратор студії.", [], ""
-    if action == "ok":
-        return apply_admin_decision("ok", booking_id, chat_id), [], ""
-    if action == "no":
-        return apply_admin_decision("no", booking_id, chat_id), [], ""
+    if action in {"ok", "no"}:
+        note = apply_admin_decision(action, booking_id, chat_id)
+        row = _find_booking(booking_id)
+        if not row or note.startswith("Підтверджувати"):
+            return html_esc(note), [], ""
+        return admin_card_text(row, note), [], ""
     if action == "xx":
         return None, None, "Цей час уже зайнятий"
     if action == "mv":
-        return start_reschedule(booking_id)
+        return start_reschedule(booking_id, reset=True)
+    if action == "ds":
+        return start_reschedule(booking_id, reset=False)
+    if action == "bk":
+        row = _find_booking(booking_id)
+        if not row:
+            raise ValueError("заявку не знайдено")
+        return admin_card_text(row), pending_keyboard(str(row.get("id") or "")), ""
     if action == "dt":
         return show_offer_times(booking_id, expand_date(extra))
     if action == "tm":
@@ -758,7 +895,13 @@ def handle_telegram_update(update: dict) -> None:
                 payload["text"] = toast[:180]
             _telegram_call("answerCallbackQuery", payload)
         if chat_id and mid and text is not None:
-            body = {"chat_id": chat_id, "message_id": mid, "text": text}
+            body = {
+                "chat_id": chat_id,
+                "message_id": mid,
+                "text": text,
+                "parse_mode": "HTML",
+                "disable_web_page_preview": True,
+            }
             if keyboard is not None:
                 body["reply_markup"] = {"inline_keyboard": keyboard}
             _telegram_call("editMessageText", body)
@@ -821,53 +964,32 @@ def telegram_ready() -> bool:
 
 
 def booking_text(row: dict) -> str:
-    design = str(row.get("design") or "").strip()
-    price = str(row.get("design_price") or "").strip()
-    extra = ""
-    if design:
-        extra = f"Дизайн: {design}" + (f" · {price}" if price else "") + "\n"
-    return (
-        f"ROSA · нова заявка · {row.get('source')}\n"
-        f"{row.get('date')} {row.get('time')} · {row.get('master')}\n"
-        f"{row.get('service')}\n"
-        f"{extra}"
-        f"{row.get('name')} · {row.get('phone')}\n"
-        f"#{row.get('id')}\n\n"
-        f"Додати запис у календар?"
-    )
+    return admin_card_text(row)
 
 
-def notify_admin(row: dict) -> bool:
-    token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
-    chat = (os.environ.get("TELEGRAM_ADMIN_CHAT_ID") or "").strip()
-    if not token or not chat:
+def notify_admin(row: dict, note: str = "", keyboard: list | None = None) -> bool:
+    chat = _admin_chat()
+    if not chat:
         return False
-    try:
-        import urllib.request
-
-        payload = {
-            "chat_id": chat,
-            "text": booking_text(row),
-            "reply_markup": {
-                "inline_keyboard": [
-                    [
-                        {"text": "Так, записати", "callback_data": f"ok:{row['id']}"},
-                        {"text": "Ні", "callback_data": f"no:{row['id']}"},
-                    ],
-                    [{"text": "Запропонувати інший час", "callback_data": f"mv:{row['id']}"}],
-                ]
-            },
-        }
-        req = urllib.request.Request(
-            f"https://api.telegram.org/bot{token}/sendMessage",
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        urllib.request.urlopen(req, timeout=12)
-        return True
-    except OSError:
-        return False
+    if keyboard is None:
+        keyboard = pending_keyboard(str(row.get("id") or ""))
+    payload = {
+        "chat_id": chat,
+        "text": admin_card_text(row, note),
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True,
+        "reply_markup": {"inline_keyboard": keyboard},
+    }
+    data = _telegram_call("sendMessage", payload)
+    result = (data or {}).get("result") or {}
+    mid = result.get("message_id")
+    if mid:
+        try:
+            _patch_booking(str(row.get("id") or ""), admin_tg_mid=mid)
+            row["admin_tg_mid"] = mid
+        except ValueError:
+            pass
+    return bool(data)
 
 
 def bot_username() -> str:
