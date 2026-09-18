@@ -249,6 +249,16 @@ body:has(.top.is-slim) .visit-bar { top: 42px; }
   font-weight: 600;
   color: var(--ink);
 }
+.visit-bar-items {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: #6d5b5f;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
 .visit-main {
   display: flex;
   align-items: center;
@@ -348,11 +358,6 @@ body:has(.top.is-slim) .visit-bar { top: 42px; }
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 600;
-}
-.visit-bar-when {
-  margin: 2px 0 0;
-  font-weight: 600;
-  color: var(--ink);
 }
 
 .band {

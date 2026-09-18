@@ -1246,7 +1246,7 @@ def booking_status(booking_id):
         "service": row.get("service"),
         "service_price": service_price_text(row),
         "design": row.get("design") or "",
-        "design_price": row.get("design_price") or "",
+        "design_price": str(row.get("design_price") or "").strip() or _design_price_text(row.get("design") or ""),
         "offers": row.get("offers") or [],
         "slots": day_slot_view(row) if row.get("status") == "offered" else [],
     })

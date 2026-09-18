@@ -41,6 +41,25 @@ function rosaBookingStillOn(data) {
   return (data.offers || []).some((item) => rosaVisitAlive(item.date, item.time));
 }
 
+function rosaEsc(value) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function rosaVisitItems(data) {
+  const bits = [];
+  if (data.service) {
+    bits.push(data.service + (data.service_price ? ` · ${data.service_price}` : ""));
+  }
+  if (data.design) {
+    bits.push(data.design + (data.design_price ? ` · ${data.design_price}` : ""));
+  }
+  if (!bits.length) return "";
+  return `<p class="visit-bar-items">${bits.map((bit) => `<span>${rosaEsc(bit)}</span>`).join("")}</p>`;
+}
+
 function rosaPrettyWhen(date, time, master) {
   let when = date;
   const parsed = new Date(`${date}T12:00:00`);
@@ -144,7 +163,7 @@ async function rosaShowVisitBar() {
       return;
     }
     const status = data.status || "pending";
-    const stamp = [status, data.date, data.time, JSON.stringify(data.offers || [])].join("|");
+    const stamp = [status, data.date, data.time, data.service, data.service_price, data.design, data.design_price, JSON.stringify(data.offers || [])].join("|");
     const changed = Boolean(rosaVisitStamp) && rosaVisitStamp !== stamp;
     const same = rosaVisitStamp === stamp;
     rosaVisitStamp = stamp;
@@ -181,6 +200,7 @@ async function rosaShowVisitBar() {
           <div class="visit-copy">
             <p class="visit-bar-kicker">${label}</p>
             <p class="visit-bar-when">${when}</p>
+            ${rosaVisitItems(data)}
           </div>
         </div>
         ${cta}
