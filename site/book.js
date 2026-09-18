@@ -82,8 +82,9 @@ function fillDesignPicks() {
   const chosen = document.getElementById("designSelect").value;
   box.innerHTML = DESIGNS.map((item) => {
     const on = item.name === chosen ? " is-on" : "";
-    return `<button type="button" class="pick-service${on}" data-design="${item.name}">
-      <span><strong>${item.name}</strong><em>${designMoney(item)}</em></span>
+    return `<button type="button" class="pick-design${on}" data-design="${item.name}">
+      <strong>${item.name}</strong>
+      <em>${designMoney(item)}</em>
     </button>`;
   }).join("");
 }

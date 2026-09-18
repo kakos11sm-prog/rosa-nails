@@ -1032,6 +1032,50 @@ a.price-card:hover {
 .pick-service span { display: flex; flex-direction: column; gap: 3px; }
 .pick-service em { font-style: normal; color: var(--rose); font-size: 0.82rem; }
 .pick-person.is-on, .pick-service.is-on { border-color: var(--rose); background: #f8eef0; }
+.pick-designs {
+  display: grid;
+  gap: 2px;
+  padding: 2px 0 4px;
+  min-width: 0;
+}
+.pick-design {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+  font: 500 0.95rem/1.35 var(--font);
+}
+.pick-design strong {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 500;
+}
+.pick-design em {
+  flex: 0 0 auto;
+  font-style: normal;
+  color: var(--rose);
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.pick-design.is-on {
+  background: #f8eef0;
+  color: var(--ink);
+}
+.pick-design.is-on strong { font-weight: 600; }
 .pick-design-skip {
   width: 100%;
   margin-top: 12px;
