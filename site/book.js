@@ -119,10 +119,11 @@ function openStep(name) {
   });
 }
 
-function setTimes(times) {
+function setTimes(times, best) {
   const field = document.getElementById("timeField");
   const sel = document.getElementById("timeSelect");
   const picked = sel.value;
+  const tight = new Set(best || []);
   if (!times || !times.length) {
     field.hidden = true;
     sel.value = "";
@@ -140,7 +141,11 @@ function setTimes(times) {
     .map(
       (g) => `<p class="slot-label">${g.title}</p>
       <div class="slot-grid">${g.items
-        .map((t) => `<button type="button" class="slot-btn${t === picked ? " is-on" : ""}" data-time="${t}">${t}</button>`)
+        .map((t) => {
+          const on = t === picked ? " is-on" : "";
+          const pack = tight.has(t) ? " is-tight" : "";
+          return `<button type="button" class="slot-btn${on}${pack}" data-time="${t}">${t}</button>`;
+        })
         .join("")}</div>`
     )
     .join("");
@@ -228,8 +233,17 @@ async function refreshSlots() {
     const res = await fetch(`/api/slots?${q}`, { cache: "no-store" });
     const data = await res.json();
     const times = data.times || [];
-    setTimes(times);
-    if (hint) hint.textContent = times.length ? "Оберіть вільний час." : "На цю дату вільних годин немає.";
+    const best = data.best || [];
+    const mins = Number(data.mins) || 0;
+    setTimes(times, best);
+    if (hint) {
+      if (!times.length) hint.textContent = "На цю дату вільних годин немає.";
+      else if (best.length) {
+        hint.innerHTML = `${mins ? `Послуга займає <b>${mins} хв</b>. ` : ""}<i class="slot-dot"></i> зручніше поруч з іншими записами — графік щільніший. Інші години теж можна.`;
+      } else {
+        hint.textContent = mins ? `Послуга займає ${mins} хв. Оберіть вільний час.` : "Оберіть вільний час.";
+      }
+    }
   } catch (_) {
     setTimes([]);
   }

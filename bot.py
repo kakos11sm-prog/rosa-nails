@@ -100,13 +100,21 @@ async def date_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         )
         return DATE
     context.user_data["date"] = date
-    await update.message.reply_text("Вільний час:", reply_markup=kb(free))
+    best = set(store.tight_times(master, date, service))
+    labels = [("● " + time if time in best else time) for time in free]
+    note = "Вільний час."
+    if best:
+        note += "\n● — зручніше поруч з іншими записами."
+    await update.message.reply_text(note, reply_markup=kb(labels))
     return TIME
 
 
 async def time_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text = (update.message.text or "").strip()
-    if text not in TIMES:
+    text = (update.message.text or "").strip().lstrip("●").strip()
+    master = str(context.user_data.get("master") or "")
+    date = str(context.user_data.get("date") or "")
+    service = str(context.user_data.get("service") or "")
+    if text not in store.free_times(master, date, service):
         await update.message.reply_text("Оберіть час з кнопок.")
         return TIME
     context.user_data["time"] = text

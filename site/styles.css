@@ -738,30 +738,43 @@ body.is-edit .why-ico { display: grid; }
   overflow-wrap: anywhere;
 }
 .why-card h3::after {
-  content: "";
+  content: "✦";
   display: block;
-  width: 40px;
-  height: 1.5px;
-  margin: 11px 0 13px;
-  border-radius: 99px;
-  background: var(--rose);
-  opacity: 0.7;
+  width: auto;
+  height: auto;
+  margin: 8px 0 12px;
+  font-size: 0.58rem;
+  letter-spacing: 0.55em;
+  color: var(--rose);
+  background: none;
+  opacity: 0.85;
 }
-.why-card p {
+.why-copy {
   position: relative;
   z-index: 1;
   margin: 0;
-  color: #675458;
-  font-size: 1rem;
-  line-height: 1.78;
+  padding: 2px 0 0 22px;
+  border-left: 1.5px solid rgba(212, 138, 148, 0.42);
+  color: #4a3b3f;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 500;
+  line-height: 1.58;
+  letter-spacing: 0.012em;
   white-space: pre-wrap;
+  text-wrap: pretty;
 }
-.why-card p::first-letter {
+.why-copy::before {
+  content: "“";
+  position: absolute;
+  left: -1px;
+  top: -0.42em;
   font-family: var(--serif);
   font-style: italic;
-  font-weight: 600;
-  font-size: 1.22em;
-  color: var(--rose-2);
+  font-size: 2.15rem;
+  line-height: 1;
+  color: var(--rose);
+  opacity: 0.78;
 }
 .why-progress {
   height: 2px;
@@ -1368,6 +1381,7 @@ body.is-edit .price-tags { pointer-events: auto; }
   gap: 8px;
 }
 .slot-btn {
+  position: relative;
   border: 1px solid var(--line);
   background: #fff;
   border-radius: 12px;
@@ -1376,6 +1390,42 @@ body.is-edit .price-tags { pointer-events: auto; }
   cursor: pointer;
 }
 .slot-btn.is-on { background: var(--rose); color: #fff; border-color: var(--rose); }
+.slot-btn.is-tight {
+  border-color: var(--rose);
+  background: #fff7f8;
+  color: var(--rose-2);
+  box-shadow: 0 0 0 1px rgba(212, 138, 148, 0.28);
+}
+.slot-btn.is-tight::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: 0 0 0 3px rgba(212, 138, 148, 0.22);
+}
+.slot-btn.is-tight.is-on {
+  background: var(--rose);
+  color: #fff;
+}
+.slot-btn.is-tight.is-on::after {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28);
+}
+.form-hint .slot-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px 1px 0;
+  border-radius: 50%;
+  background: var(--rose);
+  box-shadow: 0 0 0 3px rgba(212, 138, 148, 0.22);
+  vertical-align: middle;
+}
+.form-hint b { color: var(--ink); font-weight: 650; }
 .contacts { display: grid; gap: 10px; }
 .form {
   display: grid;
@@ -1892,7 +1942,7 @@ body.is-edit .price-tags { pointer-events: auto; }
   .hero-copy .lede { font-size: 0.98rem; line-height: 1.65; max-width: none; }
   .why-card { flex-basis: calc(100% - 28px); min-height: 11.4rem; padding: 18px 16px 22px; }
   .why-card h3 { font-size: 1.32rem; }
-  .why-card p { font-size: 0.95rem; line-height: 1.72; }
+  .why-copy { font-size: 1.08rem; line-height: 1.55; padding-left: 18px; }
   .why-num { font-size: 3.4rem; }
   .why-nav { width: 30px; height: 30px; }
   .top { height: 56px; padding: 0 16px; gap: 14px; }

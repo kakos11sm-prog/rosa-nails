@@ -451,7 +451,7 @@ function paintWhy(hero) {
           <span class="why-ico" data-edit="hero.reasons.${i}.icon">${esc(r.icon)}</span>
           <h3 data-edit="hero.reasons.${i}.title">${esc(r.title)}</h3>
         </div>
-        <p data-edit="hero.reasons.${i}.text">${esc(r.text)}</p>
+        <p class="why-copy" data-edit="hero.reasons.${i}.text">${esc(r.text)}</p>
       </article>`
     )
     .join("");

@@ -34,6 +34,9 @@ app.permanent_session_lifetime = timedelta(days=30)
 CLOSED_WEEKDAY = 0  # понеділок
 TZ = ZoneInfo("Europe/Kyiv")
 TIMES = ["10:00", "11:30", "13:00", "14:30", "16:00", "17:30", "19:00"]
+WORK_START = "10:00"
+WORK_END = "20:30"
+SLOT_STEP = 30
 SERVICE_MINUTES = {
     "Комплекс з покриттям": 90,
     "Комплекс з укріпленням": 110,
@@ -192,6 +195,58 @@ def service_minutes(name: str) -> int:
     return catalog_services().get(name, 90)
 
 
+def candidate_starts(service: str = "") -> list[str]:
+    mins = max(SLOT_STEP, service_minutes(service) if service else 90)
+    start = datetime.strptime(WORK_START, "%H:%M")
+    limit = datetime.strptime(WORK_END, "%H:%M")
+    out = []
+    cursor = start
+    step = timedelta(minutes=SLOT_STEP)
+    length = timedelta(minutes=mins)
+    while cursor + length <= limit:
+        out.append(cursor.strftime("%H:%M"))
+        cursor += step
+    return out or list(TIMES)
+
+
+def occupied_ranges(
+    master: str,
+    date: str,
+    rows: list[dict] | None = None,
+    busy: list[tuple[datetime, datetime]] | None = None,
+    skip_id: str = "",
+) -> list[tuple[datetime, datetime]]:
+    rows = rows if rows is not None else _load()
+    ranges: list[tuple[datetime, datetime]] = []
+    for row in rows:
+        if skip_id and row.get("id") == skip_id:
+            continue
+        if row.get("master") != master or row.get("date") != date:
+            continue
+        if row.get("status") == "cancelled":
+            continue
+        if row.get("google_event_id"):
+            continue
+        ranges.append(
+            slot_bounds(row["date"], row["time"], service_minutes(str(row.get("service") or "")))
+        )
+    ranges.extend(busy if busy is not None else gcal.busy_ranges(master, date))
+    ranges.sort(key=lambda item: item[0])
+    return ranges
+
+
+def is_tight_slot(start: datetime, end: datetime, occupied: list[tuple[datetime, datetime]]) -> bool:
+    if not occupied:
+        return False
+    pad = timedelta(minutes=SLOT_STEP)
+    for busy_start, busy_end in occupied:
+        if start >= busy_end and start - busy_end <= pad:
+            return True
+        if end <= busy_start and busy_start - end <= pad:
+            return True
+    return False
+
+
 def slot_bounds(date: str, time: str, minutes: int) -> tuple[datetime, datetime]:
     start = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M").replace(tzinfo=TZ)
     return start, start + timedelta(minutes=minutes)
@@ -259,9 +314,27 @@ def free_times(master: str, date: str, service: str = "", skip_id: str = "") -> 
         busy = []
     return [
         time
-        for time in TIMES
+        for time in candidate_starts(service)
         if not slot_taken(master, date, time, service, rows, busy, skip_id)
     ]
+
+
+def tight_times(master: str, date: str, service: str = "", skip_id: str = "") -> list[str]:
+    try:
+        datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        return []
+    rows = _load()
+    busy = gcal.busy_ranges(master, date)
+    occupied = occupied_ranges(master, date, rows, busy, skip_id)
+    if not occupied:
+        return []
+    best = []
+    for time in free_times(master, date, service, skip_id):
+        start, end = slot_bounds(date, time, service_minutes(service))
+        if is_tight_slot(start, end, occupied):
+            best.append(time)
+    return best
 
 
 def first_bookable_date() -> datetime:
@@ -282,7 +355,7 @@ def open_dates(master: str, service: str = "", horizon: int = 90, skip_id: str =
         if day.weekday() != CLOSED_WEEKDAY:
             date = day.strftime("%Y-%m-%d")
             busy = gcal.busy_from_events(master, date, events) if ok else []
-            if any(not slot_taken(master, date, time, service, rows, busy, skip_id) for time in TIMES):
+            if any(not slot_taken(master, date, time, service, rows, busy, skip_id) for time in candidate_starts(service)):
                 out.append(date)
         day += timedelta(days=1)
     return out
@@ -323,7 +396,7 @@ def add_booking(payload: dict) -> dict:
         raise ValueError("оберіть дизайн зі списку")
     if master not in catalog_masters():
         raise ValueError("оберіть майстра")
-    if time not in TIMES:
+    if time not in candidate_starts(service):
         raise ValueError("цей час не в графіку")
     try:
         day = datetime.strptime(date, "%Y-%m-%d")
@@ -628,18 +701,19 @@ def date_keyboard(booking_id: str, dates: list[str], picked: list[dict]) -> list
 
 def time_keyboard(booking_id: str, date: str, master: str, service: str, picked: list[dict]) -> list[list[dict]]:
     chosen = {item["time"] for item in picked if item["date"] == date}
+    best = set(tight_times(master, date, service, skip_id=booking_id))
     line: list[dict] = []
     rows: list[list[dict]] = []
-    for time in TIMES:
+    for time in candidate_starts(service):
         taken = slot_taken(master, date, time, service, skip_id=booking_id)
         compact = time.replace(":", "")
         if taken:
             btn = {"text": f"{time} · зайнято", "callback_data": f"xx:{booking_id}"}
         else:
-            mark = "✓ " if time in chosen else ""
+            mark = "✓ " if time in chosen else ("● " if time in best else "")
             btn = {"text": f"{mark}{time}", "callback_data": f"tm:{booking_id}:{compact}"}
         line.append(btn)
-        if len(line) == 2:
+        if len(line) == 3:
             rows.append(line)
             line = []
     if line:
@@ -1216,7 +1290,14 @@ def list_slots():
     if master and master not in catalog_masters():
         return jsonify({"ok": False, "error": "оберіть майстра"}), 400
     times = free_times(master, date, service) if master and date else []
-    resp = jsonify({"ok": True, "times": times, "calendar": gcal.configured()})
+    best = tight_times(master, date, service) if times else []
+    resp = jsonify({
+        "ok": True,
+        "times": times,
+        "best": best,
+        "mins": service_minutes(service) if service else 90,
+        "calendar": gcal.configured(),
+    })
     resp.headers["Cache-Control"] = "no-store"
     return resp
 
