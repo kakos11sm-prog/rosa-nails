@@ -99,6 +99,7 @@ async def decide_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             parse_mode="HTML",
             reply_markup=_markup(keyboard),
         )
+        store.remember_client_card(text, query.message.message_id if query.message else None)
     except Exception:
         print(f"кнопка запису не спрацювала: {text}")
 
