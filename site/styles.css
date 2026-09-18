@@ -1035,8 +1035,8 @@ a.price-card:hover {
 .pick-designs {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  padding: 2px 0 6px;
+  gap: 10px;
+  padding: 4px 0 8px;
   min-width: 0;
 }
 .pick-design {
@@ -1044,17 +1044,19 @@ a.price-card:hover {
   flex-direction: column;
   justify-content: space-between;
   align-items: stretch;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  min-height: 76px;
+  min-height: 92px;
   box-sizing: border-box;
   margin: 0;
-  padding: 10px 11px 9px;
-  border: 1px solid rgba(226, 180, 186, 0.4);
-  border-radius: 14px;
-  background: #fffdfc;
+  overflow: hidden;
+  padding: 12px;
+  border: 1.5px solid #e8c5ca;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(196, 111, 123, 0.1);
   cursor: pointer;
   text-align: left;
   color: var(--ink);
@@ -1062,19 +1064,23 @@ a.price-card:hover {
 .pick-design strong {
   display: block;
   font-family: var(--font);
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   font-weight: 600;
-  letter-spacing: 0;
-  line-height: 1.3;
+  letter-spacing: -0.01em;
+  line-height: 1.28;
 }
 .pick-design em {
-  display: block;
+  display: inline-flex;
+  align-self: flex-end;
   margin-top: auto;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: #f6e8eb;
   font-family: var(--font);
   font-style: normal;
-  color: var(--rose);
-  font-size: 0.78rem;
-  font-weight: 600;
+  color: var(--rose-2);
+  font-size: 0.86rem;
+  font-weight: 700;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -1082,9 +1088,14 @@ a.price-card:hover {
 }
 .pick-design.is-on {
   border-color: var(--rose);
-  background: #f8eef0;
+  background: #fffafb;
+  box-shadow: 0 0 0 2px rgba(212, 138, 148, 0.38), 0 10px 24px rgba(196, 111, 123, 0.12);
 }
 .pick-design.is-on strong { color: var(--ink); font-weight: 600; }
+.pick-design.is-on em {
+  background: var(--rose);
+  color: #fff;
+}
 .pick-design-skip {
   width: 100%;
   margin-top: 12px;
