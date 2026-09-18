@@ -344,7 +344,7 @@ function onEditPointer(e) {
   const text = e.target.closest("[data-edit]");
   const img = e.target.closest("[data-edit-img]");
   if (!img && !text) return;
-  if (e.target.closest(".edit-bar, .edit-login, .price-switch, .showcase-bar, .why-emoji")) return;
+  if (e.target.closest(".edit-bar, .edit-login, .price-switch, .showcase-bar, .why-emoji, .why-tools")) return;
   e.preventDefault();
   e.stopPropagation();
   if (text) startTextEdit(text);

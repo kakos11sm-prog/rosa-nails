@@ -429,6 +429,7 @@ body:has(.top.is-slim) .visit-bar { top: 42px; }
 @media (prefers-reduced-motion: reduce) {
   .hero-copy > *, .hero-place, .why, .showcase { animation: none; }
   .showcase-track, .shot img, .why-track, .why-emoji button { transition: none; }
+  .why-progress i { animation: none; transform: none; }
 }
 .block { max-width: 1120px; margin: 0 auto; padding: 0; }
 .eyebrow {
@@ -465,85 +466,143 @@ h1 {
   margin: 0;
   max-width: 100%;
   min-width: 0;
+  outline: none;
 }
 .why-kicker {
-  margin: 0 0 14px;
+  margin: 0;
   color: var(--rose);
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 600;
 }
+.why-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 10px;
+}
 .why-emoji {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 14px;
-  margin: 0 0 14px;
-  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  min-height: 0;
 }
 .why-emoji button {
   position: relative;
-  width: auto;
-  height: auto;
-  padding: 0 0 10px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  font-size: 1.55rem;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(196, 111, 123, 0.06);
+  font-size: 1.12rem;
   line-height: 1;
   cursor: pointer;
-  opacity: 0.22;
-  filter: grayscale(0.4);
-  transform: scale(0.84);
-  transform-origin: center bottom;
-  transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
+  opacity: 1;
+  filter: none;
+  transform: none;
+  transition: transform 0.28s ease, border-color 0.28s ease, background 0.28s ease, box-shadow 0.28s ease;
+}
+.why-emoji button:hover {
+  border-color: var(--rose);
+  transform: translateY(-1px);
 }
 .why-emoji button.is-on {
   opacity: 1;
   filter: none;
-  transform: scale(1.28);
-  border: 0;
-  box-shadow: none;
+  transform: scale(1.06);
+  border-color: var(--rose);
+  background: var(--blush);
+  box-shadow: 0 8px 18px rgba(196, 111, 123, 0.16);
 }
 .why-emoji button.is-on::after {
   content: "";
   position: absolute;
   left: 50%;
-  bottom: 0;
-  width: 6px;
-  height: 6px;
+  bottom: -7px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--rose);
   transform: translateX(-50%);
 }
+.why-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.why-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  min-width: 3.4em;
+  text-align: right;
+}
+.why-nav {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  font: 400 1.2rem/1 Georgia, serif;
+  cursor: pointer;
+}
+.why-nav:hover {
+  border-color: var(--rose);
+  color: var(--rose-2);
+}
 .why-window {
   overflow: hidden;
   min-width: 0;
+  cursor: grab;
+  touch-action: pan-y;
 }
+.why-window:active { cursor: grabbing; }
 .why-track {
   display: flex;
+  gap: 14px;
   min-width: 0;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 .why-card {
   position: relative;
-  flex: 0 0 100%;
-  min-width: 100%;
+  flex: 0 0 calc(100% - 36px);
+  min-width: 0;
   box-sizing: border-box;
   padding: 22px 22px 20px;
-  background: var(--cream);
-  border: 0;
-  border-radius: 18px;
-  box-shadow: none;
+  background: #fff;
+  border: 1px solid rgba(226, 180, 186, 0.5);
+  border-radius: 22px;
+  box-shadow: 0 12px 28px rgba(196, 111, 123, 0.1);
+  min-height: 12.2rem;
 }
-.why-ico { display: none; font-size: 1.15rem; line-height: 1; }
-body.is-edit .why-ico { display: inline-block; margin-bottom: 6px; }
+.why-ico {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  margin: 0 0 12px;
+  border-radius: 50%;
+  background: var(--blush);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+body.is-edit .why-ico { display: grid; }
 .why-card h3 {
   margin: 0 0 8px;
   font-family: var(--serif);
-  font-size: 1.22rem;
+  font-size: 1.38rem;
   font-weight: 500;
   letter-spacing: -0.015em;
   line-height: 1.28;
@@ -553,9 +612,31 @@ body.is-edit .why-ico { display: inline-block; margin-bottom: 6px; }
 .why-card p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.94rem;
-  line-height: 1.65;
+  font-size: 0.96rem;
+  line-height: 1.7;
   white-space: pre-wrap;
+}
+.why-progress {
+  height: 2px;
+  margin: 12px 36px 0 0;
+  border-radius: 99px;
+  background: #eddfe2;
+  overflow: hidden;
+}
+.why-progress i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--rose);
+  transform-origin: left center;
+  animation: whyFill 6.4s linear;
+}
+.why:hover .why-progress i { animation-play-state: paused; }
+body.is-edit .why-progress { display: none; }
+body.is-edit .why-window { cursor: default; }
+@keyframes whyFill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 .facts { display: none; }
 .facts div { margin: 0; }
@@ -1641,6 +1722,9 @@ a.price-card:hover {
   .hero-place { font-size: 0.92rem; padding-bottom: 12px; padding-left: 0; }
   .lede { font-size: 0.95rem; }
   .hero-copy .lede { font-size: 0.98rem; line-height: 1.65; max-width: none; }
+  .why-card { flex-basis: calc(100% - 28px); min-height: 11.4rem; padding: 18px 16px 16px; }
+  .why-card h3 { font-size: 1.22rem; }
+  .why-nav { width: 30px; height: 30px; }
   .top { height: 56px; padding: 0 16px; gap: 14px; }
   .top.is-slim { height: 42px; padding: 0 14px; gap: 12px; }
   .top-acts { margin-left: auto; gap: 6px; }

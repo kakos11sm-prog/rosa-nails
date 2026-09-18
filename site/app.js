@@ -415,6 +415,14 @@ function esc(s) {
     .replace(/>/g, "&gt;");
 }
 
+function whyCountLabel(n) {
+  const n10 = n % 10;
+  const n100 = n % 100;
+  if (n10 === 1 && n100 !== 11) return `${n} причина`;
+  if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return `${n} причини`;
+  return `${n} причин`;
+}
+
 function paintWhy(hero) {
   const box = document.getElementById("heroWhy");
   if (!box) return;
@@ -435,9 +443,20 @@ function paintWhy(hero) {
       </article>`
     )
     .join("");
-  box.innerHTML = `<p class="why-kicker">Деталі</p>
+  const total = reasons.length;
+  box.innerHTML = `<div class="why-top">
+      <p class="why-kicker">${total ? whyCountLabel(total) : "Причини"}</p>
+      <div class="why-tools">
+        <span class="why-count" aria-live="polite">1 / ${total || 1}</span>
+        <button type="button" class="why-nav" data-why-dir="-1" aria-label="Попередня картка">‹</button>
+        <button type="button" class="why-nav" data-why-dir="1" aria-label="Наступна картка">›</button>
+      </div>
+    </div>
     <div class="why-emoji">${tabs}</div>
-    <div class="why-window"><div class="why-track">${slides}</div></div>
+    <div class="why-window">
+      <div class="why-track">${slides}</div>
+    </div>
+    <div class="why-progress" aria-hidden="true"><i></i></div>
     <button type="button" class="edit-plus" data-add="reason">+ Причина</button>`;
 }
 
@@ -446,12 +465,23 @@ function setupWhy() {
   if (!box) return;
   let index = 0;
   let timer = 0;
+  let startX = 0;
+  let startY = 0;
+  let swiping = false;
 
   function cards() {
     return [...box.querySelectorAll(".why-card")];
   }
   function emojis() {
     return [...box.querySelectorAll(".why-emoji button")];
+  }
+
+  function beat() {
+    const bar = box.querySelector(".why-progress i");
+    if (!bar) return;
+    bar.style.animation = "none";
+    void bar.offsetWidth;
+    bar.style.animation = "";
   }
 
   function go(next) {
@@ -461,9 +491,13 @@ function setupWhy() {
     const track = box.querySelector(".why-track");
     const card = list[0];
     if (track && card) {
-      track.style.transform = `translateX(-${index * card.getBoundingClientRect().width}px)`;
+      const gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap) || 0;
+      track.style.transform = `translateX(-${index * (card.getBoundingClientRect().width + gap)}px)`;
     }
     emojis().forEach((btn, i) => btn.classList.toggle("is-on", i === index));
+    const count = box.querySelector(".why-count");
+    if (count) count.textContent = `${index + 1} / ${list.length}`;
+    beat();
   }
 
   function play() {
@@ -471,7 +505,8 @@ function setupWhy() {
     if (document.body.classList.contains("is-edit")) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (cards().length < 2) return;
-    timer = window.setInterval(() => go(index + 1), 3800);
+    timer = window.setInterval(() => go(index + 1), 6400);
+    beat();
   }
 
   window.paintWhySlider = function () {
@@ -486,6 +521,12 @@ function setupWhy() {
   if (!setupWhy.bound) {
     setupWhy.bound = true;
     box.addEventListener("click", (e) => {
+      const nav = e.target.closest("[data-why-dir]");
+      if (nav) {
+        go(index + Number(nav.dataset.whyDir));
+        play();
+        return;
+      }
       const btn = e.target.closest(".why-emoji button");
       if (!btn) return;
       go(Number(btn.dataset.why));
@@ -493,9 +534,43 @@ function setupWhy() {
     });
     box.addEventListener("mouseenter", () => window.clearInterval(timer));
     box.addEventListener("mouseleave", play);
+    box.addEventListener(
+      "pointerdown",
+      (e) => {
+        if (document.body.classList.contains("is-edit")) return;
+        if (e.target.closest("button, a, [data-edit]")) return;
+        startX = e.clientX;
+        startY = e.clientY;
+        swiping = true;
+      },
+      { passive: true }
+    );
+    box.addEventListener(
+      "pointerup",
+      (e) => {
+        if (!swiping) return;
+        swiping = false;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+        go(index + (dx < 0 ? 1 : -1));
+        play();
+      },
+      { passive: true }
+    );
+    box.addEventListener("pointercancel", () => {
+      swiping = false;
+    });
+    box.addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      e.preventDefault();
+      go(index + (e.key === "ArrowRight" ? 1 : -1));
+      play();
+    });
     window.addEventListener("resize", () => go(index));
   }
 
+  box.setAttribute("tabindex", "0");
   window.paintWhySlider();
 }
 
