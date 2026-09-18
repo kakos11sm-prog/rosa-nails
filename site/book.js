@@ -239,7 +239,7 @@ async function refreshSlots() {
     if (hint) {
       if (!times.length) hint.textContent = "На цю дату вільних годин немає.";
       else if (best.length) {
-        hint.innerHTML = `${mins ? `Послуга займає <b>${mins} хв</b>. ` : ""}<i class="slot-dot"></i> зручніше поруч з іншими записами — графік щільніший. Інші години теж можна.`;
+        hint.innerHTML = `${mins ? `Послуга займає <b>${mins} хв</b>. ` : ""}<i class="slot-dot"></i> риска знизу — зранку і одразу біля вже зайнятого часу. Інші години теж можна.`;
       } else {
         hint.textContent = mins ? `Послуга займає ${mins} хв. Оберіть вільний час.` : "Оберіть вільний час.";
       }

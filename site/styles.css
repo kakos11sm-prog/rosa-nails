@@ -1391,38 +1391,22 @@ body.is-edit .price-tags { pointer-events: auto; }
 }
 .slot-btn.is-on { background: var(--rose); color: #fff; border-color: var(--rose); }
 .slot-btn.is-tight {
-  border-color: var(--rose);
-  background: #fff7f8;
-  color: var(--rose-2);
-  box-shadow: 0 0 0 1px rgba(212, 138, 148, 0.28);
-}
-.slot-btn.is-tight::after {
-  content: "";
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--rose);
-  box-shadow: 0 0 0 3px rgba(212, 138, 148, 0.22);
+  border-bottom-color: var(--rose);
+  border-bottom-width: 2px;
 }
 .slot-btn.is-tight.is-on {
-  background: var(--rose);
-  color: #fff;
-}
-.slot-btn.is-tight.is-on::after {
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28);
+  border-color: var(--rose);
 }
 .form-hint .slot-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
-  margin: 0 4px 1px 0;
-  border-radius: 50%;
-  background: var(--rose);
-  box-shadow: 0 0 0 3px rgba(212, 138, 148, 0.22);
+  width: 16px;
+  height: 0;
+  margin: 0 5px 4px 0;
+  border: 0;
+  border-bottom: 2px solid var(--rose);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
   vertical-align: middle;
 }
 .form-hint b { color: var(--ink); font-weight: 650; }

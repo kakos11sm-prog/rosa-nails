@@ -327,12 +327,13 @@ def tight_times(master: str, date: str, service: str = "", skip_id: str = "") ->
     rows = _load()
     busy = gcal.busy_ranges(master, date)
     occupied = occupied_ranges(master, date, rows, busy, skip_id)
-    if not occupied:
-        return []
+    free = free_times(master, date, service, skip_id)
     best = []
-    for time in free_times(master, date, service, skip_id):
+    morning_first = next((time for time in free if time < "12:00"), "")
+    for time in free:
         start, end = slot_bounds(date, time, service_minutes(service))
-        if is_tight_slot(start, end, occupied):
+        near_booking = occupied and is_tight_slot(start, end, occupied)
+        if near_booking or (morning_first and time == morning_first):
             best.append(time)
     return best
 
