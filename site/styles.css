@@ -238,6 +238,33 @@ body:has(.top.is-slim) .visit-bar { top: 42px; }
 .visit-bar[hidden] { display: none !important; }
 .visit-bar.is-ok { background: #f4f8f5; }
 .visit-bar.is-no { background: #fbf4f4; }
+.visit-bar.is-offer { background: #fff4f6; }
+.visit-bar.is-wait { background: #fff8f1; }
+.visit-bar.is-ok .visit-bar-kicker { color: var(--ok); }
+.visit-bar.is-no .visit-bar-kicker { color: var(--bad); }
+.visit-bar.is-offer .visit-bar-kicker { color: var(--rose-2); }
+.visit-bar.is-wait .visit-bar-kicker { color: #c4893a; }
+.visit-bar.is-wait .visit-bar-kicker::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: #e0a14a;
+  animation: visitDot 1.2s ease-in-out infinite;
+}
+.visit-bar.is-pulse {
+  animation: visitPulse 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes visitDot {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+@keyframes visitPulse {
+  0% { transform: translateY(-10px); box-shadow: 0 12px 28px rgba(196, 111, 123, 0.18); }
+  100% { transform: none; }
+}
 .visit-bar-kicker {
   margin: 0;
   font-size: 0.72rem;
@@ -1733,6 +1760,8 @@ a.price-card:hover {
   .top, .logo, .nav, .top-acts, .top-acts .btn-sm, .icon-btn, .icon-btn svg, .top > .btn-sm, .visit-bar {
     transition: none;
   }
+  .visit-bar.is-wait .visit-bar-kicker::before,
+  .visit-bar.is-pulse { animation: none; }
   .logo-word, .logo-spark { animation: none !important; }
   .price-card .price { transition: none; }
   .price-switch-glider { animation: none; transition: none; }

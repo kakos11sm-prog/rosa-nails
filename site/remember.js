@@ -35,6 +35,12 @@ function rosaVisitAlive(date, time) {
   return Date.now() <= when.getTime() + 3 * 60 * 60 * 1000;
 }
 
+function rosaBookingStillOn(data) {
+  if (!data) return false;
+  if (rosaVisitAlive(data.date, data.time)) return true;
+  return (data.offers || []).some((item) => rosaVisitAlive(item.date, item.time));
+}
+
 function rosaPrettyWhen(date, time, master) {
   let when = date;
   const parsed = new Date(`${date}T12:00:00`);
@@ -46,6 +52,23 @@ function rosaPrettyWhen(date, time, master) {
   return when;
 }
 
+function rosaOfferLine(data) {
+  const offers = (data.offers || []).filter((item) => item && item.date && item.time);
+  if (!offers.length) return rosaPrettyWhen(data.date, data.time, data.master);
+  return offers
+    .map((item) => {
+      const parsed = new Date(`${item.date}T12:00:00`);
+      const day = Number.isNaN(parsed.getTime())
+        ? item.date
+        : parsed.toLocaleDateString("uk-UA", { day: "numeric", month: "short" });
+      return `${day}, ${item.time}`;
+    })
+    .join(" · ");
+}
+
+let rosaVisitTimer = 0;
+let rosaVisitStamp = "";
+
 async function rosaShowVisitBar() {
   const bar = document.getElementById("visitBar");
   if (!bar) return;
@@ -56,32 +79,61 @@ async function rosaShowVisitBar() {
     const data = await res.json();
     if (!res.ok) {
       rosaClearBooking();
+      bar.hidden = true;
       return;
     }
-    if (!rosaVisitAlive(data.date, data.time)) {
+    if (!rosaBookingStillOn(data)) {
       rosaClearBooking();
+      bar.hidden = true;
       return;
     }
+    const status = data.status || "pending";
+    const stamp = [status, data.date, data.time, JSON.stringify(data.offers || [])].join("|");
+    const changed = Boolean(rosaVisitStamp) && rosaVisitStamp !== stamp;
+    rosaVisitStamp = stamp;
+
     const label =
-      data.status === "confirmed"
-        ? "Ваш запис підтверджено"
-        : data.status === "cancelled"
-          ? "Цей запис скасовано"
-          : data.status === "offered"
+      status === "confirmed"
+        ? "Запис підтверджено"
+        : status === "cancelled"
+          ? "Запис скасовано"
+          : status === "offered"
             ? "Студія пропонує інший час"
             : "Заявка ще на підтвердженні";
+    const when =
+      status === "offered" ? rosaOfferLine(data) : rosaPrettyWhen(data.date, data.time, data.master);
+    const cta =
+      status === "offered"
+        ? "Обрати час"
+        : status === "cancelled"
+          ? "Записатись знову"
+          : "Відкрити статус";
+    const href = status === "cancelled" ? "/book" : "/status/" + data.id;
+
     bar.hidden = false;
-    bar.classList.toggle("is-ok", data.status === "confirmed");
-    bar.classList.toggle("is-no", data.status === "cancelled");
+    bar.classList.toggle("is-ok", status === "confirmed");
+    bar.classList.toggle("is-no", status === "cancelled");
+    bar.classList.toggle("is-offer", status === "offered");
+    bar.classList.toggle("is-wait", status === "pending" || status === "new");
     bar.innerHTML = `
       <div>
         <p class="visit-bar-kicker">${label}</p>
-        <p class="visit-bar-when">${rosaPrettyWhen(data.date, data.time, data.master)}</p>
+        <p class="visit-bar-when">${when}</p>
       </div>
-      <a class="btn btn-sm" href="/status/${data.id}">Відкрити статус</a>
+      <a class="btn btn-sm" href="${href}">${cta}</a>
     `;
+    if (changed) {
+      bar.classList.remove("is-pulse");
+      void bar.offsetWidth;
+      bar.classList.add("is-pulse");
+    }
+
+    const live = status === "pending" || status === "new" || status === "offered";
+    window.clearTimeout(rosaVisitTimer);
+    if (live) rosaVisitTimer = window.setTimeout(rosaShowVisitBar, 6000);
   } catch (_) {
-    /* offline */
+    window.clearTimeout(rosaVisitTimer);
+    rosaVisitTimer = window.setTimeout(rosaShowVisitBar, 12000);
   }
 }
 
