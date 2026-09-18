@@ -295,8 +295,6 @@ async function loadConfig() {
     if (!link) return;
     if (data.bot_url) {
       link.href = data.bot_url;
-    } else {
-      link.hidden = true;
     }
   } catch (_) {
     /* offline */

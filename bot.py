@@ -6,154 +6,60 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import (
-    Application,
-    CallbackQueryHandler,
-    CommandHandler,
-    ContextTypes,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
 import app as store
 
 ROOT = Path(__file__).resolve().parent
 load_dotenv(ROOT / ".env")
 
-SERVICE, MASTER, DATE, TIME, NAME, PHONE = range(6)
 
-SERVICES = list(store.catalog_services())
-MASTERS = list(store.catalog_masters())
-TIMES = store.TIMES
+async def _html(message, text: str, keyboard=None) -> None:
+    if not message:
+        return
+    await message.reply_text(
+        text,
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+        reply_markup=_markup(keyboard) if keyboard else None,
+    )
 
 
-def kb(items: list[str]) -> ReplyKeyboardMarkup:
-    rows = [[x] for x in items]
-    return ReplyKeyboardMarkup(rows, resize_keyboard=True, one_time_keyboard=True)
-
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data.clear()
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     payload = (context.args[0] if context.args else "").strip()
+    chat = str(update.effective_chat.id if update.effective_chat else "")
     if payload.startswith("rosa_"):
-        booking_id = payload[5:]
-        chat = str(update.effective_chat.id if update.effective_chat else "")
         try:
-            row = store.link_telegram(booking_id, chat)
+            row = store.link_telegram(payload[5:], chat)
         except ValueError as exc:
-            await update.message.reply_text(f"Не знайшла заявку: {exc}")
-            return ConversationHandler.END
+            await _html(update.message, f"Не знайшла заявку: {store.html_esc(exc)}")
+            return
         status = row.get("status")
         if status == "confirmed":
-            await update.message.reply_text(store.client_decision_text(row, True))
-            return ConversationHandler.END
+            await _html(update.message, store.client_decision_text(row, True))
+            return
         if status == "cancelled":
-            await update.message.reply_text(store.client_decision_text(row, False))
-            return ConversationHandler.END
-        await update.message.reply_text(
-            f"Заявку #{row.get('id')} прив’язала до цього чату.\n"
-            f"{row.get('date')} {row.get('time')}, {row.get('master')}.\n"
-            f"Сюди напишемо, щойно студія підтвердить або відмовить."
+            await _html(update.message, store.client_decision_text(row, False))
+            return
+        if status == "offered":
+            await _html(update.message, store.client_offer_text(row))
+            return
+        await _html(
+            update.message,
+            (
+                f"<b>ROSA · заявку прив’язала</b>\n"
+                f"<i>чекаємо відповіді студії</i>\n"
+                f"<code>#{store.html_esc(row.get('id'))}</code>\n\n"
+                f"🗓 {store.html_esc(store.pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}\n"
+                f"💅 {store.html_esc(row.get('master'))}\n\n"
+                f"Сюди напишемо, щойно студія підтвердить. Напередодні нагадаємо."
+            ),
         )
-        return ConversationHandler.END
-    await update.message.reply_text(
-        "ROSA · запис у студію.\nОберіть послугу:",
-        reply_markup=kb(list(store.catalog_services())),
-    )
-    return SERVICE
-
-
-async def service_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text = (update.message.text or "").strip()
-    if text not in store.catalog_services():
-        await update.message.reply_text("Оберіть послугу з кнопок.")
-        return SERVICE
-    context.user_data["service"] = text
-    await update.message.reply_text("Майстер:", reply_markup=kb(list(store.catalog_masters())))
-    return MASTER
-
-
-async def master_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text = (update.message.text or "").strip()
-    if text not in store.catalog_masters():
-        await update.message.reply_text("Оберіть майстра з кнопок.")
-        return MASTER
-    context.user_data["master"] = text
-    await update.message.reply_text(
-        "Дата у форматі РРРР-ММ-ДД, наприклад 2026-09-10.\nПонеділок — вихідний.",
-        reply_markup=ReplyKeyboardRemove(),
-    )
-    return DATE
-
-
-async def date_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    date = (update.message.text or "").strip()
-    master = str(context.user_data.get("master") or "")
-    service = str(context.user_data.get("service") or "")
-    free = store.free_times(master, date, service)
-    if not free:
-        await update.message.reply_text(
-            "На цю дату немає вільного часу (сайт або Google Календар). "
-            "Напишіть іншу дату РРРР-ММ-ДД."
-        )
-        return DATE
-    context.user_data["date"] = date
-    best = set(store.tight_times(master, date, service))
-    labels = [("● " + time if time in best else time) for time in free]
-    note = "Вільний час."
-    if best:
-        note += "\n● — зручніше поруч з іншими записами."
-    await update.message.reply_text(note, reply_markup=kb(labels))
-    return TIME
-
-
-async def time_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text = (update.message.text or "").strip().lstrip("●").strip()
-    master = str(context.user_data.get("master") or "")
-    date = str(context.user_data.get("date") or "")
-    service = str(context.user_data.get("service") or "")
-    if text not in store.free_times(master, date, service):
-        await update.message.reply_text("Оберіть час з кнопок.")
-        return TIME
-    context.user_data["time"] = text
-    await update.message.reply_text("Ваше ім’я:", reply_markup=ReplyKeyboardRemove())
-    return NAME
-
-
-async def name_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data["name"] = (update.message.text or "").strip()
-    await update.message.reply_text("Телефон:")
-    return PHONE
-
-
-async def phone_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data["phone"] = (update.message.text or "").strip()
-    payload = {
-        **context.user_data,
-        "source": "telegram",
-        "telegram_id": str(update.effective_chat.id if update.effective_chat else ""),
-    }
-    try:
-        row = store.add_booking(payload)
-    except ValueError as exc:
-        await update.message.reply_text(f"Не записала: {exc}\n/start — спробувати ще раз.")
-        return ConversationHandler.END
-    if not store.notify_admin(row):
-        try:
-            store.confirm_booking(row["id"])
-        except ValueError:
-            pass
-        await update.message.reply_text(
-            f"Записала. {row['date']} {row['time']}, майстер {row['master']}."
-        )
-        return ConversationHandler.END
-    await update.message.reply_text(
-        f"Заявку надіслано. {row['date']} {row['time']}, {row['master']}.\n"
-        f"Студія підтвердить у Telegram — тоді з’явиться в календарі."
-    )
-    return ConversationHandler.END
+        return
+    first = (update.effective_user.first_name if update.effective_user else "") or ""
+    text, keyboard = store.client_start_pack(chat, first)
+    await _html(update.message, text, keyboard)
 
 
 def _admin_chat() -> str:
@@ -161,7 +67,7 @@ def _admin_chat() -> str:
 
 
 def _markup(keyboard):
-    if not keyboard:
+    if keyboard is None:
         return None
     return InlineKeyboardMarkup(
         [
@@ -176,7 +82,8 @@ async def decide_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not query or not query.data:
         return
     chat_id = str(query.message.chat_id if query.message else "")
-    parts = str(query.data).split(":")
+    data = str(query.data)
+    parts = data.split(":")
     action = parts[0] if parts else ""
     booking_id = parts[1] if len(parts) > 1 else ""
     extra = parts[2] if len(parts) > 2 else ""
@@ -184,13 +91,16 @@ async def decide_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     keyboard = None
     toast = ""
     try:
-        text, keyboard, toast = store.apply_admin_callback(action, booking_id, extra, chat_id)
+        if data.startswith("c:"):
+            text, keyboard, toast = store.handle_client_callback(data, chat_id)
+        else:
+            text, keyboard, toast = store.apply_admin_callback(action, booking_id, extra, chat_id)
     except ValueError as exc:
-        text = f"Не вийшло: {exc}"
+        text = f"Не вийшло: {store.html_esc(exc)}"
         keyboard = []
         toast = str(exc)
     except Exception as exc:
-        text = f"Не вийшло: {exc}"
+        text = f"Не вийшло: {store.html_esc(exc)}"
         keyboard = []
         toast = str(exc)
     try:
@@ -212,9 +122,13 @@ async def decide_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         print(f"кнопка запису не спрацювала: {text}")
 
 
-async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    await update.message.reply_text("Скасовано.", reply_markup=ReplyKeyboardRemove())
-    return ConversationHandler.END
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat = str(update.effective_chat.id if update.effective_chat else "")
+    if chat:
+        drafts = store._drafts()
+        drafts.pop(chat, None)
+        store._save_drafts(drafts)
+    await _html(update.message, store.client_card("скасовано", "Напишіть /start, щоб записатись знову."))
 
 
 def _single_instance() -> None:
@@ -234,20 +148,10 @@ def main() -> None:
     if not token:
         raise SystemExit("немає TELEGRAM_BOT_TOKEN у файлі .env")
     app = Application.builder().token(token).build()
-    conv = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
-        states={
-            SERVICE: [MessageHandler(filters.TEXT & ~filters.COMMAND, service_chosen)],
-            MASTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, master_chosen)],
-            DATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, date_chosen)],
-            TIME: [MessageHandler(filters.TEXT & ~filters.COMMAND, time_chosen)],
-            NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name_chosen)],
-            PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, phone_chosen)],
-        },
-        fallbacks=[CommandHandler("cancel", cancel)],
-    )
+    app.add_handler(CallbackQueryHandler(decide_booking, pattern=r"^c:"))
     app.add_handler(CallbackQueryHandler(decide_booking, pattern=r"^(ok|no|mv|dt|tm|go|xx|bk|ds):"))
-    app.add_handler(conv)
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("cancel", cancel))
     print("бот ROSA запущено", flush=True)
     app.run_polling(drop_pending_updates=True)
 

@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 secrets/
 google-service*.json
+data/tg_drafts.json

@@ -412,6 +412,11 @@ def add_booking(payload: dict) -> dict:
     source = str(payload.get("source") or "site").strip() or "site"
     extras = catalog_design_names()
 
+    if source == "telegram" and str(payload.get("telegram_id") or "").strip():
+        if not name:
+            name = str(payload.get("tg_name") or "Telegram").strip() or "Telegram"
+        if not phone:
+            phone = "tg:" + str(payload.get("telegram_id")).strip()
     if not name or not phone:
         raise ValueError("вкажіть ім’я і телефон")
     if service not in catalog_services():
@@ -655,7 +660,12 @@ def notify_client(row: dict, text: str) -> bool:
     try:
         import urllib.request
 
-        payload = {"chat_id": chat, "text": text}
+        payload = {
+            "chat_id": chat,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }
         req = urllib.request.Request(
             f"https://api.telegram.org/bot{token}/sendMessage",
             data=json.dumps(payload).encode("utf-8"),
@@ -669,7 +679,7 @@ def notify_client(row: dict, text: str) -> bool:
 
 
 def client_bot_url(booking_id: str = "") -> str:
-    user = bot_username()
+    user = bot_username() or "rosa_nails_zp_bot"
     if not user:
         return ""
     if booking_id:
@@ -681,11 +691,12 @@ def client_remind_text(row: dict) -> str:
     slot = pretty_slot(str(row.get("date") or ""), str(row.get("time") or ""))
     addr = str((load_content().get("studio") or {}).get("address") or "вул. Дмитра Донцова, 6")
     return (
-        f"ROSA · нагадування про запис.\n\n"
-        f"{slot}\n"
-        f"Майстер: {row.get('master')}\n"
-        f"{row.get('service') or ''}\n\n"
-        f"Чекаємо вас у студії, {addr}."
+        f"<b>ROSA · нагадування</b>\n"
+        f"<i>завтра ваш запис</i>\n\n"
+        f"🗓 {html_esc(slot)}\n"
+        f"💅 {html_esc(row.get('master'))}\n"
+        f"✂️ {html_esc(row.get('service'))}\n\n"
+        f"Чекаємо вас у студії, {html_esc(addr)}."
     )
 
 
@@ -733,16 +744,18 @@ def client_decision_text(row: dict, accepted: bool) -> str:
     slot = pretty_slot(str(row.get("date") or ""), str(row.get("time") or ""))
     services = booking_service_lines(row)
     if accepted:
-        body = "\n".join(f"• {line}" for line in services) or str(row.get("service") or "")
+        body = "\n".join(f"• {html_esc(line)}" for line in services) or html_esc(row.get("service") or "")
         return (
-            f"ROSA · вас записано.\n\n"
-            f"{slot}\n"
-            f"Майстер: {row.get('master')}\n\n"
+            f"<b>ROSA · вас записано</b>\n"
+            f"<i>чекаємо у студії</i>\n\n"
+            f"🗓 {html_esc(slot)}\n"
+            f"💅 {html_esc(row.get('master'))}\n\n"
             f"Послуги:\n{body}\n\n"
-            f"Чекаємо вас у студії. Напередодні нагадаємо в цей чат."
+            f"Напередодні нагадаємо в цей чат."
         )
     return (
-        f"ROSA · цей час не підтвердили.\n{slot}\n"
+        f"<b>ROSA · цей час не підтвердили</b>\n"
+        f"{html_esc(slot)}\n\n"
         f"Запис не створено. Оберіть інший слот на сайті або напишіть /start."
     )
 
@@ -903,15 +916,19 @@ def send_offers(booking_id: str) -> tuple[str | None, list | None, str]:
 
 def client_offer_text(row: dict) -> str:
     offers = [item for item in (row.get("offers") or []) if isinstance(item, dict)]
-    blocks = _picked_lines([
-        {"date": str(item.get("date") or ""), "time": str(item.get("time") or "")}
-        for item in offers
-    ]).replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", "")
+    lines = []
+    for item in offers:
+        slot = pretty_slot(str(item.get("date") or ""), str(item.get("time") or ""))
+        lines.append(f"• {html_esc(slot)}")
+    body = "\n".join(lines) or "—"
+    link = html_esc(status_url(str(row.get("id") or "")))
     return (
-        f"ROSA · цей час не підходить, пропонуємо інший.\n"
-        f"Було: {row.get('date')} {row.get('time')}, {row.get('master')}.\n"
-        f"Нові варіанти:\n{blocks}\n"
-        f"Оберіть зручний на сторінці запису:\n{status_url(str(row.get('id') or ''))}"
+        f"<b>ROSA · інший час</b>\n"
+        f"<i>цей слот не підійшов</i>\n\n"
+        f"Було: {html_esc(pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}\n"
+        f"💅 {html_esc(row.get('master'))}\n\n"
+        f"Пропонуємо:\n{body}\n\n"
+        f'<a href="{link}">Обрати зручний час на сайті</a>'
     )
 
 
@@ -1080,6 +1097,305 @@ def apply_admin_callback(action: str, booking_id: str, extra: str, chat_id: str)
     raise ValueError("незрозуміла дія")
 
 
+DRAFTS_FILE = DATA.parent / "tg_drafts.json"
+
+
+def _drafts() -> dict:
+    if not DRAFTS_FILE.is_file():
+        return {}
+    try:
+        raw = json.loads(DRAFTS_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return raw if isinstance(raw, dict) else {}
+
+
+def _save_drafts(data: dict) -> None:
+    DRAFTS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    DRAFTS_FILE.write_text(json.dumps(data, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def client_master_names() -> list[str]:
+    names = []
+    for master in load_content().get("masters") or []:
+        if isinstance(master, dict) and master.get("id"):
+            names.append(str(master.get("id")))
+    return names or sorted(catalog_masters())
+
+
+def client_service_names() -> list[str]:
+    return list(catalog_services().keys())
+
+
+def client_picked_lines(draft: dict) -> str:
+    lines = []
+    if draft.get("master"):
+        lines.append(f"💅 {html_esc(draft.get('master'))}")
+    if draft.get("service"):
+        lines.append(f"✂️ {html_esc(draft.get('service'))}")
+    if draft.get("design"):
+        lines.append(f"✨ {html_esc(draft.get('design'))}")
+    if draft.get("date") or draft.get("time"):
+        lines.append(f"🗓 {html_esc(pretty_slot(str(draft.get('date') or ''), str(draft.get('time') or '')))}")
+    return ("\n".join(lines) + "\n\n") if lines else ""
+
+
+def client_card(title: str, hint: str, draft: dict | None = None) -> str:
+    body = client_picked_lines(draft or {})
+    return (
+        f"<b>ROSA · запис</b>\n"
+        f"<i>{html_esc(title)}</i>\n\n"
+        f"{body}{hint}"
+    )
+
+
+def _chunk(items: list[dict], n: int) -> list[list[dict]]:
+    rows: list[list[dict]] = []
+    line: list[dict] = []
+    for item in items:
+        line.append(item)
+        if len(line) == n:
+            rows.append(line)
+            line = []
+    if line:
+        rows.append(line)
+    return rows
+
+
+def client_master_kb() -> list[list[dict]]:
+    btns = [{"text": name, "callback_data": f"c:m:{i}"} for i, name in enumerate(client_master_names())]
+    return _chunk(btns, 2) + [[{"text": "✕ Скасувати", "callback_data": "c:q"}]]
+
+
+def client_service_kb() -> list[list[dict]]:
+    btns = [{"text": name[:40], "callback_data": f"c:s:{i}"} for i, name in enumerate(client_service_names())]
+    return _chunk(btns, 1) + [[{"text": "← Майстер", "callback_data": "c:b:m"}, {"text": "✕", "callback_data": "c:q"}]]
+
+
+def client_design_kb() -> list[list[dict]]:
+    btns = []
+    for i, item in enumerate(catalog_designs()):
+        name = str(item.get("name") or "")
+        price = _money_text(item.get("price"))
+        label = f"{name[:28]}" + (f" · {price}" if price else "")
+        btns.append({"text": label[:40], "callback_data": f"c:d:{i}"})
+    rows = _chunk(btns, 1)
+    rows.append([{"text": "Без дизайну", "callback_data": "c:d:x"}])
+    rows.append([{"text": "← Послуга", "callback_data": "c:b:s"}, {"text": "✕", "callback_data": "c:q"}])
+    return rows
+
+
+def client_date_kb(master: str, service: str, page: int = 0) -> list[list[dict]]:
+    days = open_dates(master, service, horizon=21)
+    size = 9
+    page = max(0, page)
+    chunk = days[page * size : (page + 1) * size]
+    btns = []
+    for date in chunk:
+        day = datetime.strptime(date, "%Y-%m-%d")
+        label = f"{UA_WEEKDAYS_SHORT[day.weekday()]} {day.strftime('%d.%m')}"
+        btns.append({"text": label, "callback_data": f"c:y:{date.replace('-', '')}"})
+    rows = _chunk(btns, 3)
+    nav = []
+    if page > 0:
+        nav.append({"text": "‹", "callback_data": f"c:w:{page - 1}"})
+    if (page + 1) * size < len(days):
+        nav.append({"text": "›", "callback_data": f"c:w:{page + 1}"})
+    if nav:
+        rows.append(nav)
+    rows.append([{"text": "← Дизайн", "callback_data": "c:b:d"}, {"text": "✕", "callback_data": "c:q"}])
+    return rows
+
+
+def client_time_kb(master: str, date: str, service: str) -> list[list[dict]]:
+    free = free_times(master, date, service)
+    best = set(tight_times(master, date, service))
+    btns = []
+    for time in free:
+        mark = "● " if time in best else ""
+        btns.append({"text": f"{mark}{time}", "callback_data": f"c:t:{time.replace(':', '')}"})
+    rows = _chunk(btns, 3)
+    if not btns:
+        rows = [[{"text": "Немає вільного часу", "callback_data": "c:b:y"}]]
+    rows.append([{"text": "← Дата", "callback_data": "c:b:y"}, {"text": "✕", "callback_data": "c:q"}])
+    return rows
+
+
+def client_start_pack(chat_id: str, first_name: str = "") -> tuple[str, list[list[dict]]]:
+    drafts = _drafts()
+    drafts[chat_id] = {"step": "master", "name": (first_name or "").strip() or "Telegram"}
+    _save_drafts(drafts)
+    return client_card("оберіть майстра", "Без імені і телефону — ви вже в Telegram.", drafts[chat_id]), client_master_kb()
+
+
+def handle_client_callback(data: str, chat_id: str) -> tuple[str, list[list[dict]], str]:
+    parts = data.split(":")
+    action = parts[1] if len(parts) > 1 else ""
+    extra = parts[2] if len(parts) > 2 else ""
+    drafts = _drafts()
+    draft = dict(drafts.get(chat_id) or {})
+    if action == "q":
+        drafts.pop(chat_id, None)
+        _save_drafts(drafts)
+        return client_card("скасовано", "Напишіть /start, щоб записатись знову."), [], "Скасовано"
+
+    masters = client_master_names()
+    services = client_service_names()
+    designs = catalog_designs()
+
+    if action == "b":
+        if extra == "m":
+            draft["step"] = "master"
+        elif extra == "s":
+            draft["step"] = "service"
+        elif extra == "d":
+            draft["step"] = "design"
+        elif extra == "y":
+            draft["step"] = "date"
+        drafts[chat_id] = draft
+        _save_drafts(drafts)
+
+    if action == "m":
+        try:
+            draft["master"] = masters[int(extra)]
+        except (ValueError, IndexError) as exc:
+            raise ValueError("оберіть майстра") from exc
+        draft["step"] = "service"
+        drafts[chat_id] = draft
+        _save_drafts(drafts)
+        return client_card("оберіть послугу", "Час порахується за тривалістю послуги.", draft), client_service_kb(), ""
+
+    if action == "s":
+        try:
+            draft["service"] = services[int(extra)]
+        except (ValueError, IndexError) as exc:
+            raise ValueError("оберіть послугу") from exc
+        draft["step"] = "design"
+        drafts[chat_id] = draft
+        _save_drafts(drafts)
+        return client_card("додатковий дизайн", "Можна пропустити.", draft), client_design_kb(), ""
+
+    if action == "d":
+        if extra == "x":
+            draft["design"] = ""
+        else:
+            try:
+                draft["design"] = str(designs[int(extra)].get("name") or "")
+            except (ValueError, IndexError) as exc:
+                raise ValueError("оберіть дизайн") from exc
+        draft["step"] = "date"
+        draft["page"] = 0
+        drafts[chat_id] = draft
+        _save_drafts(drafts)
+        master, service = str(draft.get("master") or ""), str(draft.get("service") or "")
+        return client_card("оберіть дату", "Понеділок — вихідний.", draft), client_date_kb(master, service, 0), ""
+
+    if action == "w":
+        try:
+            page = int(extra)
+        except ValueError:
+            page = 0
+        draft["page"] = page
+        draft["step"] = "date"
+        drafts[chat_id] = draft
+        _save_drafts(drafts)
+        return (
+            client_card("оберіть дату", "Понеділок — вихідний.", draft),
+            client_date_kb(str(draft.get("master") or ""), str(draft.get("service") or ""), page),
+            "",
+        )
+
+    if action == "y":
+        date = expand_date(extra)
+        draft["date"] = date
+        draft["step"] = "time"
+        drafts[chat_id] = draft
+        _save_drafts(drafts)
+        kb = client_time_kb(str(draft.get("master") or ""), date, str(draft.get("service") or ""))
+        return client_card("оберіть час", "● — зручніше поруч з іншими записами.", draft), kb, ""
+
+    if action == "t":
+        time = expand_time(extra)
+        draft["time"] = time
+        drafts[chat_id] = draft
+        _save_drafts(drafts)
+        try:
+            row = add_booking(
+                {
+                    "name": str(draft.get("name") or "Telegram"),
+                    "service": draft.get("service"),
+                    "design": draft.get("design") or "",
+                    "master": draft.get("master"),
+                    "date": draft.get("date"),
+                    "time": time,
+                    "source": "telegram",
+                    "telegram_id": chat_id,
+                }
+            )
+        except ValueError as exc:
+            return client_card("цей час уже зайнятий", html_esc(str(exc)), draft), client_time_kb(
+                str(draft.get("master") or ""), str(draft.get("date") or ""), str(draft.get("service") or "")
+            ), str(exc)
+        drafts.pop(chat_id, None)
+        _save_drafts(drafts)
+        if not notify_admin(row):
+            try:
+                row = confirm_booking(row["id"])
+            except ValueError:
+                pass
+            return client_done_text(row, True), [], "Записано"
+        return client_done_text(row, False), [], "Заявку надіслано"
+
+    step = str(draft.get("step") or "master")
+    if step == "service":
+        return client_card("оберіть послугу", "Час порахується за тривалістю послуги.", draft), client_service_kb(), ""
+    if step == "design":
+        return client_card("додатковий дизайн", "Можна пропустити.", draft), client_design_kb(), ""
+    if step == "date":
+        page = int(draft.get("page") or 0)
+        return (
+            client_card("оберіть дату", "Понеділок — вихідний.", draft),
+            client_date_kb(str(draft.get("master") or ""), str(draft.get("service") or ""), page),
+            "",
+        )
+    if step == "time":
+        return (
+            client_card("оберіть час", "● — зручніше поруч з іншими записами.", draft),
+            client_time_kb(str(draft.get("master") or ""), str(draft.get("date") or ""), str(draft.get("service") or "")),
+            "",
+        )
+    return client_card("оберіть майстра", "Без імені і телефону — ви вже в Telegram.", draft), client_master_kb(), ""
+
+
+def client_done_text(row: dict, instant: bool) -> str:
+    services = "\n".join(f"• {html_esc(line)}" for line in booking_service_lines(row))
+    if instant:
+        head, note = "Вас записано", "студія вже підтвердила"
+    else:
+        head, note = "Заявку надіслано", "чекаємо підтвердження студії"
+    return (
+        f"<b>ROSA · {html_esc(head)}</b>\n"
+        f"<i>{html_esc(note)}</i>\n"
+        f"<code>#{html_esc(row.get('id'))}</code>\n\n"
+        f"🗓 {html_esc(pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}\n"
+        f"💅 {html_esc(row.get('master'))}\n"
+        f"{services}\n\n"
+        f"Напишемо сюди, щойно студія відповість. Напередодні нагадаємо."
+    )
+
+
+def _send_html(chat_id: str, text: str, keyboard: list | None = None) -> None:
+    body = {
+        "chat_id": chat_id,
+        "text": text,
+        "parse_mode": "HTML",
+        "disable_web_page_preview": True,
+    }
+    if keyboard:
+        body["reply_markup"] = {"inline_keyboard": keyboard}
+    _telegram_call("sendMessage", body)
+
+
 def handle_telegram_update(update: dict) -> None:
     maybe_send_reminders()
     query = update.get("callback_query") or {}
@@ -1087,7 +1403,7 @@ def handle_telegram_update(update: dict) -> None:
         data = str(query.get("data") or "")
         qid = query.get("id")
         message = query.get("message") or {}
-        chat_id = str((message.get("chat") or {}).get("id") or "")
+        chat_id = str((message.get("chat") or {}).get("id") or query.get("from", {}).get("id") or "")
         mid = message.get("message_id")
         parts = data.split(":")
         action = parts[0] if parts else ""
@@ -1097,9 +1413,12 @@ def handle_telegram_update(update: dict) -> None:
         keyboard: list | None = None
         toast = ""
         try:
-            text, keyboard, toast = apply_admin_callback(action, booking_id, extra, chat_id)
+            if data.startswith("c:"):
+                text, keyboard, toast = handle_client_callback(data, chat_id)
+            else:
+                text, keyboard, toast = apply_admin_callback(action, booking_id, extra, chat_id)
         except ValueError as exc:
-            text = f"Не вийшло: {exc}"
+            text = f"Не вийшло: {html_esc(exc)}"
             keyboard = []
             toast = str(exc)
         if qid:
@@ -1122,38 +1441,42 @@ def handle_telegram_update(update: dict) -> None:
     message = update.get("message") or {}
     text = str(message.get("text") or "").strip()
     chat_id = str((message.get("chat") or {}).get("id") or "")
+    first = str((message.get("from") or {}).get("first_name") or "")
     if not text.startswith("/start") or not chat_id:
         return
     parts = text.split(maxsplit=1)
     payload = parts[1].strip() if len(parts) > 1 else ""
+    if payload.startswith("@"):
+        payload = ""
     if not payload.startswith("rosa_"):
+        card, keyboard = client_start_pack(chat_id, first)
+        _send_html(chat_id, card, keyboard)
         return
     try:
         row = link_telegram(payload[5:], chat_id)
     except ValueError as exc:
-        _telegram_call("sendMessage", {"chat_id": chat_id, "text": f"Не знайшла заявку: {exc}"})
+        _send_html(chat_id, f"Не знайшла заявку: {html_esc(exc)}")
         return
     status = row.get("status")
     if status == "confirmed":
-        _telegram_call("sendMessage", {"chat_id": chat_id, "text": client_decision_text(row, True)})
+        _send_html(chat_id, client_decision_text(row, True))
         return
     if status == "cancelled":
-        _telegram_call("sendMessage", {"chat_id": chat_id, "text": client_decision_text(row, False)})
+        _send_html(chat_id, client_decision_text(row, False))
         return
     if status == "offered":
-        _telegram_call("sendMessage", {"chat_id": chat_id, "text": client_offer_text(row)})
+        _send_html(chat_id, client_offer_text(row))
         return
-    _telegram_call(
-        "sendMessage",
-        {
-            "chat_id": chat_id,
-            "text": (
-                f"Заявку #{row.get('id')} прив’язала до цього чату.\n"
-                f"{row.get('date')} {row.get('time')}, {row.get('master')}.\n"
-                f"Сюди напишемо, щойно студія підтвердить або відмовить.\n"
-                f"Напередодні візиту нагадаємо."
-            ),
-        },
+    _send_html(
+        chat_id,
+        (
+            f"<b>ROSA · заявку прив’язала</b>\n"
+            f"<i>чекаємо відповіді студії</i>\n"
+            f"<code>#{html_esc(row.get('id'))}</code>\n\n"
+            f"🗓 {html_esc(pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}\n"
+            f"💅 {html_esc(row.get('master'))}\n\n"
+            f"Сюди напишемо, щойно студія підтвердить. Напередодні нагадаємо."
+        ),
     )
 
 
@@ -1364,10 +1687,10 @@ def cancel_offer(booking_id):
 
 @app.get("/api/config")
 def config():
-    user = bot_username()
+    user = bot_username() or "rosa_nails_zp_bot"
     return jsonify({
         "ok": True,
-        "bot_url": f"https://t.me/{user}" if user else "",
+        "bot_url": f"https://t.me/{user}",
         "calendar": gcal.configured(),
     })
 

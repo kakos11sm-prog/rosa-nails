@@ -219,6 +219,26 @@ img { max-width: 100%; display: block; }
 .btn-ghost:hover { border-color: var(--rose); }
 .btn-wide { width: 100%; }
 .btn:disabled { opacity: 0.5; cursor: default; }
+.btn-tg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: #2AABEE;
+  color: #fff;
+  font: 600 0.92rem/1 var(--font);
+  padding: 13px 20px;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(42, 171, 238, 0.28);
+}
+.btn-tg svg { width: 18px; height: 18px; flex: 0 0 auto; }
+.btn-tg:hover { background: #229ED9; }
+.btn-tg[hidden] { display: none !important; }
+.btn-tg:disabled { opacity: 0.5; cursor: default; }
 
 .visit-bar {
   position: sticky;
@@ -1893,8 +1913,9 @@ body.is-edit .team-note-url:empty::before {
   margin-top: 8px;
 }
 .book-finish .form-hint { margin: 0; }
-.btn-ghost[hidden] { display: none !important; }
-.status-box .btn-ghost { margin-bottom: 10px; }
+.btn-ghost[hidden], .btn-tg[hidden] { display: none !important; }
+.status-box .btn-ghost,
+.status-box .btn-tg { margin-bottom: 10px; }
 
 .foot {
   border-top: 1px solid rgba(196, 111, 123, 0.16);
