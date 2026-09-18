@@ -25,6 +25,8 @@ function setScene(kind) {
   if (eye) {
     eye.textContent = kind === "ok" ? "Підтверджено" : kind === "no" ? "Відмова" : kind === "offer" ? "Інший час" : "Заявка";
   }
+  const morph = document.getElementById("statusOfferMorph");
+  if (morph && kind !== "offer") morph.hidden = true;
   void scene.offsetWidth;
   scene.classList.add("is-reveal");
 }
@@ -52,26 +54,20 @@ function paintOffers(data) {
     return;
   }
   const offers = data.offers || [];
-  const date = (offers[0] && offers[0].date) || (slots[0] && slots[0].date);
-  const hours = offers.map((item) => item.time).filter(Boolean);
+  const hours = slots.filter((slot) => slot.kind === "offer");
+  const morph = document.getElementById("statusOfferMorph");
+  if (morph) {
+    morph.hidden = false;
+    morph.innerHTML = `
+      <p>Пропонуємо інший час</p>
+      <div class="status-offer-hours">${hours
+        .map((slot) => `<button type="button" class="status-hour" data-choose="${slot.date}|${slot.time}">${slot.time}</button>`)
+        .join("")}</div>
+    `;
+  }
   box.hidden = false;
   box.className = "status-offers";
-  box.innerHTML = `
-    <p class="status-offer-banner">
-      <span>Пропонуємо</span>
-      <strong>${prettyDay(date)}</strong>
-      <b>${hours.join(" · ") || "оберіть годину"}</b>
-    </p>
-    <p class="slot-label">Оберіть годину</p>
-    <div class="slot-grid">${slots
-      .map((slot) =>
-        slot.kind === "busy"
-          ? `<button type="button" class="slot-btn is-busy" disabled>${slot.time} · зайнято</button>`
-          : `<button type="button" class="slot-btn is-offer" data-choose="${slot.date}|${slot.time}">${slot.time}</button>`
-      )
-      .join("")}</div>
-    <button type="button" class="btn-ghost" data-cancel="1">Скасувати запис</button>
-  `;
+  box.innerHTML = `<button type="button" class="btn-ghost" data-cancel="1">Скасувати запис</button>`;
 }
 
 function paint(status, data) {
@@ -82,6 +78,8 @@ function paint(status, data) {
   const pack = LABELS[status] || LABELS.pending;
   title.textContent = pack[0];
   lead.textContent = pack[1];
+  title.hidden = status === "offered";
+  lead.hidden = status === "offered";
   if (data) {
     facts.hidden = false;
     facts.innerHTML = `
@@ -140,7 +138,7 @@ async function postStatus(path, body) {
   return data;
 }
 
-document.getElementById("statusOffers")?.addEventListener("click", async (e) => {
+document.querySelector(".status-box")?.addEventListener("click", async (e) => {
   const choose = e.target.closest("[data-choose]");
   const cancel = e.target.closest("[data-cancel]");
   if ((!choose && !cancel) || busy) return;

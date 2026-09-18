@@ -1225,6 +1225,8 @@ a.price-card:hover {
   color: var(--muted);
 }
 .status-box { max-width: 36rem; padding-top: 8px; padding-bottom: 48px; }
+.status-box h1[hidden],
+.status-box .lede[hidden] { display: none !important; }
 .book-page { max-width: 42rem; padding-bottom: 72px; }
 .book-page h1 { margin: 0 0 8px; }
 .book-page .lede { margin-bottom: 22px; }
@@ -1241,40 +1243,6 @@ a.price-card:hover {
 .status-facts dd { margin: 3px 0 0; font-weight: 600; }
 .status-offers { margin: 4px 0 20px; }
 .status-offers[hidden] { display: none !important; }
-.status-offers .slot-label { margin-top: 14px; }
-.status-offer-banner {
-  margin: 0 0 12px;
-  padding: 16px 16px 14px;
-  background: #fff;
-  border: 1.5px solid var(--rose);
-  border-radius: 18px;
-  box-shadow: 0 10px 24px rgba(196, 111, 123, 0.1);
-}
-.status-offer-banner span {
-  display: block;
-  color: var(--rose-2);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.status-offer-banner strong {
-  display: block;
-  font-family: var(--serif);
-  font-size: 1.2rem;
-  font-weight: 500;
-  text-transform: none;
-  margin-bottom: 4px;
-}
-.status-offer-banner b {
-  display: block;
-  font-family: var(--font);
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--rose-2);
-  letter-spacing: 0.02em;
-}
 .slot-btn.is-busy {
   cursor: default;
   color: var(--muted);
@@ -1408,31 +1376,62 @@ a.price-card:hover {
 .status-scene.is-wait .seal-check,
 .status-scene.is-wait .seal-x { opacity: 0; }
 
+.status-scene.is-offer {
+  width: min(100%, 26rem);
+  height: auto;
+  margin-bottom: 18px;
+}
 .status-scene.is-offer .status-seal {
-  animation: status-wiggle 0.9s ease-in-out infinite;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  padding: 22px 18px 18px;
+  background: #fff;
+  border: 2px solid var(--rose);
+  border-radius: 28px;
+  box-shadow: 0 14px 32px rgba(196, 111, 123, 0.14);
+  animation: status-stretch 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.status-scene.is-offer .seal-ring {
-  stroke: var(--rose-2);
-  stroke-dasharray: 314;
-  stroke-dashoffset: 0;
+.status-scene.is-offer .status-seal svg,
+.status-scene.is-offer .status-dots { display: none; }
+.status-offer-morph[hidden] { display: none !important; }
+.status-scene.is-offer .status-offer-morph {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  position: relative;
+  z-index: 2;
 }
-.status-scene.is-offer .seal-halo {
-  stroke: rgba(196, 111, 123, 0.35);
-  animation: status-breathe 1.4s ease-in-out infinite;
+.status-offer-morph p {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
 }
-.status-scene.is-offer .seal-check,
-.status-scene.is-offer .seal-x { opacity: 0; }
-.status-scene.is-offer .status-dots i {
-  animation: status-dot 0.7s ease-in-out infinite;
+.status-offer-hours {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
-.status-scene.is-offer .status-dots i:nth-child(2) { animation-delay: 0.1s; }
-.status-scene.is-offer .status-dots i:nth-child(3) { animation-delay: 0.2s; }
-@keyframes status-wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-8deg); }
-  40% { transform: rotate(7deg); }
-  60% { transform: rotate(-5deg); }
-  80% { transform: rotate(4deg); }
+.status-hour {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--rose);
+  color: #fff;
+  font: 700 1rem/1 var(--font);
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(196, 111, 123, 0.2);
+}
+.status-hour:hover { background: var(--rose-2); }
+@keyframes status-stretch {
+  from { transform: scale(0.72); opacity: 0.35; border-radius: 50%; }
+  to { transform: none; opacity: 1; border-radius: 28px; }
 }
 
 .status-scene.is-ok .status-dots,
