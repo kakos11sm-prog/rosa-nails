@@ -73,10 +73,14 @@
         <h2 id="teamTitle" data-edit="team.title">Майстри</h2>
       </header>
       <div class="people" id="mastersList"></div>
-      <p class="team-note" id="teamNote">
-        <span id="teamNoteText" data-edit="team.note">Також у студії працює майстер-бровист</span>
-        <a id="teamNoteLink" hidden target="_blank" rel="noreferrer">Instagram</a>
-      </p>
+      <article class="team-guest" id="teamNote">
+        <span class="team-guest-ico" aria-hidden="true">✦</span>
+        <div class="team-guest-copy">
+          <p class="team-guest-kicker">Ще в студії</p>
+          <p class="team-guest-title" id="teamNoteText" data-edit="team.note">Також у студії працює майстер-бровист</p>
+          <a class="team-guest-link" id="teamNoteLink" hidden target="_blank" rel="noreferrer">Instagram</a>
+        </div>
+      </article>
       <p class="team-note-url" id="teamNoteUrl" data-edit="team.note_url"></p>
       <button type="button" class="edit-plus" data-add="master">+ Майстер</button>
       </div>

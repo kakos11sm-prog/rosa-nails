@@ -1207,20 +1207,63 @@ body.is-edit .price-tags { pointer-events: auto; }
 .looks-more a:hover { color: var(--rose-2); }
 
 .people { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.team-note {
-  margin: 18px 0 0;
-  color: #5c4a4e;
-  font-size: 0.98rem;
-  line-height: 1.55;
+.team-guest {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 16px 0 0;
+  padding: 20px 24px 22px;
+  background:
+    radial-gradient(460px 180px at 8% 0%, #fdeef1 0%, transparent 62%),
+    #fff;
+  border: 1px solid rgba(226, 180, 186, 0.55);
+  border-radius: 24px;
+  box-shadow: 0 14px 34px rgba(196, 111, 123, 0.1);
 }
-.team-note a {
-  margin-left: 8px;
+.team-guest-ico {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--blush);
   color: var(--rose-2);
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
+  font-size: 1.15rem;
+  box-shadow: 0 0 0 5px #fff, 0 0 0 6px rgba(226, 180, 186, 0.55);
 }
-.team-note a:hover { text-decoration: underline; }
+.team-guest-copy { min-width: 0; }
+.team-guest-kicker {
+  margin: 0 0 4px;
+  color: var(--rose);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.team-guest-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.28rem, 2.4vw, 1.7rem);
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  color: #3a2e32;
+}
+.team-guest-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--rose);
+  color: #fff;
+  font: 600 0.82rem/1 var(--font);
+  text-decoration: none;
+}
+.team-guest-link:hover { background: var(--rose-2); }
+.team-guest-link[hidden] { display: none !important; }
 .team-note-url {
   display: none;
   margin: 8px 0 0;
@@ -1962,6 +2005,8 @@ body.is-edit .team-note-url:empty::before {
   .why-copy { font-size: 1.08rem; line-height: 1.55; padding-left: 18px; }
   .why-num { font-size: 3.4rem; }
   .why-nav { width: 30px; height: 30px; }
+  .team-guest { padding: 16px 16px 18px; gap: 12px; }
+  .team-guest-ico { width: 44px; height: 44px; }
   .top { height: 56px; padding: 0 16px; gap: 14px; }
   .top.is-slim { height: 42px; padding: 0 14px; gap: 12px; }
   .top-acts { margin-left: auto; gap: 6px; }
