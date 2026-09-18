@@ -35,30 +35,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         except ValueError as exc:
             await _html(update.message, f"Не знайшла заявку: {store.html_esc(exc)}")
             return
-        status = row.get("status")
-        if status == "confirmed":
-            await _html(update.message, store.client_decision_text(row, True))
-            return
-        if status == "cancelled":
-            await _html(update.message, store.client_decision_text(row, False))
-            return
-        if status == "offered":
-            await _html(update.message, store.client_offer_text(row))
-            return
-        await _html(
-            update.message,
-            (
-                f"<b>ROSA · заявку прив’язала</b>\n"
-                f"<i>чекаємо відповіді студії</i>\n"
-                f"<code>#{store.html_esc(row.get('id'))}</code>\n\n"
-                f"🗓 {store.html_esc(store.pretty_slot(str(row.get('date') or ''), str(row.get('time') or '')))}\n"
-                f"💅 {store.html_esc(row.get('master'))}\n\n"
-                f"Сюди напишемо, щойно студія підтвердить. Напередодні нагадаємо."
-            ),
-        )
+        text, keyboard = store.client_linked_pack(row)
+        await _html(update.message, text, keyboard)
         return
     first = (update.effective_user.first_name if update.effective_user else "") or ""
-    text, keyboard = store.client_start_pack(chat, first)
+    text, keyboard = store.client_open_pack(chat, first)
     await _html(update.message, text, keyboard)
 
 
@@ -124,11 +105,9 @@ async def decide_booking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = str(update.effective_chat.id if update.effective_chat else "")
-    if chat:
-        drafts = store._drafts()
-        drafts.pop(chat, None)
-        store._save_drafts(drafts)
-    await _html(update.message, store.client_card("скасовано", "Напишіть /start, щоб записатись знову."))
+    first = (update.effective_user.first_name if update.effective_user else "") or ""
+    text, keyboard = store.client_open_pack(chat, first)
+    await _html(update.message, text, keyboard)
 
 
 def _single_instance() -> None:
