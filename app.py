@@ -411,12 +411,13 @@ def add_booking(payload: dict) -> dict:
     time = str(payload.get("time") or "").strip()
     source = str(payload.get("source") or "site").strip() or "site"
     extras = catalog_design_names()
+    via_tg = bool(payload.get("via_telegram")) or source == "telegram"
 
-    if source == "telegram" and str(payload.get("telegram_id") or "").strip():
+    if via_tg:
         if not name:
             name = str(payload.get("tg_name") or "Telegram").strip() or "Telegram"
         if not phone:
-            phone = "tg:" + str(payload.get("telegram_id")).strip()
+            phone = "tg:" + str(payload.get("telegram_id") or "pending").strip()
     if not name or not phone:
         raise ValueError("вкажіть ім’я і телефон")
     if service not in catalog_services():
@@ -648,6 +649,8 @@ def link_telegram(booking_id: str, chat_id: str) -> dict:
     if not row:
         raise ValueError("заявку не знайдено")
     row["telegram_id"] = str(chat_id).strip()
+    if str(row.get("phone") or "").startswith("tg:"):
+        row["phone"] = "tg:" + str(chat_id).strip()
     _save(rows)
     return row
 

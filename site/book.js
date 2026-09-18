@@ -438,6 +438,14 @@ async function submitBooking(viaTelegram) {
     showNote("Оберіть майстра, послугу, дату і час.", false);
     return;
   }
+  if (!viaTelegram && (!String(payload.name || "").trim() || !String(payload.phone || "").trim())) {
+    showNote("Вкажіть ім’я і телефон, або продовжіть у Telegram без них.", false);
+    return;
+  }
+  if (viaTelegram) {
+    payload.via_telegram = true;
+    payload.source = "telegram";
+  }
   btn.disabled = true;
   if (tg) tg.disabled = true;
   try {
