@@ -203,6 +203,7 @@ img { max-width: 100%; display: block; }
   box-shadow: 0 8px 18px rgba(196, 111, 123, 0.18);
 }
 .btn:hover { background: var(--rose-2); }
+.btn[hidden] { display: none !important; }
 .btn-sm { padding: 8px 14px; font-size: 0.82rem; }
 .btn-ghost {
   background: #fff;
@@ -1238,15 +1239,54 @@ a.price-card:hover {
 }
 .status-facts dt { color: var(--muted); font-size: 0.75rem; }
 .status-facts dd { margin: 3px 0 0; font-weight: 600; }
-.status-offers { margin: 0 0 18px; }
-.status-offers .slot-label { margin-top: 0; }
+.status-offers { margin: 4px 0 20px; }
+.status-offers[hidden] { display: none !important; }
+.status-offers .slot-label { margin-top: 14px; }
+.status-offer-banner {
+  margin: 0 0 12px;
+  padding: 16px 16px 14px;
+  background: #fff;
+  border: 1.5px solid var(--rose);
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(196, 111, 123, 0.1);
+}
+.status-offer-banner span {
+  display: block;
+  color: var(--rose-2);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.status-offer-banner strong {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 500;
+  text-transform: none;
+  margin-bottom: 4px;
+}
+.status-offer-banner b {
+  display: block;
+  font-family: var(--font);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--rose-2);
+  letter-spacing: 0.02em;
+}
 .slot-btn.is-busy {
   cursor: default;
   color: var(--muted);
   background: #f6f1f2;
   text-decoration: line-through;
 }
-.slot-btn.is-offer { border-color: var(--rose); }
+.slot-btn.is-offer {
+  border-color: var(--rose);
+  background: #f8eef0;
+  color: var(--rose-2);
+  font-weight: 700;
+}
 .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -1367,6 +1407,33 @@ a.price-card:hover {
 .status-scene.is-wait .status-dots i:nth-child(3) { animation-delay: 0.3s; }
 .status-scene.is-wait .seal-check,
 .status-scene.is-wait .seal-x { opacity: 0; }
+
+.status-scene.is-offer .status-seal {
+  animation: status-wiggle 0.9s ease-in-out infinite;
+}
+.status-scene.is-offer .seal-ring {
+  stroke: var(--rose-2);
+  stroke-dasharray: 314;
+  stroke-dashoffset: 0;
+}
+.status-scene.is-offer .seal-halo {
+  stroke: rgba(196, 111, 123, 0.35);
+  animation: status-breathe 1.4s ease-in-out infinite;
+}
+.status-scene.is-offer .seal-check,
+.status-scene.is-offer .seal-x { opacity: 0; }
+.status-scene.is-offer .status-dots i {
+  animation: status-dot 0.7s ease-in-out infinite;
+}
+.status-scene.is-offer .status-dots i:nth-child(2) { animation-delay: 0.1s; }
+.status-scene.is-offer .status-dots i:nth-child(3) { animation-delay: 0.2s; }
+@keyframes status-wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-8deg); }
+  40% { transform: rotate(7deg); }
+  60% { transform: rotate(-5deg); }
+  80% { transform: rotate(4deg); }
+}
 
 .status-scene.is-ok .status-dots,
 .status-scene.is-no .status-dots { display: none; }
@@ -1547,7 +1614,9 @@ a.price-card:hover {
   }
   .seal-ring, .seal-check, .seal-x { stroke-dashoffset: 0; }
   .status-scene.is-wait .seal-check,
-  .status-scene.is-wait .seal-x { opacity: 0; }
+  .status-scene.is-wait .seal-x,
+  .status-scene.is-offer .seal-check { opacity: 0; }
+  .status-scene.is-offer .seal-x { opacity: 0.55; stroke-dashoffset: 0; }
 }
 
 @media (max-width: 820px) {

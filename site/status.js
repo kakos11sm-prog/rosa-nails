@@ -1,6 +1,6 @@
 const LABELS = {
   pending: ["Очікує підтвердження", "Студія ще не відповіла. Сторінка оновиться сама — тут з’явиться так або ні."],
-  offered: ["Студія пропонує інший час", "Цей слот не підходить. Оберіть одну з вільних годин — зайняті закреслені. Або скасуйте запис."],
+  offered: ["Студія пропонує інший час", "Цей слот не підходить. Оберіть одну з годин нижче — або скасуйте запис."],
   confirmed: ["Запис підтверджено", "Чекаємо вас у студії в обраний час."],
   cancelled: ["Запис скасовано", "Цей час вільний для інших. Оберіть інший слот на сайті."],
   new: ["Очікує підтвердження", "Студія ще не відповіла."],
@@ -15,7 +15,7 @@ function setScene(kind) {
   const band = document.getElementById("statusBand");
   const eye = document.getElementById("statusEye");
   if (!scene) return;
-  scene.classList.remove("is-wait", "is-ok", "is-no", "is-reveal");
+  scene.classList.remove("is-wait", "is-ok", "is-no", "is-offer", "is-reveal");
   scene.classList.add("is-" + kind);
   scene.dataset.state = kind;
   if (band) {
@@ -23,7 +23,7 @@ function setScene(kind) {
     if (kind === "ok" || kind === "no") band.classList.add("is-" + kind);
   }
   if (eye) {
-    eye.textContent = kind === "ok" ? "Підтверджено" : kind === "no" ? "Відмова" : "Заявка";
+    eye.textContent = kind === "ok" ? "Підтверджено" : kind === "no" ? "Відмова" : kind === "offer" ? "Інший час" : "Заявка";
   }
   void scene.offsetWidth;
   scene.classList.add("is-reveal");
@@ -51,11 +51,18 @@ function paintOffers(data) {
     box.innerHTML = "";
     return;
   }
-  const date = slots[0].date;
+  const offers = data.offers || [];
+  const date = (offers[0] && offers[0].date) || (slots[0] && slots[0].date);
+  const hours = offers.map((item) => item.time).filter(Boolean);
   box.hidden = false;
   box.className = "status-offers";
   box.innerHTML = `
-    <p class="slot-label">${prettyDay(date)}</p>
+    <p class="status-offer-banner">
+      <span>Пропонуємо</span>
+      <strong>${prettyDay(date)}</strong>
+      <b>${hours.join(" · ") || "оберіть годину"}</b>
+    </p>
+    <p class="slot-label">Оберіть годину</p>
     <div class="slot-grid">${slots
       .map((slot) =>
         slot.kind === "busy"
@@ -85,7 +92,7 @@ function paint(status, data) {
       ${data.design ? `<div><dt>Дизайн</dt><dd>${data.design}${data.design_price ? " · " + data.design_price : ""}</dd></div>` : ""}
     `;
   }
-  paintOffers(data || {});
+  paintOffers({ ...(data || {}), status });
   if (cta) {
     cta.hidden = status === "offered";
     if (status === "confirmed") {
@@ -96,7 +103,7 @@ function paint(status, data) {
       cta.href = "/book";
     }
   }
-  const kind = status === "confirmed" ? "ok" : status === "cancelled" ? "no" : "wait";
+  const kind = status === "confirmed" ? "ok" : status === "cancelled" ? "no" : status === "offered" ? "offer" : "wait";
   if (kind !== last) {
     last = kind;
     setScene(kind);
@@ -156,13 +163,20 @@ document.getElementById("statusOffers")?.addEventListener("click", async (e) => 
 });
 
 const look = new URLSearchParams(location.search).get("look");
-if (look === "ok" || look === "no") {
-  paint(look === "ok" ? "confirmed" : "cancelled", {
+if (look === "ok" || look === "no" || look === "offer") {
+  paint(look === "ok" ? "confirmed" : look === "no" ? "cancelled" : "offered", {
     id: "demo",
-    date: "2026-09-10",
-    time: "13:00",
+    date: "2026-09-19",
+    time: "11:30",
     master: "Аля",
     service: "Манікюр + покриття",
+    offers: look === "offer" ? [{ date: "2026-09-19", time: "14:30" }, { date: "2026-09-19", time: "16:00" }] : [],
+    slots: look === "offer" ? [
+      { date: "2026-09-19", time: "13:00", kind: "busy" },
+      { date: "2026-09-19", time: "14:30", kind: "offer" },
+      { date: "2026-09-19", time: "16:00", kind: "offer" },
+      { date: "2026-09-19", time: "17:30", kind: "busy" },
+    ] : [],
   });
 } else {
   load();
