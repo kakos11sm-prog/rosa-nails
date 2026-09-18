@@ -335,7 +335,7 @@ body:has(.top.is-slim) .visit-bar { top: 42px; }
 .hero-copy > * {
   animation: rise 0.7s ease both;
 }
-.hero-copy h1 { animation-delay: 0.1s; }
+.hero-copy h1 { animation-delay: 0.1s; font-style: italic; font-weight: 600; }
 .hero-copy .lede { animation-delay: 0.18s; }
 .why { animation: rise 0.7s ease 0.22s both; }
 @keyframes rise {
@@ -453,11 +453,11 @@ h1 {
 .lede { color: var(--muted); max-width: 38rem; margin: 0 0 22px; font-size: 1.02rem; line-height: 1.55; overflow-wrap: break-word; }
 .hero-copy .lede {
   font-family: var(--font);
-  font-size: 1.05rem;
+  font-size: 1.06rem;
   font-weight: 400;
-  line-height: 1.72;
-  color: var(--muted);
-  letter-spacing: 0;
+  line-height: 1.78;
+  color: #6d5b5f;
+  letter-spacing: 0.01em;
   max-width: 34em;
   margin: 0;
   overflow-wrap: anywhere;
@@ -580,19 +580,43 @@ h1 {
   flex: 0 0 calc(100% - 36px);
   min-width: 0;
   box-sizing: border-box;
-  padding: 22px 22px 20px;
+  padding: 22px 22px 26px;
   background: #fff;
   border: 1px solid rgba(226, 180, 186, 0.5);
   border-radius: 22px;
   box-shadow: 0 12px 28px rgba(196, 111, 123, 0.1);
   min-height: 12.2rem;
+  overflow: hidden;
+}
+.why-num {
+  position: absolute;
+  right: 14px;
+  bottom: 4px;
+  z-index: 0;
+  font-family: var(--serif);
+  font-size: 4.2rem;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 0.8;
+  color: rgba(196, 111, 123, 0.13);
+  pointer-events: none;
+  user-select: none;
+}
+.why-card-h {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 4px;
 }
 .why-ico {
   display: grid;
   place-items: center;
   width: 34px;
   height: 34px;
-  margin: 0 0 12px;
+  margin: 2px 0 0;
+  flex-shrink: 0;
   border-radius: 50%;
   background: var(--blush);
   font-size: 1.05rem;
@@ -600,21 +624,41 @@ h1 {
 }
 body.is-edit .why-ico { display: grid; }
 .why-card h3 {
-  margin: 0 0 8px;
+  margin: 0;
   font-family: var(--serif);
-  font-size: 1.38rem;
-  font-weight: 500;
-  letter-spacing: -0.015em;
-  line-height: 1.28;
-  color: var(--ink);
+  font-size: 1.52rem;
+  font-style: italic;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #3a2e32;
   overflow-wrap: anywhere;
 }
+.why-card h3::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 1.5px;
+  margin: 11px 0 13px;
+  border-radius: 99px;
+  background: var(--rose);
+  opacity: 0.7;
+}
 .why-card p {
+  position: relative;
+  z-index: 1;
   margin: 0;
-  color: var(--muted);
-  font-size: 0.96rem;
-  line-height: 1.7;
+  color: #675458;
+  font-size: 1rem;
+  line-height: 1.78;
   white-space: pre-wrap;
+}
+.why-card p::first-letter {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.22em;
+  color: var(--rose-2);
 }
 .why-progress {
   height: 2px;
@@ -1722,8 +1766,10 @@ a.price-card:hover {
   .hero-place { font-size: 0.92rem; padding-bottom: 12px; padding-left: 0; }
   .lede { font-size: 0.95rem; }
   .hero-copy .lede { font-size: 0.98rem; line-height: 1.65; max-width: none; }
-  .why-card { flex-basis: calc(100% - 28px); min-height: 11.4rem; padding: 18px 16px 16px; }
-  .why-card h3 { font-size: 1.22rem; }
+  .why-card { flex-basis: calc(100% - 28px); min-height: 11.4rem; padding: 18px 16px 22px; }
+  .why-card h3 { font-size: 1.32rem; }
+  .why-card p { font-size: 0.95rem; line-height: 1.72; }
+  .why-num { font-size: 3.4rem; }
   .why-nav { width: 30px; height: 30px; }
   .top { height: 56px; padding: 0 16px; gap: 14px; }
   .top.is-slim { height: 42px; padding: 0 14px; gap: 12px; }

@@ -437,8 +437,11 @@ function paintWhy(hero) {
     .map(
       (r, i) => `<article class="why-card">
         <button type="button" class="edit-del" data-del-reason="${i}" aria-label="Прибрати">×</button>
-        <span class="why-ico" data-edit="hero.reasons.${i}.icon">${esc(r.icon)}</span>
-        <h3 data-edit="hero.reasons.${i}.title">${esc(r.title)}</h3>
+        <span class="why-num" aria-hidden="true">${String(i + 1).padStart(2, "0")}</span>
+        <div class="why-card-h">
+          <span class="why-ico" data-edit="hero.reasons.${i}.icon">${esc(r.icon)}</span>
+          <h3 data-edit="hero.reasons.${i}.title">${esc(r.title)}</h3>
+        </div>
         <p data-edit="hero.reasons.${i}.text">${esc(r.text)}</p>
       </article>`
     )
