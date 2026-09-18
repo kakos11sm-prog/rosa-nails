@@ -84,7 +84,6 @@ function fillDesignPicks() {
     const on = item.name === chosen ? " is-on" : "";
     return `<button type="button" class="pick-design${on}" data-design="${item.name}">
       <strong>${item.name}</strong>
-      <span class="pick-design-line" aria-hidden="true"></span>
       <em>${designMoney(item)}</em>
     </button>`;
   }).join("");
